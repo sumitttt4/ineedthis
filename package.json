@@ -1,0 +1,14 @@
+{
+  "name": "ineedthis",
+  "version": "1.0.0",
+  "private": true,
+  "description": "100% Private, Client-Side Media & Document Engine with One-Tap Workflows and PWA Support",
+  "scripts": {
+    "dev": "npm run dev --prefix app",
+    "build": "npm run build --prefix app",
+    "start": "npm run start --prefix app",
+    "lint": "npm run lint --prefix app"
+  },
+  "author": "Sumit",
+  "license": "MIT"
+}

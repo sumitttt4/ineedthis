@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="128" fill="#000000"/>
+  <rect x="24" y="24" width="464" height="464" rx="104" stroke="#2563eb" stroke-opacity="0.3" stroke-width="4"/>
+  <defs>
+    <linearGradient id="glow" x1="128" y1="128" x2="384" y2="384" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#8b5cf6"/>
+    </linearGradient>
+  </defs>
+  <!-- Modern File Glyph -->
+  <path d="M168 120H296L368 192V392H168V120Z" fill="url(#glow)" fill-opacity="0.15" stroke="url(#glow)" stroke-width="24" stroke-linejoin="round"/>
+  <path d="M296 120V192H368" stroke="url(#glow)" stroke-width="24" stroke-linejoin="round"/>
+  <!-- Sparkle / Lightning Bolt in Center -->
+  <path d="M256 240L236 296H276L256 352L304 280H264L284 240H256Z" fill="#3b82f6"/>
+</svg>
