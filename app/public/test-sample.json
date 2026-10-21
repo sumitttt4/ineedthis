@@ -1,0 +1,5 @@
+[
+  { "id": 1, "product": "Antigravity Studio", "tier": "Enterprise", "privacy": "100% Client-Side", "score": 100 },
+  { "id": 2, "product": "PDF to Word DOCX", "tier": "Pro Engine", "privacy": "Zero Server Uploads", "score": 99.8 },
+  { "id": 3, "product": "Universal Downloader", "tier": "Unlimited", "privacy": "Direct Stream", "score": 99.5 }
+]

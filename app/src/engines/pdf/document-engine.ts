@@ -16,12 +16,13 @@ export async function docxToPdf(
   const mammoth = await import("mammoth");
   const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
 
-  const result = await mammoth.convertToHtml({ arrayBuffer: buffer });
-  const html = result.value;
+  const isNode = typeof Buffer !== "undefined";
+  const mammothOptions = isNode
+    ? { buffer: Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer) }
+    : ({ arrayBuffer: buffer } as any);
 
-  // Parse HTML text content (strip tags for plain text PDF)
-  const parser = new DOMParser();
-  const htmlDoc = parser.parseFromString(html, "text/html");
+  const result = await mammoth.convertToHtml(mammothOptions);
+  const html = result.value;
 
   const doc = await PDFDocument.create();
   const font = await doc.embedFont(StandardFonts.Helvetica);
@@ -118,7 +119,23 @@ export async function docxToPdf(
     }
   };
 
-  walk(htmlDoc.body);
+  if (typeof DOMParser !== "undefined") {
+    const parser = new DOMParser();
+    const htmlDoc = parser.parseFromString(html, "text/html");
+    walk(htmlDoc.body);
+  } else {
+    const paragraphs = html
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")
+      .split(/<\/p>|<\/div>|<\/h[1-6]>|<\/tr>|<\/li>/gi);
+    for (const p of paragraphs) {
+      const clean = p
+        .replace(/<[^>]+>/g, " ")
+        .replace(/&nbsp;/g, " ")
+        .replace(/&amp;/g, "&")
+        .trim();
+      if (clean) writeText(clean);
+    }
+  }
 
   const bytes = await doc.save();
   const baseName = filename.replace(/\.docx?$/i, "");
@@ -564,7 +581,7 @@ export async function pdfToPptx(
 // ============================================================================
 
 export async function convertDataFormat(
-  buffer: ArrayBuffer,
+  buffer: ArrayBuffer | ArrayBufferView,
   filename: string,
   fromFormat: "json" | "csv" | "xlsx",
   toFormat: "json" | "csv" | "xlsx"
@@ -574,10 +591,14 @@ export async function convertDataFormat(
 
   let workbook: ReturnType<typeof XLSX.read>;
 
+  const uint8 = ArrayBuffer.isView(buffer)
+    ? new Uint8Array(buffer.buffer, buffer.byteOffset, buffer.byteLength)
+    : new Uint8Array(buffer);
+
   // Parse input
   switch (fromFormat) {
     case "json": {
-      const text = new TextDecoder().decode(buffer);
+      const text = new TextDecoder().decode(uint8);
       const jsonData = JSON.parse(text);
       const data = Array.isArray(jsonData) ? jsonData : [jsonData];
       const sheet = XLSX.utils.json_to_sheet(data);
@@ -586,12 +607,12 @@ export async function convertDataFormat(
       break;
     }
     case "csv": {
-      const text = new TextDecoder().decode(buffer);
+      const text = new TextDecoder().decode(uint8);
       workbook = XLSX.read(text, { type: "string" });
       break;
     }
     case "xlsx": {
-      workbook = XLSX.read(buffer, { type: "array" });
+      workbook = XLSX.read(uint8, { type: "array" });
       break;
     }
   }
@@ -652,7 +673,22 @@ export async function pdfToDocx(
   filename: string
 ): Promise<TaskResult> {
   const t = performance.now();
-  const JSZip = (await import("jszip")).default;
+  // Ensure toHex polyfill for pdfjs-dist in environments without ECMAScript 2025 toHex
+  if (typeof Uint8Array !== "undefined" && !(Uint8Array.prototype as any).toHex) {
+    (Uint8Array.prototype as any).toHex = function () {
+      return Array.from(this)
+        .map((b: any) => b.toString(16).padStart(2, "0"))
+        .join("");
+    };
+  }
+  if (typeof ArrayBuffer !== "undefined" && !(ArrayBuffer.prototype as any).toHex) {
+    (ArrayBuffer.prototype as any).toHex = function () {
+      return Array.from(new Uint8Array(this))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+    };
+  }
+
   const pdfjsLib = await import("pdfjs-dist");
 
   if (typeof window !== "undefined") {
@@ -660,6 +696,7 @@ export async function pdfToDocx(
   }
 
   const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
+  const JSZip = (await import("jszip")).default;
   const zip = new JSZip();
 
   const escapeXml = (str: string): string => {
@@ -873,78 +910,86 @@ export async function pdfToDocx(
         }>;
       }
 
-      const formattedLines: FormattedLine[] = lines.map((line) => {
-        line.items.sort((a: any, b: any) => a.x - b.x);
+      const formattedLines: FormattedLine[] = lines
+        .map((line) => {
+          // Filter out empty or whitespace-only items so they don't swallow column gaps
+          const validItems = line.items.filter(
+            (it: any) => typeof it.str === "string" && it.str.trim().length > 0
+          );
+          if (validItems.length === 0) return null;
 
-        const segments: FormattedLine["segments"] = [];
-        let currentSegment = {
-          x: line.items[0].x,
-          width: line.items[0].width,
-          text: line.items[0].str,
-          fontSize: line.items[0].fontSize,
-          fontFamily: line.items[0].fontFamily,
-          isBold: line.items[0].isBold,
-          isItalic: line.items[0].isItalic,
-        };
+          validItems.sort((a: any, b: any) => a.x - b.x);
 
-        for (let idx = 1; idx < line.items.length; idx++) {
-          const prev = line.items[idx - 1];
-          const curr = line.items[idx];
-          const gap = curr.x - (prev.x + prev.width);
+          const segments: FormattedLine["segments"] = [];
+          let currentSegment = {
+            x: validItems[0].x,
+            width: validItems[0].width,
+            text: validItems[0].str,
+            fontSize: validItems[0].fontSize,
+            fontFamily: validItems[0].fontFamily,
+            isBold: validItems[0].isBold,
+            isItalic: validItems[0].isItalic,
+          };
 
-          // If there's a large horizontal gap, split into separate columns (table/tab)
-          if (gap >= Math.max(28, prev.fontSize * 2.2)) {
-            segments.push(currentSegment);
-            currentSegment = {
-              x: curr.x,
-              width: curr.width,
-              text: curr.str,
-              fontSize: curr.fontSize,
-              fontFamily: curr.fontFamily,
-              isBold: curr.isBold,
-              isItalic: curr.isItalic,
-            };
-          } else {
-            // Normal word or character continuation
-            const needsSpace =
-              gap > 2 &&
-              !currentSegment.text.endsWith(" ") &&
-              !curr.str.startsWith(" ");
-            currentSegment.text += (needsSpace ? " " : "") + curr.str;
-            currentSegment.width = curr.x + curr.width - currentSegment.x;
-            if (curr.fontSize > currentSegment.fontSize) {
-              currentSegment.fontSize = curr.fontSize;
+          for (let idx = 1; idx < validItems.length; idx++) {
+            const prev = validItems[idx - 1];
+            const curr = validItems[idx];
+            const gap = curr.x - (prev.x + prev.width);
+
+            // If there's a horizontal gap >= 22pt (or >= 1.8x font size), split into separate columns (table/tab)
+            if (gap >= Math.max(22, prev.fontSize * 1.8)) {
+              segments.push(currentSegment);
+              currentSegment = {
+                x: curr.x,
+                width: curr.width,
+                text: curr.str,
+                fontSize: curr.fontSize,
+                fontFamily: curr.fontFamily,
+                isBold: curr.isBold,
+                isItalic: curr.isItalic,
+              };
+            } else {
+              // Normal word or character continuation
+              const needsSpace =
+                gap > 1.5 &&
+                !currentSegment.text.endsWith(" ") &&
+                !curr.str.startsWith(" ");
+              currentSegment.text += (needsSpace ? " " : "") + curr.str;
+              currentSegment.width = curr.x + curr.width - currentSegment.x;
+              if (curr.fontSize > currentSegment.fontSize) {
+                currentSegment.fontSize = curr.fontSize;
+              }
+              if (curr.isBold) currentSegment.isBold = true;
             }
-            if (curr.isBold) currentSegment.isBold = true;
           }
-        }
-        segments.push(currentSegment);
+          segments.push(currentSegment);
 
-        const left = line.items[0].x;
-        const last = line.items[line.items.length - 1];
-        const right = last.x + last.width;
-        const maxFontSize = Math.max(...line.items.map((it: any) => it.fontSize));
-        const dominantFont = line.items[0].fontFamily;
-        const anyBold = line.items.some((it: any) => it.isBold);
-        const fullText = segments.map((s) => s.text).join(" ");
-        const isHeading =
-          (maxFontSize >= 15 || (maxFontSize >= 13 && anyBold)) &&
-          fullText.length < 90 &&
-          segments.length === 1;
+          const left = validItems[0].x;
+          const last = validItems[validItems.length - 1];
+          const right = last.x + last.width;
+          const maxFontSize = Math.max(...validItems.map((it: any) => it.fontSize));
+          const dominantFont = validItems[0].fontFamily;
+          const anyBold = validItems.some((it: any) => it.isBold);
+          const fullText = segments.map((s) => s.text).join(" ");
+          const isHeading =
+            (maxFontSize >= 15 || (maxFontSize >= 13 && anyBold)) &&
+            fullText.length < 90 &&
+            segments.length === 1;
 
-        return {
-          top: line.top,
-          left,
-          right,
-          width: right - left,
-          fontSize: maxFontSize,
-          fontFamily: dominantFont,
-          isBold: anyBold,
-          isItalic: line.items[0].isItalic,
-          isHeading,
-          segments,
-        };
-      });
+          return {
+            top: line.top,
+            left,
+            right,
+            width: right - left,
+            fontSize: maxFontSize,
+            fontFamily: dominantFont,
+            isBold: anyBold,
+            isItalic: validItems[0].isItalic,
+            isHeading,
+            segments,
+          };
+        })
+        .filter((l): l is FormattedLine => l !== null);
 
       // Detect table sequences vs regular paragraphs
       let lineIdx = 0;
