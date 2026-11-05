@@ -1,6 +1,6 @@
 # INeedThis — Local-First File & Media Studio
 
-An ultra-fast, browser-based Swiss Army knife for files, media, and documents. Most tools process **entirely on your device** with WebAssembly, Web Workers, and local canvas/decoders.
+An ultra-fast, browser-based Swiss Army knife for files, media, and documents (33 tools). Most tools process **entirely on your device** with WebAssembly, Web Workers, and local canvas/decoders.
 
 Built with Next.js, TypeScript, Tailwind CSS, and Geist typography.
 
@@ -17,7 +17,7 @@ Built with Next.js, TypeScript, Tailwind CSS, and Geist typography.
 
 ---
 
-## 32 Included Utilities
+## 33 Included Utilities
 
 ### PDF & Documents
 1. PDF to Word (DOCX)
@@ -36,28 +36,29 @@ Built with Next.js, TypeScript, Tailwind CSS, and Geist typography.
 
 ### Video & Audio Lab
 14. Universal Video Downloader *(server-assisted)*
-15. Target-MB Video Compressor
-16. Precision Video Trimmer
-17. Video to GIF Converter
-18. Audio Extractor & Converter
-19. Audio Volume Booster
-20. Live Screen & Audio Recorder
+15. Convert to MP4 (MOV / WEBM / MKV → MP4)
+16. Target-MB Video Compressor
+17. Precision Video Trimmer
+18. Video to GIF Converter
+19. Audio Extractor & Converter
+20. Audio Volume Booster
+21. Live Screen & Audio Recorder
 
 ### Image Lab
-21. HEIC / HEIF to JPG/PNG
-22. Target-KB Image Compressor
-23. EXIF & GPS Metadata Stripper
-24. Passport Photo Grid Generator
-25. Favicon & App Icon Generator
-26. High-DPI Image Resizer
-27. Universal Batch Image Converter
+22. HEIC / HEIF to JPG/PNG
+23. Target-KB Image Compressor
+24. EXIF & GPS Metadata Stripper
+25. Passport Photo Grid Generator
+26. Favicon & App Icon Generator
+27. High-DPI Image Resizer
+28. Universal Batch Image Converter
 
 ### Data, Security & P2P
-28. In-Browser ZIP Archiver & Extractor
-29. Tabular Data Format Converter
-30. File Checksum & Hash Generator
-31. Vector QR Code Studio (Text / Wi‑Fi / UPI / vCard)
-32. Live Encrypted P2P File Transfer
+29. In-Browser ZIP Archiver & Extractor
+30. Tabular Data Format Converter
+31. File Checksum & Hash Generator
+32. Vector QR Code Studio (Text / Wi‑Fi / UPI / vCard)
+33. Live Encrypted P2P File Transfer
 
 ---
 

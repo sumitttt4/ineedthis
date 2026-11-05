@@ -8,8 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test:engine": "node --experimental-strip-types scripts/test-engine.mjs",
-    "test:upload": "node --experimental-strip-types scripts/test-upload-e2e.mjs",
+    "test:engine": "tsx --tsconfig tsconfig.json scripts/test-engine.mjs",
+    "test:upload": "tsx --tsconfig tsconfig.json scripts/test-upload-e2e.mjs",
+    "test:accuracy": "node scripts/test-accuracy.mjs",
     "postinstall": "node scripts/copy-runtime-assets.mjs"
   },
   "dependencies": {
@@ -47,6 +48,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.4.2",
     "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

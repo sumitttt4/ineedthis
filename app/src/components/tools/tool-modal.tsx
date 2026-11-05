@@ -47,6 +47,7 @@ import {
 import {
   compressVideo,
   trimVideo,
+  remuxToMp4,
   videoToGif,
   convertAudio,
   boostAudio,
@@ -103,7 +104,7 @@ export default function ToolModal({
   const [vcardPhone, setVcardPhone] = useState("");
   const [dataTargetFormat, setDataTargetFormat] = useState<"json" | "csv" | "xlsx">("csv");
   const [imageFormat, setImageFormat] = useState<"webp" | "jpg" | "png">("webp");
-  const [audioFormat] = useState<"mp3" | "wav" | "m4a">("mp3");
+  const [audioFormat, setAudioFormat] = useState<"mp3" | "wav" | "m4a" | "ogg">("mp3");
   const [hashesResult, setHashesResult] = useState<Record<string, string> | null>(null);
   const [qrPreviewUrl, setQrPreviewUrl] = useState<string | null>(null);
   const [trimStart, setTrimStart] = useState(0);
@@ -263,10 +264,11 @@ export default function ToolModal({
       case "image-favicon":
       case "image-resize":
         return "image/*,.heic,.heif";
+      case "video-to-mp4":
       case "video-compress-mb":
       case "video-trim":
       case "video-to-gif":
-        return "video/*";
+        return "video/*,.mov,.mkv,.avi,.webm,.mp4";
       case "audio-extract-convert":
       case "audio-booster":
         return "audio/*,video/*";
@@ -478,6 +480,10 @@ export default function ToolModal({
             height,
             maintainAspectRatio: true,
           });
+          break;
+        }
+        case "video-to-mp4": {
+          res = await remuxToMp4(activeFiles[0], (p) => setProgress(p));
           break;
         }
         case "video-compress-mb": {
@@ -1061,6 +1067,24 @@ export default function ToolModal({
                   className="border-input bg-background rounded-lg border px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-primary/50"
                 />
               </label>
+            </div>
+          </div>
+        )}
+
+        {tool.id === "audio-extract-convert" && (
+          <div className="border-border bg-card flex flex-col gap-2 rounded-xl border p-4 shadow-sm">
+            <label className="text-[13px] font-medium">Output audio format</label>
+            <div className="flex flex-wrap gap-2">
+              {(["mp3", "wav", "m4a", "ogg"] as const).map((fmt) => (
+                <Button
+                  key={fmt}
+                  variant={audioFormat === fmt ? "primary" : "secondary"}
+                  size="sm"
+                  onClick={() => setAudioFormat(fmt)}
+                >
+                  {fmt.toUpperCase()}
+                </Button>
+              ))}
             </div>
           </div>
         )}

@@ -34,10 +34,10 @@ export const CATEGORIES: Array<{
   count: number;
   icon: ComponentType<IconProps>;
 }> = [
-  { id: "all", name: "All Tools", count: 32, icon: LayersIcon },
+  { id: "all", name: "All Tools", count: 33, icon: LayersIcon },
   { id: "pdf", name: "PDF & Docs", count: 13, icon: FilePdfIcon },
   { id: "image", name: "Image Lab", count: 7, icon: ImageIcon },
-  { id: "media", name: "Video & Audio", count: 7, icon: VideoIcon },
+  { id: "media", name: "Video & Audio", count: 8, icon: VideoIcon },
   { id: "data", name: "Data & Archives", count: 4, icon: DataIcon },
   { id: "p2p", name: "Live P2P Transfer", count: 1, icon: ShareP2PIcon },
 ];
@@ -237,6 +237,16 @@ export const TOOLS: ToolDefinition[] = [
     icon: VideoIcon,
     formats: ["URL", "MP4", "MP3"],
     action: "video-download",
+  },
+  {
+    id: "video-to-mp4",
+    name: "Convert to MP4",
+    description:
+      "Convert MOV, WEBM, MKV, and other video files to MP4 (fast remux when possible, transcode fallback).",
+    category: "media",
+    icon: VideoIcon,
+    formats: ["MOV", "WEBM", "MKV", "AVI", "MP4"],
+    action: "remux-mp4",
   },
   {
     id: "video-compress-mb",

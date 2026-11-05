@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { inspectFile } from "@/lib/file-router";
+import {
+  inspectFile,
+  fileCategoryToToolCategory,
+} from "@/lib/file-router";
 import type { InspectedFile } from "@/lib/types";
 import { formatBytes } from "@/lib/utils";
 import Button from "@/components/_ui/button";
@@ -9,7 +12,6 @@ import {
   UploadCloudIcon,
   ShieldCheckIcon,
   CpuIcon,
-  CheckCircleIcon,
   ChevronRightIcon,
 } from "@/components/_ui/icons";
 import { TOOLS, type ToolDefinition } from "@/components/tools/tools-registry";
@@ -40,7 +42,14 @@ export default function GlobalDropzone({
       const inspected = await inspectFile(file);
       setInspectedFile(inspected);
     } catch {
-      // Fallback
+      // Fallback: still show generic hash tool
+      setInspectedFile({
+        file,
+        mimeType: file.type || "application/octet-stream",
+        category: "unknown",
+        extension: file.name.split(".").pop()?.toLowerCase() || "bin",
+        actions: ["file-hash"],
+      });
     }
   };
 
@@ -58,16 +67,22 @@ export default function GlobalDropzone({
     }
   };
 
-  // Find tools matching the inspected file's category or actions
-  const matchingTools = inspectedFile
-    ? TOOLS.filter(
-        (t) =>
-          t.category === inspectedFile.category ||
-          t.formats.some(
-            (fmt) => fmt.toLowerCase() === inspectedFile.extension.toLowerCase()
-          )
-      )
-    : [];
+  const matchingTools: ToolDefinition[] = (() => {
+    if (!inspectedFile) return [];
+    const byAction = inspectedFile.actions
+      .map((id) => TOOLS.find((t) => t.id === id))
+      .filter((t): t is ToolDefinition => Boolean(t));
+    if (byAction.length > 0) return byAction;
+
+    const toolCats = new Set(fileCategoryToToolCategory(inspectedFile.category));
+    return TOOLS.filter(
+      (t) =>
+        toolCats.has(t.category) ||
+        t.formats.some(
+          (fmt) => fmt.toLowerCase() === inspectedFile.extension.toLowerCase()
+        )
+    );
+  })();
 
   return (
     <div className="flex flex-col gap-3">
@@ -105,19 +120,18 @@ export default function GlobalDropzone({
         <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-[11px] text-muted-foreground font-medium">
           <span className="flex items-center gap-1">
             <ShieldCheckIcon className="size-3.5 text-emerald-500" />
-            Local processing (files stay on device)
+            Local processing for file tools
           </span>
           <span className="opacity-40">•</span>
           <span className="flex items-center gap-1">
             <CpuIcon className="size-3.5 text-blue-500" />
-            Runs locally in browser
+            Runs in your browser
           </span>
           <span className="opacity-40">•</span>
-          <span>Never leaves your device</span>
+          <span>Video download is server-assisted</span>
         </div>
       </div>
 
-      {/* Inspected file banner with instant recommendations */}
       {inspectedFile && (
         <div className="border-border bg-secondary/60 rounded-xl border p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in duration-200">
           <div className="flex items-center gap-3">
@@ -143,7 +157,7 @@ export default function GlobalDropzone({
             <span className="text-[12px] font-medium text-muted-foreground mr-1">
               Actions:
             </span>
-            {matchingTools.slice(0, 3).map((tool) => (
+            {matchingTools.slice(0, 4).map((tool) => (
               <Button
                 key={tool.id}
                 variant="secondary"
@@ -157,6 +171,9 @@ export default function GlobalDropzone({
                 <ChevronRightIcon className="size-3" />
               </Button>
             ))}
+            {matchingTools.length === 0 && (
+              <span className="text-[12px] text-muted-foreground">No matching tools</span>
+            )}
           </div>
         </div>
       )}
