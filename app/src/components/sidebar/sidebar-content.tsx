@@ -116,7 +116,7 @@ export default function SidebarContent({
       <div className="border-sidebar-border bg-sidebar-accent/30 flex shrink-0 flex-col gap-2 border-t p-3.5 text-[12px]">
         <div className="flex items-center gap-2 text-muted-foreground">
           <ShieldCheckIcon className="size-4 text-emerald-500 shrink-0" />
-          <span className="truncate">0 bytes uploaded to servers</span>
+          <span className="truncate">File tools stay on-device</span>
         </div>
         <div className="flex items-center gap-2 text-muted-foreground">
           <CpuIcon className="size-4 text-purple-500 shrink-0" />

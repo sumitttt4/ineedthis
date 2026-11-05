@@ -68,16 +68,10 @@ class FFmpegManager {
       });
 
       // Load from CDN with proper CORS headers
-      const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm";
+      // Prefer locally hosted core assets for offline/PWA reliability.
       await this.ffmpeg.load({
-        coreURL: await toBlobURL(
-          `${baseURL}/ffmpeg-core.js`,
-          "text/javascript"
-        ),
-        wasmURL: await toBlobURL(
-          `${baseURL}/ffmpeg-core.wasm`,
-          "application/wasm"
-        ),
+        coreURL: await toBlobURL("/ffmpeg/ffmpeg-core.js", "text/javascript"),
+        wasmURL: await toBlobURL("/ffmpeg/ffmpeg-core.wasm", "application/wasm"),
       });
 
       this.loaded = true;

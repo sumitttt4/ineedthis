@@ -127,10 +127,10 @@ export default function Home() {
                   <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <ShieldCheckIcon className="size-3.5 text-emerald-500" />
-                      100% Private
+                      Local-first processing
                     </span>
                     <span className="opacity-40">•</span>
-                    <span>Zero Uploads</span>
+                    <span>File tools never upload</span>
                   </div>
                 </div>
 
@@ -167,7 +167,9 @@ export default function Home() {
                 <footer className="mt-8 border-t border-border/80 pt-6 pb-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[13px] text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <ShieldCheckIcon className="size-4 text-emerald-500 shrink-0" />
-                    <span>Files are processed directly in your browser. Nothing is ever uploaded.</span>
+                    <span>
+                      File tools run in your browser. The video downloader is server-assisted.
+                    </span>
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3">

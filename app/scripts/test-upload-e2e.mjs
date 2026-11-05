@@ -50,6 +50,11 @@ async function testUploadE2E() {
   console.log(` → Verification: Table structure (<w:tbl>): ${hasTable ? "YES (PASS)" : "NO"}`);
   console.log(` → Verification: Table data (Throughput): ${hasThroughput ? "YES (PASS)" : "NO"}`);
 
+  const structureOk = Boolean(hasTitle && hasTable && hasThroughput);
+  if (!structureOk) {
+    throw new Error("PDF→DOCX structure verification failed (title/table/data checks).");
+  }
+
   // ---------------------------------------------------------------------------
   // 2. WORD (DOCX) TO PDF UPLOAD & CONVERSION
   // ---------------------------------------------------------------------------

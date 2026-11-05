@@ -13,7 +13,7 @@ const geist = Geist({
 export const metadata: Metadata = {
   title: "File & Media Studio | Private & Instant",
   description:
-    "Fast, 100% private file utilities for PDF, image compression, video conversion, and direct peer-to-peer sharing directly in your browser.",
+    "Local-first file utilities for PDF, images, video, and peer-to-peer sharing. Most tools never leave your device; video download is server-assisted.",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
