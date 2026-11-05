@@ -24,7 +24,7 @@ import {
  * Each engine module wraps this with its own worker URL and typed options.
  */
 export function useEngine<TOptions = Record<string, unknown>>(
-  workerUrl: string | URL | (() => Worker)
+  workerFactory: string | URL | (() => Worker)
 ): UseEngineReturn<TOptions> {
   const [state, setState] = useState<TaskState>("idle");
   const [progress, setProgress] = useState<TaskProgress>(createIdleProgress());
@@ -35,16 +35,10 @@ export function useEngine<TOptions = Record<string, unknown>>(
 
   const getController = useCallback((): WorkerController => {
     if (!controllerRef.current) {
-      const url =
-        typeof workerUrl === "function"
-          ? // For Next.js worker URL pattern: new Worker(new URL(...))
-            // We pass the URL string; the function form is for the hook consumer
-            (workerUrl as unknown as string | URL)
-          : workerUrl;
-      controllerRef.current = new WorkerController(url);
+      controllerRef.current = new WorkerController(workerFactory);
     }
     return controllerRef.current;
-  }, [workerUrl]);
+  }, [workerFactory]);
 
   const onProgress: ProgressCallback = useCallback((p: TaskProgress) => {
     setProgress(p);

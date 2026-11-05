@@ -3,7 +3,6 @@
 // ============================================================================
 
 import type {
-  TaskState,
   TaskProgress,
   TaskResult,
   BatchTaskResult,
@@ -39,11 +38,11 @@ export class WorkerController {
   private pendingTasks = new Map<string, PendingTask>();
   private isReady = false;
   private readyPromise: Promise<void> | null = null;
-  private workerUrl: string | URL;
+  private workerFactory: string | URL | (() => Worker);
   private objectUrls: string[] = [];
 
-  constructor(workerUrl: string | URL) {
-    this.workerUrl = workerUrl;
+  constructor(workerFactory: string | URL | (() => Worker)) {
+    this.workerFactory = workerFactory;
   }
 
   /** Lazily initialize the worker on first use. */
@@ -52,7 +51,10 @@ export class WorkerController {
 
     this.readyPromise = new Promise<void>((resolve, reject) => {
       try {
-        this.worker = new Worker(this.workerUrl, { type: "module" });
+        this.worker =
+          typeof this.workerFactory === "function"
+            ? this.workerFactory()
+            : new Worker(this.workerFactory, { type: "module" });
 
         const onReady = (e: MessageEvent<WorkerResponse>) => {
           if (e.data.type === "ready") {

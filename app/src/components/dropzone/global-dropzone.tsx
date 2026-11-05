@@ -105,7 +105,7 @@ export default function GlobalDropzone({
         <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-[11px] text-muted-foreground font-medium">
           <span className="flex items-center gap-1">
             <ShieldCheckIcon className="size-3.5 text-emerald-500" />
-            100% Private (0 KB Uploaded)
+            Local processing (files stay on device)
           </span>
           <span className="opacity-40">•</span>
           <span className="flex items-center gap-1">

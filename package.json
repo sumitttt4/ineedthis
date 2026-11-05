@@ -7,7 +7,13 @@
     "dev": "npm run dev --prefix app",
     "build": "npm run build --prefix app",
     "start": "npm run start --prefix app",
-    "lint": "npm run lint --prefix app"
+    "lint": "npm run lint --prefix app",
+    "typecheck": "npm run typecheck --prefix app",
+    "test:engine": "npm run test:engine --prefix app",
+    "test:upload": "npm run test:upload --prefix app"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "author": "Sumit",
   "license": "MIT"

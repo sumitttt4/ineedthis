@@ -3,6 +3,7 @@
 // ============================================================================
 
 import type { TaskResult, BatchTaskResult } from "@/lib/types";
+import { loadPdfJs } from "@/lib/pdfjs";
 
 // ============================================================================
 // DOCX → PDF (using mammoth for HTML extraction, then canvas/pdf-lib)
@@ -480,11 +481,7 @@ export async function pdfToPptx(
 ): Promise<TaskResult> {
   const t = performance.now();
   const PptxGenJS = (await import("pptxgenjs")).default;
-  const pdfjsLib = await import("pdfjs-dist");
-
-  if (typeof window !== "undefined") {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-  }
+  const pdfjsLib = await loadPdfJs();
 
   const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
   const pptx = new PptxGenJS();
@@ -689,11 +686,7 @@ export async function pdfToDocx(
     };
   }
 
-  const pdfjsLib = await import("pdfjs-dist");
-
-  if (typeof window !== "undefined") {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-  }
+  const pdfjsLib = await loadPdfJs();
 
   const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
   const JSZip = (await import("jszip")).default;

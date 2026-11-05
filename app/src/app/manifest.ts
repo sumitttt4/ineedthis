@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "File Studio | 100% Private File & Media Engine",
+    name: "File Studio | Local-First File & Media Engine",
     short_name: "File Studio",
     description:
       "Fast, private client-side file utilities for PDF, video transcoding, image compression, and direct one-tap conversion.",

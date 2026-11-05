@@ -18,6 +18,7 @@ import type {
   PdfRedactOptions,
   PdfSecurityOptions,
 } from "@/lib/types";
+import { loadPdfJs } from "@/lib/pdfjs";
 
 // ============================================================================
 // Helpers
@@ -211,13 +212,7 @@ export async function compressPdf(
   // Instead, use pdf-lib to iterate objects. For a practical approach,
   // we render each page to canvas at reduced resolution and rebuild.
 
-  // Dynamic import pdfjs-dist for rendering
-  const pdfjsLib = await import("pdfjs-dist");
-
-  // Set worker source
-  if (typeof window !== "undefined") {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-  }
+  const pdfjsLib = await loadPdfJs();
 
   const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
   const newDoc = await PDFDocument.create();
@@ -341,11 +336,7 @@ export async function pdfToImages(
   format: "png" | "jpg" = "png"
 ): Promise<BatchTaskResult> {
   const t = performance.now();
-  const pdfjsLib = await import("pdfjs-dist");
-
-  if (typeof window !== "undefined") {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-  }
+  const pdfjsLib = await loadPdfJs();
 
   const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
   const results: TaskResult[] = [];
@@ -612,10 +603,7 @@ export async function redactPdf(
   const baseName = filename.replace(/\.pdf$/i, "");
 
   // Use pdfjs-dist to extract text positions
-  const pdfjsLib = await import("pdfjs-dist");
-  if (typeof window !== "undefined") {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
-  }
+  const pdfjsLib = await loadPdfJs();
 
   const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
   const doc = await loadPdf(buffer);

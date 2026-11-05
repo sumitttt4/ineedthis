@@ -6,9 +6,14 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test:engine": "node --experimental-strip-types scripts/test-engine.mjs",
+    "test:upload": "node --experimental-strip-types scripts/test-upload-e2e.mjs",
+    "postinstall": "node scripts/copy-runtime-assets.mjs"
   },
   "dependencies": {
+    "@ffmpeg/core": "^0.12.6",
     "@ffmpeg/ffmpeg": "^0.12.15",
     "@ffmpeg/util": "^0.12.2",
     "class-variance-authority": "^0.7.1",

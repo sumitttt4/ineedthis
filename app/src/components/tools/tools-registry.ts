@@ -38,7 +38,7 @@ export const CATEGORIES: Array<{
   { id: "pdf", name: "PDF & Docs", count: 13, icon: FilePdfIcon },
   { id: "image", name: "Image Lab", count: 7, icon: ImageIcon },
   { id: "media", name: "Video & Audio", count: 7, icon: VideoIcon },
-  { id: "data", name: "Data & Archives", count: 5, icon: DataIcon },
+  { id: "data", name: "Data & Archives", count: 4, icon: DataIcon },
   { id: "p2p", name: "Live P2P Transfer", count: 1, icon: ShareP2PIcon },
 ];
 
@@ -231,7 +231,8 @@ export const TOOLS: ToolDefinition[] = [
   {
     id: "universal-video-downloader",
     name: "One-Tap Video Downloader",
-    description: "Download videos in one tap from YouTube, X/Twitter, TikTok, Instagram, Reddit, or direct URLs without ads.",
+    description:
+      "Download videos from YouTube, X/Twitter, TikTok, Instagram, Reddit, or direct URLs. Uses a server-assisted resolver (not local-only).",
     category: "media",
     icon: VideoIcon,
     formats: ["URL", "MP4", "MP3"],

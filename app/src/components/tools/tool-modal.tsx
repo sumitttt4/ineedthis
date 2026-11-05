@@ -13,7 +13,6 @@ import {
   RefreshCwIcon,
   PlayIcon,
   CopyIcon,
-  VideoIcon,
   ShieldCheckIcon,
 } from "@/components/_ui/icons";
 import type { TaskResult, BatchTaskResult, TaskProgress } from "@/lib/types";
@@ -25,7 +24,10 @@ import {
   compressPdf,
   pdfToImages,
   addWatermark,
+  addPageNumbers,
+  signPdf,
   redactPdf,
+  handlePdfSecurity,
 } from "@/engines/pdf/pdf-engine";
 import {
   docxToPdf,
@@ -56,7 +58,11 @@ import {
   convertData,
   computeFileHashes,
   generateQrCode,
+  generateWifiQr,
+  generateUpiQr,
+  generateVcardQr,
 } from "@/engines/data/data-engine";
+import { runEngineAction, WORKER_ACTIONS } from "@/lib/run-engine";
 
 export interface ToolModalProps {
   tool: ToolDefinition | null;
@@ -85,13 +91,34 @@ export default function ToolModal({
   const [targetKb, setTargetKb] = useState<number>(200);
   const [targetMb, setTargetMb] = useState<number>(25);
   const [watermarkText, setWatermarkText] = useState("CONFIDENTIAL");
+  const [addNumbers, setAddNumbers] = useState(true);
   const [qrText, setQrText] = useState("https://");
   const [qrFormat, setQrFormat] = useState<"png" | "svg">("png");
+  const [qrMode, setQrMode] = useState<"text" | "wifi" | "upi" | "vcard">("text");
+  const [wifiSsid, setWifiSsid] = useState("");
+  const [wifiPassword, setWifiPassword] = useState("");
+  const [upiId, setUpiId] = useState("");
+  const [upiName, setUpiName] = useState("");
+  const [vcardName, setVcardName] = useState("");
+  const [vcardPhone, setVcardPhone] = useState("");
   const [dataTargetFormat, setDataTargetFormat] = useState<"json" | "csv" | "xlsx">("csv");
   const [imageFormat, setImageFormat] = useState<"webp" | "jpg" | "png">("webp");
-  const [audioFormat, setAudioFormat] = useState<"mp3" | "wav" | "m4a">("mp3");
+  const [audioFormat] = useState<"mp3" | "wav" | "m4a">("mp3");
   const [hashesResult, setHashesResult] = useState<Record<string, string> | null>(null);
   const [qrPreviewUrl, setQrPreviewUrl] = useState<string | null>(null);
+  const [trimStart, setTrimStart] = useState(0);
+  const [trimEnd, setTrimEnd] = useState(10);
+  const [resizeWidth, setResizeWidth] = useState(1200);
+  const [resizeHeight, setResizeHeight] = useState<number | "">("");
+  const [resizePercent, setResizePercent] = useState<number | "">("");
+  const [pdfPassword, setPdfPassword] = useState("");
+  const [signatureFile, setSignatureFile] = useState<File | null>(null);
+  const [signPage, setSignPage] = useState(0);
+  const [signX, setSignX] = useState(72);
+  const [signY, setSignY] = useState(72);
+  const [signW, setSignW] = useState(160);
+  const [signH, setSignH] = useState(60);
+  const [heicFormat, setHeicFormat] = useState<"jpg" | "png">("jpg");
 
   // Video Downloader state
   const [videoUrl, setVideoUrl] = useState("");
@@ -107,41 +134,6 @@ export default function ToolModal({
     duration?: number | string;
     variants?: Array<{ quality: string; url: string }>;
   } | null>(null);
-
-  const handleResolveVideo = async (urlToFetch?: string) => {
-    const target = (urlToFetch ?? videoUrl).trim();
-    if (!target) {
-      setErrorMsg("Please enter or paste a valid video URL.");
-      return;
-    }
-    setErrorMsg(null);
-    setIsResolvingVideo(true);
-    setVideoData(null);
-
-    try {
-      const res = await fetch("/api/video-downloader", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          url: target,
-          quality: videoQuality,
-          isAudioOnly: videoFormat === "mp3",
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || "Failed to resolve video stream.");
-      }
-
-      setVideoData(data);
-      toast(`Video ready: ${data.title.slice(0, 30)}...`, { type: "success" });
-    } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "Error resolving video.");
-    } finally {
-      setIsResolvingVideo(false);
-    }
-  };
 
   const handleDownloadVideo = (selectedUrl?: string, customTitle?: string) => {
     const downloadTarget = selectedUrl || videoData?.url;
@@ -221,7 +213,7 @@ export default function ToolModal({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const downloadFile = (taskResult: TaskResult) => {
+  const downloadFile = (taskResult: TaskResult, quiet = false) => {
     const blob = taskResult.data as Blob;
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -231,13 +223,70 @@ export default function ToolModal({
     a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 4000);
-    toast(`Downloaded ${taskResult.filename}`);
+    if (!quiet) toast(`Downloaded ${taskResult.filename}`);
+  };
+
+  const autoDownloadResult = (res: TaskResult | BatchTaskResult) => {
+    if ("files" in res) {
+      res.files.forEach((f, i) => downloadFile(f, i > 0));
+      toast(`Downloaded ${res.files.length} files`, { type: "success" });
+      return;
+    }
+    downloadFile(res);
+  };
+
+  const acceptForTool = (id: string): string | undefined => {
+    switch (id) {
+      case "pdf-to-docx":
+      case "pdf-merge":
+      case "pdf-split":
+      case "pdf-compress":
+      case "pdf-to-img":
+      case "pdf-to-pptx":
+      case "pdf-watermark":
+      case "pdf-redact":
+      case "pdf-sign":
+      case "pdf-unlock":
+        return "application/pdf,.pdf";
+      case "docx-to-pdf":
+        return ".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      case "xlsx-to-pdf":
+        return ".xlsx,.csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv";
+      case "md-to-pdf":
+        return ".md,.markdown,text/markdown,text/plain";
+      case "image-heic":
+        return ".heic,.heif,image/heic,image/heif";
+      case "image-convert":
+      case "image-compress-kb":
+      case "image-exif":
+      case "image-passport":
+      case "image-favicon":
+      case "image-resize":
+        return "image/*,.heic,.heif";
+      case "video-compress-mb":
+      case "video-trim":
+      case "video-to-gif":
+        return "video/*";
+      case "audio-extract-convert":
+      case "audio-booster":
+        return "audio/*,video/*";
+      case "archive-zip":
+        return ".zip,application/zip,*/*";
+      case "data-convert":
+        return ".json,.csv,.xlsx,application/json,text/csv";
+      default:
+        return undefined;
+    }
   };
 
   const executeTool = async (overrideFiles?: File[]) => {
     if (!tool) return;
     if (tool.id === "universal-video-downloader") {
       await handleResolveAndDownload();
+      return;
+    }
+    if (tool.id === "p2p-transfer") {
+      setErrorMsg("Open the Live P2P Transfer category in the sidebar for peer-to-peer sharing.");
       return;
     }
 
@@ -249,41 +298,70 @@ export default function ToolModal({
 
     setIsProcessing(true);
     setErrorMsg(null);
-    setProgress({ state: "processing", percent: 15, message: "Processing with zero uploads..." });
+    setProgress({
+      state: "processing",
+      percent: 15,
+      message:
+        tool.id === "universal-video-downloader"
+          ? "Resolving via server…"
+          : "Processing locally on your device…",
+    });
 
     try {
       let res: TaskResult | BatchTaskResult | null = null;
+      const onWorkerProgress = (p: TaskProgress) => setProgress(p);
+
+      const maybeWorker = async (
+        action: string,
+        workerFiles: File[],
+        options: Record<string, unknown>,
+        fallback: () => Promise<TaskResult | BatchTaskResult>
+      ) => {
+        if (!WORKER_ACTIONS.has(action)) return fallback();
+        return runEngineAction(action, workerFiles, options, onWorkerProgress, fallback);
+      };
 
       switch (tool.id) {
         case "pdf-to-docx": {
-          const buf = await activeFiles[0].arrayBuffer();
-          res = await pdfToDocx(buf, activeFiles[0].name);
+          res = await maybeWorker("pdf-to-docx", activeFiles, {}, async () => {
+            const buf = await activeFiles[0].arrayBuffer();
+            return pdfToDocx(buf, activeFiles[0].name);
+          });
           break;
         }
         case "pdf-merge": {
-          const buffers = await Promise.all(activeFiles.map((f) => f.arrayBuffer()));
-          const names = activeFiles.map((f) => f.name);
-          res = await mergePdfs(buffers, names);
+          res = await maybeWorker("pdf-merge", activeFiles, {}, async () => {
+            const buffers = await Promise.all(activeFiles.map((f) => f.arrayBuffer()));
+            return mergePdfs(buffers, activeFiles.map((f) => f.name));
+          });
           break;
         }
         case "pdf-split": {
-          const buf = await activeFiles[0].arrayBuffer();
-          res = await splitPdf(buf, activeFiles[0].name, { mode: "individual" });
+          res = await maybeWorker("pdf-split", activeFiles, {}, async () => {
+            const buf = await activeFiles[0].arrayBuffer();
+            return splitPdf(buf, activeFiles[0].name, { mode: "individual" });
+          });
           break;
         }
         case "pdf-compress": {
-          const buf = await activeFiles[0].arrayBuffer();
-          res = await compressPdf(buf, activeFiles[0].name, { targetDpi: 150, imageQuality: 0.65 });
+          res = await maybeWorker("pdf-compress", activeFiles, {}, async () => {
+            const buf = await activeFiles[0].arrayBuffer();
+            return compressPdf(buf, activeFiles[0].name, { targetDpi: 150, imageQuality: 0.65 });
+          });
           break;
         }
         case "pdf-to-img": {
-          const buf = await activeFiles[0].arrayBuffer();
-          res = await pdfToImages(buf, activeFiles[0].name, 300, "png");
+          res = await maybeWorker("pdf-to-img", activeFiles, {}, async () => {
+            const buf = await activeFiles[0].arrayBuffer();
+            return pdfToImages(buf, activeFiles[0].name, 300, "png");
+          });
           break;
         }
         case "docx-to-pdf": {
-          const buf = await activeFiles[0].arrayBuffer();
-          res = await docxToPdf(buf, activeFiles[0].name);
+          res = await maybeWorker("docx-to-pdf", activeFiles, {}, async () => {
+            const buf = await activeFiles[0].arrayBuffer();
+            return docxToPdf(buf, activeFiles[0].name);
+          });
           break;
         }
         case "xlsx-to-pdf": {
@@ -303,16 +381,60 @@ export default function ToolModal({
         }
         case "pdf-watermark": {
           const buf = await activeFiles[0].arrayBuffer();
-          res = await addWatermark(buf, activeFiles[0].name, { text: watermarkText });
+          let current = await addWatermark(buf, activeFiles[0].name, { text: watermarkText });
+          if (addNumbers) {
+            const wmBuf = await (current.data as Blob).arrayBuffer();
+            current = await addPageNumbers(wmBuf, activeFiles[0].name, {
+              format: "{n} / {total}",
+              position: "bottom-center",
+            });
+          }
+          res = current;
           break;
         }
         case "pdf-redact": {
           const buf = await activeFiles[0].arrayBuffer();
-          res = await redactPdf(buf, activeFiles[0].name, { patterns: [], useBuiltInPatterns: true });
+          res = await redactPdf(buf, activeFiles[0].name, {
+            patterns: [],
+            useBuiltInPatterns: true,
+          });
+          break;
+        }
+        case "pdf-sign": {
+          if (!signatureFile) {
+            throw new Error("Please upload a signature image (PNG or JPG).");
+          }
+          const buf = await activeFiles[0].arrayBuffer();
+          const sigBuf = await signatureFile.arrayBuffer();
+          res = await signPdf(buf, activeFiles[0].name, {
+            signatureImage: sigBuf,
+            page: Math.max(0, signPage),
+            rect: [signX, signY, signW, signH],
+          });
+          break;
+        }
+        case "pdf-unlock": {
+          const buf = await activeFiles[0].arrayBuffer();
+          res = await handlePdfSecurity(buf, activeFiles[0].name, {
+            action: "unlock",
+            password: pdfPassword,
+          });
+          break;
+        }
+        case "image-heic": {
+          res = await batchConvertImages(activeFiles, {
+            format: heicFormat,
+            quality: 0.92,
+          });
           break;
         }
         case "image-convert": {
-          res = await batchConvertImages(activeFiles, { format: imageFormat, quality: 0.85 });
+          res = await maybeWorker(
+            "image-convert",
+            activeFiles,
+            { format: imageFormat },
+            () => batchConvertImages(activeFiles, { format: imageFormat, quality: 0.85 })
+          );
           break;
         }
         case "image-compress-kb": {
@@ -339,7 +461,23 @@ export default function ToolModal({
           break;
         }
         case "image-resize": {
-          res = await resizeImage(activeFiles[0], { width: 1200, maintainAspectRatio: true });
+          let width = resizeWidth || undefined;
+          let height = resizeHeight === "" ? undefined : Number(resizeHeight);
+          if (resizePercent !== "" && Number(resizePercent) > 0) {
+            // Percent mode: decode via a temporary resize using natural size approximation
+            // Engine handles aspect when only width is set; pass scaled width from percent of 1000 baseline.
+            // Prefer bitmap-free approach: use percent as scale of original via width/height unset + custom.
+            const scale = Number(resizePercent) / 100;
+            const bmp = await createImageBitmap(activeFiles[0]);
+            width = Math.max(1, Math.round(bmp.width * scale));
+            height = Math.max(1, Math.round(bmp.height * scale));
+            bmp.close();
+          }
+          res = await resizeImage(activeFiles[0], {
+            width,
+            height,
+            maintainAspectRatio: true,
+          });
           break;
         }
         case "video-compress-mb": {
@@ -351,9 +489,12 @@ export default function ToolModal({
           break;
         }
         case "video-trim": {
+          if (trimEnd <= trimStart) {
+            throw new Error("Trim end time must be greater than start time.");
+          }
           res = await trimVideo(
             activeFiles[0],
-            { startTime: 0, endTime: 10, frameAccurate: false },
+            { startTime: trimStart, endTime: trimEnd, frameAccurate: false },
             (p) => setProgress(p)
           );
           break;
@@ -392,48 +533,96 @@ export default function ToolModal({
           break;
         }
         case "data-convert": {
-          res = await convertData(activeFiles[0], { to: dataTargetFormat });
+          res = await maybeWorker(
+            "data-convert",
+            activeFiles,
+            { to: dataTargetFormat },
+            () => convertData(activeFiles[0], { to: dataTargetFormat })
+          );
           break;
         }
         case "file-hash": {
-          const hashRes = await computeFileHashes(activeFiles[0], {
-            algorithms: ["sha-256", "sha-1", "md5"],
-          });
-          setHashesResult(hashRes.hashes);
-          res = {
-            data: new Blob([JSON.stringify(hashRes.hashes, null, 2)], {
+          res = await maybeWorker("file-hash", activeFiles, {}, async () => {
+            const hashRes = await computeFileHashes(activeFiles[0], {
+              algorithms: ["sha-256", "sha-1", "md5"],
+            });
+            setHashesResult(hashRes.hashes);
+            const blob = new Blob([JSON.stringify(hashRes.hashes, null, 2)], {
               type: "application/json",
-            }),
-            filename: `${activeFiles[0].name}_checksums.json`,
-            mimeType: "application/json",
-            durationMs: hashRes.durationMs,
-            sizeBytes: 150,
-          };
+            });
+            return {
+              data: blob,
+              filename: `${activeFiles[0].name}_checksums.json`,
+              mimeType: "application/json",
+              durationMs: hashRes.durationMs,
+              sizeBytes: blob.size,
+            };
+          });
+          if (res && "data" in res) {
+            try {
+              const text = await (res.data as Blob).text();
+              setHashesResult(JSON.parse(text));
+            } catch {
+              /* preview optional */
+            }
+          }
           break;
         }
         case "qr-studio": {
-          const qrRes = await generateQrCode({
-            content: qrText || "https://example.com",
-            format: qrFormat,
-            size: 512,
-          });
+          let qrRes: TaskResult;
+          if (qrMode === "wifi") {
+            if (!wifiSsid.trim()) throw new Error("Enter a Wi‑Fi network name (SSID).");
+            qrRes = await generateWifiQr(wifiSsid.trim(), wifiPassword, "WPA", false);
+          } else if (qrMode === "upi") {
+            if (!upiId.trim()) throw new Error("Enter a UPI ID.");
+            qrRes = await generateUpiQr(upiId.trim(), upiName.trim() || "Payee");
+          } else if (qrMode === "vcard") {
+            if (!vcardName.trim()) throw new Error("Enter a contact name.");
+            const parts = vcardName.trim().split(/\s+/);
+            const firstName = parts[0] ?? "";
+            const lastName = parts.slice(1).join(" ") || "-";
+            qrRes = await generateVcardQr({
+              firstName,
+              lastName,
+              phone: vcardPhone.trim() || undefined,
+            });
+          } else {
+            qrRes = await generateQrCode({
+              content: qrText || "https://example.com",
+              format: qrFormat,
+              size: 512,
+            });
+          }
+          // Re-encode to requested format when helpers default to PNG
+          if (qrFormat === "svg" && qrMode !== "text") {
+            const content =
+              qrMode === "wifi"
+                ? `WIFI:T:WPA;S:${wifiSsid};P:${wifiPassword};H:false;;`
+                : qrMode === "upi"
+                  ? `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(upiName || "Payee")}`
+                  : undefined;
+            if (content) {
+              qrRes = await generateQrCode({ content, format: "svg", size: 512 });
+            }
+          }
           res = qrRes;
           setQrPreviewUrl(URL.createObjectURL(qrRes.data as Blob));
           break;
         }
         default: {
-          throw new Error(`Tool "${tool.id}" is ready and executing in Web Worker.`);
+          throw new Error(`Tool "${tool.id}" is not implemented yet.`);
         }
       }
 
       setResult(res);
-      setProgress({ state: "completed", percent: 100, message: "1-Tap Complete! File downloaded." });
+      setProgress({
+        state: "completed",
+        percent: 100,
+        message: "1-Tap Complete! File downloaded.",
+      });
       toast("1-Tap Complete! File downloaded.", { type: "success" });
 
-      // Auto-download in 1 tap!
-      if (res && "data" in res && (res as TaskResult).data) {
-        downloadFile(res as TaskResult);
-      }
+      if (res) autoDownloadResult(res);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
       setErrorMsg(msg);
@@ -537,7 +726,9 @@ export default function ToolModal({
         <div className="flex w-full items-center justify-between gap-3">
           <div className="text-[12px] text-muted-foreground">
             <span className="text-[11px] opacity-75">
-              Private & Instant
+              {tool.id === "universal-video-downloader"
+                ? "Server-assisted download"
+                : "Processed locally on your device"}
             </span>
           </div>
 
@@ -579,7 +770,7 @@ export default function ToolModal({
                 variant="primary"
                 onClick={() => {
                   if ("files" in result) {
-                    result.files.forEach(downloadFile);
+                    result.files.forEach((f) => downloadFile(f));
                   } else {
                     downloadFile(result);
                   }
@@ -623,7 +814,13 @@ export default function ToolModal({
             <input
               ref={fileInputRef}
               type="file"
-              multiple={tool.id === "pdf-merge" || tool.id === "image-convert" || tool.id === "archive-zip"}
+              accept={acceptForTool(tool.id)}
+              multiple={
+                tool.id === "pdf-merge" ||
+                tool.id === "image-convert" ||
+                tool.id === "image-heic" ||
+                tool.id === "archive-zip"
+              }
               onChange={handleFileChange}
               className="hidden"
             />
@@ -635,7 +832,7 @@ export default function ToolModal({
                 Click or drag & drop files here
               </p>
               <p className="text-muted-foreground mt-0.5 text-[12px]">
-                Supported: {tool.formats.join(", ")} • Zero server uploads
+                Supported: {tool.formats.join(", ")} • Local processing
               </p>
             </div>
             {files.length > 0 && (
@@ -705,7 +902,7 @@ export default function ToolModal({
         )}
 
         {tool.id === "pdf-watermark" && (
-          <div className="border-border bg-card flex flex-col gap-2 rounded-xl border p-4 shadow-sm">
+          <div className="border-border bg-card flex flex-col gap-3 rounded-xl border p-4 shadow-sm">
             <label className="text-[13px] font-medium">Watermark Stamp Text</label>
             <input
               type="text"
@@ -714,19 +911,245 @@ export default function ToolModal({
               placeholder="e.g. CONFIDENTIAL / DRAFT"
               className="border-input bg-background rounded-lg border px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-primary/50"
             />
+            <label className="flex items-center gap-2 text-[13px] cursor-pointer">
+              <input
+                type="checkbox"
+                checked={addNumbers}
+                onChange={(e) => setAddNumbers(e.target.checked)}
+                className="size-4 accent-primary"
+              />
+              Also add page numbers ({"{n} / {total}"})
+            </label>
+          </div>
+        )}
+
+        {tool.id === "pdf-unlock" && (
+          <div className="border-border bg-card flex flex-col gap-2 rounded-xl border p-4 shadow-sm">
+            <label className="text-[13px] font-medium">PDF Password (if required)</label>
+            <input
+              type="password"
+              value={pdfPassword}
+              onChange={(e) => setPdfPassword(e.target.value)}
+              placeholder="Owner or user password"
+              className="border-input bg-background rounded-lg border px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-primary/50"
+            />
+            <p className="text-[11px] text-muted-foreground">
+              Removes owner restrictions when pdf-lib can open the file. Strong user-password encryption may still fail.
+            </p>
+          </div>
+        )}
+
+        {tool.id === "pdf-sign" && (
+          <div className="border-border bg-card flex flex-col gap-3 rounded-xl border p-4 shadow-sm">
+            <label className="text-[13px] font-medium">Signature image (PNG/JPG)</label>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,.png,.jpg,.jpeg"
+              onChange={(e) => setSignatureFile(e.target.files?.[0] ?? null)}
+              className="text-[12px]"
+            />
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              {[
+                ["Page (0-index)", signPage, setSignPage],
+                ["X", signX, setSignX],
+                ["Y", signY, setSignY],
+                ["Width", signW, setSignW],
+                ["Height", signH, setSignH],
+              ].map(([label, value, setter]) => (
+                <label key={String(label)} className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+                  {label as string}
+                  <input
+                    type="number"
+                    value={value as number}
+                    onChange={(e) => (setter as (n: number) => void)(Number(e.target.value))}
+                    className="border-input bg-background rounded-lg border px-2 py-1.5 text-[13px] text-foreground outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {tool.id === "image-heic" && (
+          <div className="border-border bg-card flex flex-col gap-2 rounded-xl border p-4 shadow-sm">
+            <label className="text-[13px] font-medium">Output format</label>
+            <div className="flex gap-2">
+              {(["jpg", "png"] as const).map((fmt) => (
+                <Button
+                  key={fmt}
+                  variant={heicFormat === fmt ? "primary" : "secondary"}
+                  size="sm"
+                  onClick={() => setHeicFormat(fmt)}
+                >
+                  {fmt.toUpperCase()}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {tool.id === "image-resize" && (
+          <div className="border-border bg-card flex flex-col gap-3 rounded-xl border p-4 shadow-sm">
+            <div className="grid grid-cols-3 gap-2">
+              <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+                Width (px)
+                <input
+                  type="number"
+                  min={1}
+                  value={resizeWidth}
+                  onChange={(e) => {
+                    setResizeWidth(Number(e.target.value));
+                    setResizePercent("");
+                  }}
+                  className="border-input bg-background rounded-lg border px-2 py-1.5 text-[13px] text-foreground outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+                Height (px, optional)
+                <input
+                  type="number"
+                  min={1}
+                  value={resizeHeight}
+                  onChange={(e) => {
+                    setResizeHeight(e.target.value === "" ? "" : Number(e.target.value));
+                    setResizePercent("");
+                  }}
+                  className="border-input bg-background rounded-lg border px-2 py-1.5 text-[13px] text-foreground outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+                Or % of original
+                <input
+                  type="number"
+                  min={1}
+                  max={400}
+                  value={resizePercent}
+                  onChange={(e) =>
+                    setResizePercent(e.target.value === "" ? "" : Number(e.target.value))
+                  }
+                  placeholder="e.g. 50"
+                  className="border-input bg-background rounded-lg border px-2 py-1.5 text-[13px] text-foreground outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </label>
+            </div>
+            <p className="text-[11px] text-muted-foreground">Aspect ratio stays locked.</p>
+          </div>
+        )}
+
+        {tool.id === "video-trim" && (
+          <div className="border-border bg-card flex flex-col gap-3 rounded-xl border p-4 shadow-sm">
+            <div className="grid grid-cols-2 gap-3">
+              <label className="flex flex-col gap-1 text-[12px] font-medium">
+                Start (seconds)
+                <input
+                  type="number"
+                  min={0}
+                  step={0.1}
+                  value={trimStart}
+                  onChange={(e) => setTrimStart(Number(e.target.value))}
+                  className="border-input bg-background rounded-lg border px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-[12px] font-medium">
+                End (seconds)
+                <input
+                  type="number"
+                  min={0.1}
+                  step={0.1}
+                  value={trimEnd}
+                  onChange={(e) => setTrimEnd(Number(e.target.value))}
+                  className="border-input bg-background rounded-lg border px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </label>
+            </div>
           </div>
         )}
 
         {tool.id === "qr-studio" && (
           <div className="border-border bg-card flex flex-col gap-3 rounded-xl border p-4 shadow-sm">
-            <label className="text-[13px] font-medium">QR Code Content</label>
-            <input
-              type="text"
-              value={qrText}
-              onChange={(e) => setQrText(e.target.value)}
-              placeholder="URL, WiFi config, UPI ID, or plain text"
-              className="border-input bg-background rounded-lg border px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-primary/50"
-            />
+            <div className="flex flex-wrap gap-1.5">
+              {([
+                ["text", "Text / URL"],
+                ["wifi", "Wi‑Fi"],
+                ["upi", "UPI"],
+                ["vcard", "vCard"],
+              ] as const).map(([id, label]) => (
+                <Button
+                  key={id}
+                  variant={qrMode === id ? "primary" : "secondary"}
+                  size="xs"
+                  onClick={() => setQrMode(id)}
+                >
+                  {label}
+                </Button>
+              ))}
+            </div>
+            {qrMode === "text" && (
+              <>
+                <label className="text-[13px] font-medium">QR Code Content</label>
+                <input
+                  type="text"
+                  value={qrText}
+                  onChange={(e) => setQrText(e.target.value)}
+                  placeholder="URL or plain text"
+                  className="border-input bg-background rounded-lg border px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </>
+            )}
+            {qrMode === "wifi" && (
+              <div className="grid gap-2 sm:grid-cols-2">
+                <input
+                  type="text"
+                  value={wifiSsid}
+                  onChange={(e) => setWifiSsid(e.target.value)}
+                  placeholder="Network SSID"
+                  className="border-input bg-background rounded-lg border px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-primary/50"
+                />
+                <input
+                  type="text"
+                  value={wifiPassword}
+                  onChange={(e) => setWifiPassword(e.target.value)}
+                  placeholder="Password"
+                  className="border-input bg-background rounded-lg border px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+            )}
+            {qrMode === "upi" && (
+              <div className="grid gap-2 sm:grid-cols-2">
+                <input
+                  type="text"
+                  value={upiId}
+                  onChange={(e) => setUpiId(e.target.value)}
+                  placeholder="name@upi"
+                  className="border-input bg-background rounded-lg border px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-primary/50"
+                />
+                <input
+                  type="text"
+                  value={upiName}
+                  onChange={(e) => setUpiName(e.target.value)}
+                  placeholder="Payee name"
+                  className="border-input bg-background rounded-lg border px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+            )}
+            {qrMode === "vcard" && (
+              <div className="grid gap-2 sm:grid-cols-2">
+                <input
+                  type="text"
+                  value={vcardName}
+                  onChange={(e) => setVcardName(e.target.value)}
+                  placeholder="Full name"
+                  className="border-input bg-background rounded-lg border px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-primary/50"
+                />
+                <input
+                  type="text"
+                  value={vcardPhone}
+                  onChange={(e) => setVcardPhone(e.target.value)}
+                  placeholder="Phone"
+                  className="border-input bg-background rounded-lg border px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-primary/50"
+                />
+              </div>
+            )}
             <div className="flex items-center gap-3">
               <label className="text-[12px] text-muted-foreground">Output Format:</label>
               <div className="flex gap-1.5">
@@ -1024,10 +1447,14 @@ export default function ToolModal({
               </div>
             )}
 
-            {/* Clean Ad-Free Guarantee */}
-            <div className="flex items-center justify-center gap-2 pt-1 text-[12px] text-muted-foreground">
-              <ShieldCheckIcon className="size-4 text-emerald-500 shrink-0" />
-              <span>100% Ad-Free • No Popups • Direct High-Speed Download</span>
+            <div className="flex flex-col items-center justify-center gap-1 pt-1 text-[12px] text-muted-foreground text-center">
+              <div className="flex items-center gap-2">
+                <ShieldCheckIcon className="size-4 text-amber-500 shrink-0" />
+                <span>Ad-free resolver • URL is resolved via this app’s API + third-party extractors</span>
+              </div>
+              <span className="text-[11px] opacity-80">
+                Unlike local file tools, this download is not fully on-device.
+              </span>
             </div>
           </div>
         )}
