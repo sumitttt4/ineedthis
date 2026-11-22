@@ -107,6 +107,7 @@ const CATEGORY_ACTIONS: Record<FileCategory, string[]> = {
     "pdf-flatten",
   ],
   image: [
+    "image-bg-remove",
     "image-crop",
     "image-convert",
     "image-compress-kb",

@@ -848,6 +848,53 @@ const audioTrim: ExtraTool = {
 };
 
 /* ------------------------------------------------------------------ */
+/* AI: background remover (on device)                                  */
+/* ------------------------------------------------------------------ */
+
+const imageBgRemove: ExtraTool = {
+  accept: IMAGE_ACCEPT,
+  manual: true,
+  defaults: { model: "portrait", background: "transparent" },
+  Options: ({ value, onChange }) => (
+    <Panel>
+      <p className="text-[12px] text-muted-foreground">
+        Works best on photos of people. The 13 MB AI model downloads once and is then cached. Your photo never leaves this device.
+      </p>
+      <Choice
+        label="New background"
+        value={String(value.background)}
+        options={[
+          { value: "transparent", label: "Transparent (PNG)" },
+          { value: "#ffffff", label: "White" },
+          { value: "#000000", label: "Black" },
+          { value: "#2445e6", label: "Blue" },
+        ]}
+        onChange={(v) => onChange({ ...value, background: v })}
+      />
+    </Panel>
+  ),
+  run: async (files, o, onProgress) => {
+    const t = performance.now();
+    const f = files[0];
+    let input: Blob = f;
+    if (/\.(heic|heif)$/i.test(f.name) || /hei[cf]/i.test(f.type)) {
+      const bmp = await decode(f);
+      const { c } = canvasOf(bmp.width, bmp.height);
+      c.getContext("2d")!.drawImage(bmp, 0, 0);
+      input = await toBlob(c, "image/png");
+    }
+    const { removeBackground } = await import("@/engines/ai/background-remover");
+    const blob = await removeBackground(
+      input,
+      { model: o.model as "portrait" | "object", background: String(o.background) },
+      (p) => onProgress({ state: "processing", percent: p.percent, message: p.message })
+    );
+    const ext = o.background === "transparent" ? "png" : "jpg";
+    return result(blob, `${baseName(f.name)}_no-bg.${ext}`, t);
+  },
+};
+
+/* ------------------------------------------------------------------ */
 /* Registry                                                            */
 /* ------------------------------------------------------------------ */
 
@@ -864,6 +911,7 @@ export const EXTRA_TOOLS: Record<string, ExtraTool> = {
   "image-text": imageText,
   "image-colors": imageColors,
   "screenshot-beautify": screenshotBeautify,
+  "image-bg-remove": imageBgRemove,
 };
 
 export function useExtraDefaults(id: string | undefined) {

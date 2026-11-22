@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "INeedThis — private file tools",
     short_name: "INeedThis",
     description:
-      "54 tools that run in your browser. PDF, images, video, audio, text and dev utilities — your files never leave your device.",
+      "56 tools that run in your browser. PDF, images, video, audio, text and dev utilities — your files never leave your device.",
     start_url: "/",
     display: "standalone",
     background_color: "#000000",

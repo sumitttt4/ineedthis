@@ -30,6 +30,7 @@ const SLUGS: Record<string, string> = {
   "image-favicon": "favicon-generator",
   "image-resize": "resize-image",
   "text-to-image": "text-to-image",
+  "image-bg-remove": "remove-background",
   "image-crop": "crop-image",
   "image-text": "add-text-to-image",
   "image-colors": "color-palette-from-image",

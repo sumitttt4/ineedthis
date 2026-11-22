@@ -4,7 +4,7 @@
 
 🌐 **[ineedthis.site](https://ineedthis.site)**
 
-An ultra-fast, browser-based Swiss Army knife for files, media, and documents (54 tools). Most tools process **entirely on your device** with WebAssembly, Web Workers, and local canvas/decoders.
+An ultra-fast, browser-based Swiss Army knife for files, media, and documents (56 tools). Most tools process **entirely on your device** with WebAssembly, Web Workers, and local canvas/decoders.
 
 Built with Next.js, TypeScript, Tailwind CSS, Geist, and [Paper Shaders](https://shaders.paper.design) for the hero.
 
@@ -16,12 +16,14 @@ Built with Next.js, TypeScript, Tailwind CSS, Geist, and [Paper Shaders](https:/
 - **True 1-tap execution**: Drop or select files — optimal defaults process and auto-download (including multi-file batches).
 - **High-fidelity PDF → Word (DOCX)**: Reconstructs geometry, typography, native Word tables, headings, and page breaks.
 - **Universal video downloader**: Paste YouTube, X, TikTok, Instagram, Reddit, or direct MP4 links. **This tool is server-assisted** (resolves via the app API + third-party extractors).
+- **Every tool has its own page** (`/pdf-to-word`, `/compress-pdf`, …) with its own title, FAQ and share image — 56 statically generated pages in the sitemap.
+- **On-device AI**: background removal with an Apache-2.0 model (MODNet) via transformers.js; the model downloads once and the photo never leaves the device.
 - **Real WebRTC P2P**: Manual SDP offer/answer exchange for browser-to-browser transfer. STUN by default; add a TURN relay via env for strict NATs.
 - **PWA ready**: Installable on desktop and mobile. After a tool has been used once, its WASM / worker runtime is cached and works offline.
 
 ---
 
-## 54 Included Utilities
+## 56 Included Utilities
 
 ### PDF & Documents
 1. PDF to Word (DOCX)
@@ -69,23 +71,25 @@ Built with Next.js, TypeScript, Tailwind CSS, Geist, and [Paper Shaders](https:/
 39. Add Text / Watermark to Image
 40. Color Palette from Image
 41. Screenshot Beautifier
+42. Text to Image (Paper Shaders backgrounds, Hindi fonts)
+43. Remove Background (on-device AI)
 
 ### Data, Security & P2P
-42. In-Browser ZIP Archiver & Extractor
-43. Tabular Data Format Converter (JSON ↔ CSV ↔ XLSX)
-44. File Checksum & Hash Generator
-45. Vector QR Code Studio (Text / Wi‑Fi / UPI / vCard)
-46. Live Encrypted P2P File Transfer
+44. In-Browser ZIP Archiver & Extractor
+45. Tabular Data Format Converter (JSON ↔ CSV ↔ XLSX)
+46. File Checksum & Hash Generator
+47. Vector QR Code Studio (Text / Wi‑Fi / UPI / vCard)
+48. Live Encrypted P2P File Transfer
 
 ### Text & Developer
-47. Word & Character Counter
-48. Text Case Converter
-49. JSON Formatter & Validator
-50. Base64 Encode & Decode
-51. URL Encode & Decode
-52. Password & UUID Generator
-53. Unix Timestamp Converter
-54. Text Diff Checker
+49. Word & Character Counter
+50. Text Case Converter
+51. JSON Formatter & Validator
+52. Base64 Encode & Decode
+53. URL Encode & Decode
+54. Password & UUID Generator
+55. Unix Timestamp Converter
+56. Text Diff Checker
 
 ---
 
@@ -136,10 +140,6 @@ npm run cf:deploy           # build + deploy to Cloudflare
 ```
 
 **One-time setup**
-
-1. Add `ineedthis.site` as a zone in your Cloudflare account (point the registrar's nameservers at Cloudflare).
-2. The first `npm run cf:deploy` creates the `ineedthis` Worker and attaches `ineedthis.site` and `www.ineedthis.site` as custom domains (`routes` in `wrangler.jsonc`). `www` 308-redirects to the apex.
-3. For automatic deploys on every push to `main`, add two GitHub repository secrets: `CLOUDFLARE_API_TOKEN` (template "Edit Cloudflare Workers") and `CLOUDFLARE_ACCOUNT_ID`. The `Deploy to Cloudflare` workflow uses them.
 
 **How the Workers build differs**
 

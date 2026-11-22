@@ -71,6 +71,12 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["libheif-js"],
   webpack: (config, { isServer, webpack }) => {
     if (!isServer) {
+      // transformers.js: never bundle its Node-only backends for the browser.
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        sharp$: false,
+        "onnxruntime-node$": false,
+      };
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,

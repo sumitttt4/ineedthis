@@ -47,9 +47,9 @@ export const CATEGORIES: Array<{
   count: number;
   icon: ComponentType<IconProps>;
 }> = [
-  { id: "all", name: "All Tools", count: 55, icon: LayersIcon },
+  { id: "all", name: "All Tools", count: 56, icon: LayersIcon },
   { id: "pdf", name: "PDF & Docs", count: 17, icon: FilePdfIcon },
-  { id: "image", name: "Image Lab", count: 12, icon: ImageIcon },
+  { id: "image", name: "Image Lab", count: 13, icon: ImageIcon },
   { id: "media", name: "Video & Audio", count: 13, icon: VideoIcon },
   { id: "data", name: "Data & Archives", count: 4, icon: DataIcon },
   { id: "text", name: "Text & Dev", count: 8, icon: BracesIcon },
@@ -275,6 +275,15 @@ export const TOOLS: ToolDefinition[] = [
     icon: ImageIcon,
     formats: ["PNG", "JPG", "WEBP"],
     action: "resize",
+  },
+  {
+    id: "image-bg-remove",
+    name: "Remove Background (AI)",
+    description: "AI cuts people out of photos for a transparent PNG or a clean white, black or blue background. Runs on your device.",
+    category: "image",
+    icon: SparklesIcon,
+    formats: ["JPG", "PNG", "WEBP", "HEIC"],
+    action: "image-bg-remove",
   },
   {
     id: "text-to-image",
