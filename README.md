@@ -2,6 +2,8 @@
 
 **Every file tool you need. None of the uploads.**
 
+🌐 **[ineedthis.site](https://ineedthis.site)**
+
 An ultra-fast, browser-based Swiss Army knife for files, media, and documents (33 tools). Most tools process **entirely on your device** with WebAssembly, Web Workers, and local canvas/decoders.
 
 Built with Next.js, TypeScript, Tailwind CSS, Geist, and [Paper Shaders](https://shaders.paper.design) for the hero.
@@ -87,7 +89,7 @@ Copy `app/.env.example` to `app/.env.local`.
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | In production | Absolute URL for canonical, Open Graph and sitemap links |
+| `NEXT_PUBLIC_SITE_URL` | No | Canonical URL for metadata, Open Graph and sitemap. Defaults to `https://ineedthis.site` in production; set it for preview/staging deploys |
 | `NEXT_PUBLIC_TURN_URL` / `_USERNAME` / `_CREDENTIAL` | No | TURN relay for P2P transfer behind symmetric NATs |
 
 ### Production
@@ -131,6 +133,7 @@ CI runs all of the above plus `npm audit --audit-level=high` on every push and P
 
 - **Sumit** — [sumitsharma.pro](https://sumitsharma.pro)
 - **X / Twitter** — [@sumitthq](https://x.com/sumitthq)
+- **Website** — [ineedthis.site](https://ineedthis.site)
 - **Repository** — [github.com/sumitttt4/ineedthis](https://github.com/sumitttt4/ineedthis)
 
 Licensed under the [MIT License](LICENSE).

@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { SITE_NAME } from "@/lib/site";
+import { SITE_DOMAIN, SITE_NAME } from "@/lib/site";
 
 export const alt = `${SITE_NAME} — every file tool you need, none of the uploads`;
 export const size = { width: 1200, height: 630 };
@@ -45,7 +45,7 @@ export default async function OpengraphImage() {
           <span>Audio</span>
           <span>ZIP</span>
           <span>QR</span>
-          <span style={{ color: "#60a5fa" }}>Runs in your browser</span>
+          <span style={{ color: "#60a5fa" }}>{SITE_DOMAIN}</span>
         </div>
       </div>
     ),
