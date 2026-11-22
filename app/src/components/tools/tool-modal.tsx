@@ -114,6 +114,7 @@ export default function ToolModal({
   const [resizeHeight, setResizeHeight] = useState<number | "">("");
   const [resizePercent, setResizePercent] = useState<number | "">("");
   const [pdfPassword, setPdfPassword] = useState("");
+  const [pdfSecurityAction, setPdfSecurityAction] = useState<"unlock" | "protect">("unlock");
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
   const [signPage, setSignPage] = useState(0);
   const [signX, setSignX] = useState(72);
@@ -426,7 +427,7 @@ export default function ToolModal({
         case "pdf-unlock": {
           const buf = await activeFiles[0].arrayBuffer();
           res = await handlePdfSecurity(buf, activeFiles[0].name, {
-            action: "unlock",
+            action: pdfSecurityAction,
             password: pdfPassword,
           });
           break;
@@ -508,7 +509,7 @@ export default function ToolModal({
           }
           res = await trimVideo(
             activeFiles[0],
-            { startTime: trimStart, endTime: trimEnd, frameAccurate: false },
+            { startTime: trimStart, endTime: Math.max(trimEnd, trimStart + 0.1), frameAccurate: true },
             (p) => setProgress(p)
           );
           break;
@@ -949,16 +950,36 @@ export default function ToolModal({
 
         {tool.id === "pdf-unlock" && (
           <div className="border-border bg-card flex flex-col gap-2 rounded-xl border p-4 shadow-sm">
-            <label className="text-[13px] font-medium">PDF Password (if required)</label>
+            <div role="radiogroup" aria-label="Action" className="flex gap-1.5">
+              {(["unlock", "protect"] as const).map((a) => (
+                <Button
+                  key={a}
+                  role="radio"
+                  aria-checked={pdfSecurityAction === a}
+                  variant={pdfSecurityAction === a ? "primary" : "secondary"}
+                  size="xs"
+                  onClick={() => setPdfSecurityAction(a)}
+                >
+                  {a === "unlock" ? "Remove password" : "Add password"}
+                </Button>
+              ))}
+            </div>
+            <label htmlFor="pdf-password" className="text-[13px] font-medium">
+              {pdfSecurityAction === "unlock" ? "Current password" : "New password"}
+            </label>
             <input
+              id="pdf-password"
               type="password"
+              autoComplete={pdfSecurityAction === "unlock" ? "current-password" : "new-password"}
               value={pdfPassword}
               onChange={(e) => setPdfPassword(e.target.value)}
-              placeholder="Owner or user password"
+              placeholder={pdfSecurityAction === "unlock" ? "Password used to open the PDF" : "At least 4 characters"}
               className="border-input bg-background rounded-lg border px-3 py-2 text-[13px] outline-none focus:ring-2 focus:ring-primary/50"
             />
             <p className="text-[11px] text-muted-foreground">
-              Removes owner restrictions when pdf-lib can open the file. Strong user-password encryption may still fail.
+              {pdfSecurityAction === "unlock"
+                ? "Decrypts the PDF on your device and saves a copy without a password."
+                : "Encrypts the PDF with AES-256 on your device. Keep the password safe — it can't be recovered."}
             </p>
           </div>
         )}

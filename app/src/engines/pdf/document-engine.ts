@@ -17,7 +17,13 @@ export async function docxToPdf(
   const mammoth = await import("mammoth");
   const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
 
-  const isNode = typeof Buffer !== "undefined";
+  // Bundlers ship a Buffer polyfill to the browser, so `typeof Buffer` is not a
+  // Node check. Mammoth's browser build only accepts { arrayBuffer }.
+  const isNode =
+    typeof window === "undefined" &&
+    typeof (globalThis as { WorkerGlobalScope?: unknown }).WorkerGlobalScope === "undefined" &&
+    typeof process !== "undefined" &&
+    !!process.versions?.node;
   const mammothOptions = isNode
     ? { buffer: Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer) }
     : ({ arrayBuffer: buffer } as any);
@@ -481,7 +487,7 @@ export async function pdfToPptx(
   const PptxGenJS = (await import("pptxgenjs")).default;
   const pdfjsLib = await loadPdfJs();
 
-  const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
+  const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer.slice(0)) }).promise;
   const pptx = new PptxGenJS();
 
   for (let i = 1; i <= pdfDoc.numPages; i++) {
@@ -686,7 +692,7 @@ export async function pdfToDocx(
 
   const pdfjsLib = await loadPdfJs();
 
-  const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
+  const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer.slice(0)) }).promise;
   const JSZip = (await import("jszip")).default;
   const zip = new JSZip();
 

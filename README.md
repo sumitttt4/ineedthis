@@ -34,9 +34,9 @@ Built with Next.js, TypeScript, Tailwind CSS, Geist, and [Paper Shaders](https:/
 8. Markdown to PDF
 9. PDF to PowerPoint (PPTX)
 10. PDF Watermark & Numbering
-11. PII & Pattern Redactor
+11. PII & Pattern Redactor (true redaction)
 12. PDF Digital Signature
-13. PDF Password Unlock
+13. PDF Password Unlock & Protect (AES-256)
 
 ### Video & Audio Lab
 14. Universal Video Downloader *(server-assisted)*

@@ -535,6 +535,44 @@ export class P2PTransfer {
 // 5. Data Format Converter (JSON ↔ CSV ↔ XLSX)
 // ============================================================================
 
+// SheetJS has no JSON reader: XLSX.read() treats JSON text as CSV and splits it
+// on commas. Detect JSON and build the sheet from parsed rows instead.
+function isJsonInput(name: string, buffer: ArrayBuffer): boolean {
+  if (/\.json$/i.test(name)) return true;
+  const head = new TextDecoder().decode(buffer.slice(0, 64)).trimStart();
+  return head.startsWith("[") || head.startsWith("{");
+}
+
+function flattenRow(value: unknown, prefix = "", out: Record<string, unknown> = {}) {
+  if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      flattenRow(v, prefix ? `${prefix}.${k}` : k, out);
+    }
+  } else {
+    out[prefix || "value"] = Array.isArray(value) ? JSON.stringify(value) : value;
+  }
+  return out;
+}
+
+function jsonToWorkbook(XLSX: typeof import("xlsx"), buffer: ArrayBuffer) {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(new TextDecoder().decode(buffer));
+  } catch {
+    throw new Error("This file isn't valid JSON.");
+  }
+  // Accept an array of rows, or an object wrapping one (e.g. { "data": [...] }).
+  let rows: unknown[] = Array.isArray(parsed) ? parsed : [parsed];
+  if (!Array.isArray(parsed) && parsed && typeof parsed === "object") {
+    const firstArray = Object.values(parsed as Record<string, unknown>).find(Array.isArray);
+    if (firstArray) rows = firstArray as unknown[];
+  }
+  const flat = rows.map((r) => flattenRow(r));
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(flat), "Sheet1");
+  return wb;
+}
+
 export async function convertData(
   file: File,
   options: { to: "json" | "csv" | "xlsx" }
@@ -542,7 +580,9 @@ export async function convertData(
   const t = performance.now();
   const XLSX = await import("xlsx");
   const buffer = await file.arrayBuffer();
-  const workbook = XLSX.read(buffer, { type: "array" });
+  const workbook = isJsonInput(file.name, buffer)
+    ? jsonToWorkbook(XLSX, buffer)
+    : XLSX.read(buffer, { type: "array" });
   const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
 
   let outBlob: Blob;

@@ -152,9 +152,20 @@ export async function compressImageToSize(
   const buffer = await file.arrayBuffer();
   const ext = getExtension(file.name);
   const mime = file.type || getMimeType(ext);
-  const bitmap = await decodeImage(buffer, mime);
-
   const maxBytes = options.maxSizeBytes;
+
+  // Already under the target: re-encoding would only make it bigger or worse.
+  if (file.size <= maxBytes) {
+    return {
+      data: file,
+      filename: file.name,
+      mimeType: mime,
+      durationMs: performance.now() - t,
+      sizeBytes: file.size,
+    };
+  }
+
+  const bitmap = await decodeImage(buffer, mime);
   const minQuality = options.minQuality ?? 0.1;
   const outputFormat: "jpg" | "webp" = "jpg"; // Lossy for compression
 

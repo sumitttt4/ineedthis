@@ -137,7 +137,7 @@ export const TOOLS: ToolDefinition[] = [
   {
     id: "pdf-redact",
     name: "PII & Pattern Redactor",
-    description: "Auto-scan and black-box redact emails, phone numbers, and SSNs in PDF.",
+    description: "Permanently remove emails, phone numbers, card numbers and SSNs. Redacted pages are flattened so the text is truly gone.",
     category: "pdf",
     icon: ScissorsIcon,
     formats: ["PDF"],
@@ -154,8 +154,8 @@ export const TOOLS: ToolDefinition[] = [
   },
   {
     id: "pdf-unlock",
-    name: "PDF Password Unlock",
-    description: "Remove owner passwords and printing/copying restrictions instantly.",
+    name: "PDF Password Unlock & Protect",
+    description: "Remove a PDF password you know, or add AES-256 password protection. Done on your device.",
     category: "pdf",
     icon: FilePdfIcon,
     formats: ["PDF"],

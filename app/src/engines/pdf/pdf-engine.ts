@@ -213,7 +213,7 @@ export async function compressPdf(
 
   const pdfjsLib = await loadPdfJs();
 
-  const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
+  const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer.slice(0)) }).promise;
   const newDoc = await PDFDocument.create();
 
   for (let i = 1; i <= pdfDoc.numPages; i++) {
@@ -267,9 +267,34 @@ export async function compressPdf(
   }
 
   (pdfDoc as any).destroy?.();
-  const bytes = await newDoc.save();
+  const rasterBytes = await newDoc.save();
   const baseName = filename.replace(/\.pdf$/i, "");
-  return makeResult(bytes, `${baseName}_compressed.pdf`, t);
+
+  // 1) Lossless: qpdf object streams + recompressed streams (keeps text selectable).
+  let losslessBytes: Uint8Array | null = null;
+  try {
+    const { runQpdf } = await import("@/lib/qpdf");
+    losslessBytes = await runQpdf(buffer.slice(0), [
+      "--object-streams=generate",
+      "--compress-streams=y",
+      "--recompress-flate",
+      "--compression-level=9",
+      "{in}",
+      "{out}",
+    ]);
+  } catch {
+    losslessBytes = null;
+  }
+
+  // 2) Pick the smallest. Rasterising flattens text into images, so it only wins
+  //    when it saves a lot (typical for scanned / image-heavy PDFs). Never return
+  //    something bigger than the original.
+  const original = new Uint8Array(buffer);
+  let best: Uint8Array = original;
+  if (losslessBytes && losslessBytes.byteLength < best.byteLength) best = losslessBytes;
+  if (rasterBytes.byteLength < best.byteLength * 0.7) best = rasterBytes;
+
+  return makeResult(best, `${baseName}_compressed.pdf`, t);
 }
 
 // ============================================================================
@@ -337,7 +362,7 @@ export async function pdfToImages(
   const t = performance.now();
   const pdfjsLib = await loadPdfJs();
 
-  const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
+  const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer.slice(0)) }).promise;
   const results: TaskResult[] = [];
   const baseName = filename.replace(/\.pdf$/i, "");
 
@@ -408,7 +433,8 @@ export async function addWatermark(
   const font = await doc.embedFont(StandardFonts.Helvetica);
   const opacity = options.opacity ?? 0.3;
   const fontSize = options.fontSize ?? 48;
-  const rotation = options.rotation ?? -45;
+  // Classic diagonal: bottom-left to top-right.
+  const rotation = options.rotation ?? 45;
 
   for (const page of pages) {
     const { width, height } = page.getSize();
@@ -418,10 +444,16 @@ export async function addWatermark(
       let x: number, y: number;
 
       switch (options.position ?? "center") {
-        case "center":
-          x = (width - textWidth) / 2;
-          y = height / 2;
+        case "center": {
+          // pdf-lib rotates around the text origin, so offset the origin to put
+          // the rotated text's midpoint on the page centre.
+          const rad = (rotation * Math.PI) / 180;
+          const halfW = textWidth / 2;
+          const halfH = (fontSize * 0.7) / 2;
+          x = width / 2 - (Math.cos(rad) * halfW - Math.sin(rad) * halfH);
+          y = height / 2 - (Math.sin(rad) * halfW + Math.cos(rad) * halfH);
           break;
+        }
         case "top-left":
           x = 20;
           y = height - fontSize - 20;
@@ -593,6 +625,20 @@ const BUILTIN_PII_PATTERNS: Record<string, RegExp> = {
   ssn: /\b\d{3}-\d{2}-\d{4}\b/g,
 };
 
+let measureCtx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null = null;
+function measureText(text: string, family: string): number {
+  if (!text) return 0;
+  if (!measureCtx) {
+    measureCtx =
+      typeof OffscreenCanvas !== "undefined"
+        ? new OffscreenCanvas(1, 1).getContext("2d")
+        : document.createElement("canvas").getContext("2d");
+  }
+  if (!measureCtx) return text.length;
+  measureCtx.font = `100px ${family}`;
+  return measureCtx.measureText(text).width;
+}
+
 export async function redactPdf(
   buffer: ArrayBuffer,
   filename: string,
@@ -600,49 +646,96 @@ export async function redactPdf(
 ): Promise<TaskResult> {
   const t = performance.now();
   const baseName = filename.replace(/\.pdf$/i, "");
-
-  // Use pdfjs-dist to extract text positions
   const pdfjsLib = await loadPdfJs();
+  const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer.slice(0)) }).promise;
+  const source = await loadPdf(buffer.slice(0));
 
-  const pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(buffer) }).promise;
-  const doc = await loadPdf(buffer);
+  const patterns: RegExp[] = (options.patterns ?? []).map((p) => new RegExp(p, "g"));
+  if (options.useBuiltInPatterns) patterns.push(...Object.values(BUILTIN_PII_PATTERNS));
 
-  // Compile user patterns
-  const patterns: RegExp[] = (options.patterns ?? []).map(
-    (p) => new RegExp(p, "g")
-  );
-  if (options.useBuiltInPatterns) {
-    patterns.push(...Object.values(BUILTIN_PII_PATTERNS));
-  }
+  const out = await PDFDocument.create();
+  let redactedCount = 0;
 
   for (let i = 1; i <= pdfDoc.numPages; i++) {
     const pdfPage = await pdfDoc.getPage(i);
     const textContent = await pdfPage.getTextContent();
-    const page = doc.getPage(i - 1);
 
+    // Collect a box (PDF user space) for every individual match. Widths come from
+    // measuring the substring in the item's own font; character-count ratios
+    // under-cover narrow glyphs like digits and leak the last characters.
+    const boxes: Array<[number, number, number, number]> = [];
+    const styles = (textContent as { styles?: Record<string, { fontFamily?: string }> }).styles ?? {};
     for (const item of textContent.items) {
       if (!("str" in item) || !item.str) continue;
-      const textItem = item as { str: string; transform: number[]; width: number; height: number };
-
+      const it = item as { str: string; transform: number[]; width: number; height: number; fontName?: string };
+      const [, , , , tx, ty] = it.transform;
+      const h = it.height || Math.abs(it.transform[3]) || 10;
+      const family = (it.fontName && styles[it.fontName]?.fontFamily) || "sans-serif";
+      const full = measureText(it.str, family) || 1;
       for (const pattern of patterns) {
         pattern.lastIndex = 0;
-        if (pattern.test(textItem.str)) {
-          // Draw black rectangle over the text item
-          const [, , , , tx, ty] = textItem.transform;
-          page.drawRectangle({
-            x: tx,
-            y: ty - 2, // slight offset for coverage
-            width: textItem.width + 4,
-            height: textItem.height + 4,
-            color: rgb(0, 0, 0),
-          });
+        let m: RegExpExecArray | null;
+        while ((m = pattern.exec(it.str))) {
+          if (!m[0]) { pattern.lastIndex++; continue; }
+          const start = (measureText(it.str.slice(0, m.index), family) / full) * it.width;
+          const w = (measureText(m[0], family) / full) * it.width;
+          const pad = Math.max(2, h * 0.3);
+          boxes.push([tx + start - pad, ty - h * 0.3, w + pad * 2, h * 1.45]);
         }
       }
     }
+
+    if (boxes.length === 0) {
+      const [copied] = await out.copyPages(source, [i - 1]);
+      out.addPage(copied);
+      continue;
+    }
+
+    // True redaction: rasterise this page with the boxes burned in, so the
+    // original text is gone from the file (not merely covered).
+    redactedCount += boxes.length;
+    const scale = 2.5;
+    const viewport = pdfPage.getViewport({ scale });
+    let canvas: OffscreenCanvas | HTMLCanvasElement;
+    if (typeof OffscreenCanvas !== "undefined") {
+      canvas = new OffscreenCanvas(viewport.width, viewport.height);
+    } else {
+      canvas = document.createElement("canvas");
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+    }
+    const ctx = canvas.getContext("2d") as CanvasRenderingContext2D | null;
+    if (!ctx) throw new Error("Could not get canvas context");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, viewport.width, viewport.height);
+    await (pdfPage.render as any)({ canvasContext: ctx, viewport, canvas }).promise;
+    ctx.fillStyle = "#000000";
+    for (const [x, y, w, h] of boxes) {
+      // PDF user space -> canvas pixels via the viewport transform [a b c d e f].
+      const [ta, tb, tc, td, te, tf] = viewport.transform as number[];
+      const map = (px: number, py: number) => [ta * px + tc * py + te, tb * px + td * py + tf];
+      const [x1, y1] = map(x, y);
+      const [x2, y2] = map(x + w, y + h);
+      ctx.fillRect(Math.min(x1, x2), Math.min(y1, y2), Math.abs(x2 - x1), Math.abs(y2 - y1));
+    }
+    const blob =
+      canvas instanceof OffscreenCanvas
+        ? await canvas.convertToBlob({ type: "image/png" })
+        : await new Promise<Blob>((res) => (canvas as HTMLCanvasElement).toBlob((b) => res(b!), "image/png"));
+    const png = await out.embedPng(new Uint8Array(await blob.arrayBuffer()));
+    const base = pdfPage.getViewport({ scale: 1 });
+    const page = out.addPage([base.width, base.height]);
+    page.drawImage(png, { x: 0, y: 0, width: base.width, height: base.height });
   }
 
   (pdfDoc as any).destroy?.();
-  const bytes = await doc.save();
+  // Drop identifying metadata too.
+  out.setTitle(""); out.setAuthor(""); out.setSubject(""); out.setKeywords([]);
+  out.setProducer("INeedThis"); out.setCreator("INeedThis");
+  if (redactedCount === 0) {
+    throw new Error("No matching personal data was found, so nothing was redacted.");
+  }
+  const bytes = await out.save();
   return makeResult(bytes, `${baseName}_redacted.pdf`, t);
 }
 
@@ -657,23 +750,24 @@ export async function handlePdfSecurity(
 ): Promise<TaskResult> {
   const t = performance.now();
   const baseName = filename.replace(/\.pdf$/i, "");
+  const { runQpdf } = await import("@/lib/qpdf");
 
   if (options.action === "unlock") {
-    // Load with password, then save without encryption
-    const doc = await PDFDocument.load(buffer, {
-      ignoreEncryption: true,
-      ...(options.password ? ({ password: options.password } as any) : {}),
-    } as any);
-    const bytes = await doc.save();
+    // Real decryption via qpdf (pdf-lib cannot decrypt). Works with the user
+    // (open) password or the owner (permissions) password.
+    const args = ["--decrypt", "{in}", "{out}"];
+    if (options.password) args.unshift(`--password=${options.password}`);
+    const bytes = await runQpdf(buffer, args);
     return makeResult(bytes, `${baseName}_unlocked.pdf`, t);
-  } else {
-    // Protect: pdf-lib doesn't support encryption natively.
-    // We pass through as-is with a note. Full encryption would require
-    // a WASM-based solution like qpdf.
-    const doc = await loadPdf(buffer);
-    const bytes = await doc.save();
-    return makeResult(bytes, `${baseName}_protected.pdf`, t);
   }
+
+  if (!options.password) throw new Error("Enter a password to protect this PDF.");
+  // AES-256 encryption; the same password opens and owns the file.
+  const bytes = await runQpdf(buffer, [
+    "--encrypt", options.password, options.password, "256", "--",
+    "{in}", "{out}",
+  ]);
+  return makeResult(bytes, `${baseName}_protected.pdf`, t);
 }
 
 // ============================================================================

@@ -95,20 +95,45 @@ class FFmpegManager {
     }
   }
 
-  /** Read a file from FFmpeg's virtual filesystem. */
+  /** Read a file from FFmpeg's virtual filesystem. Empty output is a failure, not a result. */
   async readFile(name: string): Promise<Uint8Array> {
     const ff = await this.ensureLoaded();
-    const data = await ff.readFile(name);
-    if (typeof data === "string") {
-      return new TextEncoder().encode(data);
+    let data: Uint8Array | string;
+    try {
+      data = await ff.readFile(name);
+    } catch {
+      throw new Error("FFmpeg produced no output for this file.");
     }
-    return data;
+    const bytes = typeof data === "string" ? new TextEncoder().encode(data) : data;
+    if (bytes.byteLength === 0) {
+      throw new Error("FFmpeg produced an empty file. The input format may not be supported.");
+    }
+    return bytes;
   }
 
-  /** Execute FFmpeg command. */
+  /**
+   * Execute an FFmpeg command. ffmpeg.wasm resolves with the exit code instead of
+   * throwing, so a failed run used to look like success (0-byte or track-less
+   * output). Non-zero exit codes now throw with the tail of FFmpeg's log.
+   */
   async exec(args: string[]): Promise<void> {
     const ff = await this.ensureLoaded();
-    await ff.exec(args);
+    const tail: string[] = [];
+    const onLog = ({ message }: { message: string }) => {
+      tail.push(message);
+      if (tail.length > 8) tail.shift();
+    };
+    ff.on("log", onLog);
+    let code: number;
+    try {
+      code = await ff.exec(args);
+    } finally {
+      ff.off("log", onLog);
+    }
+    if (code !== 0) {
+      const reason = tail.filter((l) => /error|invalid|not supported|could not|unable/i.test(l)).pop();
+      throw new Error(`FFmpeg failed (exit ${code})${reason ? `: ${reason.trim()}` : ""}`);
+    }
   }
 
   /** Delete a file from the virtual FS. */
@@ -253,8 +278,11 @@ export async function trimVideo(
   const t = performance.now();
   await ffmpegManager.ensureLoaded(onProgress);
 
-  const ext = getExtension(file.name) || "mp4";
-  const inputName = `input.${ext}`;
+  const inExt = getExtension(file.name) || "mp4";
+  // Stream copy can only cut on keyframes and silently drops the video track when
+  // the range has none, so the default is an accurate re-encode to MP4.
+  const ext = options.frameAccurate === false ? inExt : "mp4";
+  const inputName = `input.${inExt}`;
   const outputName = `output.${ext}`;
 
   await ffmpegManager.writeFile(inputName, file);
@@ -265,10 +293,13 @@ export async function trimVideo(
     "-to", String(options.endTime),
   ];
 
-  if (options.frameAccurate) {
-    args.push("-c:v", "libx264", "-preset", "fast", "-c:a", "aac");
-  } else {
+  if (options.frameAccurate === false) {
     args.push("-c", "copy");
+  } else {
+    args.push(
+      "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p",
+      "-c:a", "aac", "-movflags", "+faststart"
+    );
   }
 
   args.push("-y", outputName);
@@ -344,7 +375,9 @@ export async function remuxToMp4(
     await ffmpegManager.exec([
       "-i", inputName,
       "-c:v", "libx264",
-      "-preset", "fast",
+      "-preset", "veryfast",
+      "-crf", "23",
+      "-pix_fmt", "yuv420p",
       "-c:a", "aac",
       "-movflags", "+faststart",
       "-y", outputName,

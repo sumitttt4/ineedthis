@@ -43,3 +43,9 @@ const ffmpegClassDir = path.join(root, "node_modules/@ffmpeg/ffmpeg/dist/esm");
 for (const f of ["worker.js", "const.js", "errors.js"]) {
   copyFile(path.join(ffmpegClassDir, f), path.join(root, "public/ffmpeg/class", f));
 }
+
+// qpdf (WebAssembly): real PDF decrypt / encrypt / lossless optimisation.
+copyFile(
+  path.join(root, "node_modules/@neslinesli93/qpdf-wasm/dist/qpdf.wasm"),
+  path.join(root, "public/qpdf/qpdf.wasm")
+);
