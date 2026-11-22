@@ -47,10 +47,10 @@ export const CATEGORIES: Array<{
   count: number;
   icon: ComponentType<IconProps>;
 }> = [
-  { id: "all", name: "All Tools", count: 56, icon: LayersIcon },
+  { id: "all", name: "All Tools", count: 58, icon: LayersIcon },
   { id: "pdf", name: "PDF & Docs", count: 17, icon: FilePdfIcon },
   { id: "image", name: "Image Lab", count: 13, icon: ImageIcon },
-  { id: "media", name: "Video & Audio", count: 13, icon: VideoIcon },
+  { id: "media", name: "Video & Audio", count: 15, icon: VideoIcon },
   { id: "data", name: "Data & Archives", count: 4, icon: DataIcon },
   { id: "text", name: "Text & Dev", count: 8, icon: BracesIcon },
   { id: "p2p", name: "Live P2P Transfer", count: 1, icon: ShareP2PIcon },
@@ -405,6 +405,24 @@ export const TOOLS: ToolDefinition[] = [
     icon: CameraIcon,
     formats: ["Screen", "Tab", "Mic"],
     action: "screen-record",
+  },
+  {
+    id: "transcribe-audio",
+    name: "Transcribe Audio to Text (AI)",
+    description: "Turn recordings, voice notes, lectures and videos into text with Whisper AI, in 99 languages incl. Hindi. Runs on your device.",
+    category: "media",
+    icon: TypeIcon,
+    formats: ["MP3", "WAV", "M4A", "MP4", "WEBM"],
+    action: "transcribe-audio",
+  },
+  {
+    id: "auto-subtitles",
+    name: "Subtitle Generator (AI)",
+    description: "Create SRT and VTT subtitles for any video, or translate speech to English subtitles. Preview them on your video. No upload.",
+    category: "media",
+    icon: DiffIcon,
+    formats: ["MP4", "MOV", "WEBM", "MP3"],
+    action: "auto-subtitles",
   },
   {
     id: "video-mute",

@@ -31,6 +31,8 @@ const SLUGS: Record<string, string> = {
   "image-resize": "resize-image",
   "text-to-image": "text-to-image",
   "image-bg-remove": "remove-background",
+  "transcribe-audio": "transcribe-audio-to-text",
+  "auto-subtitles": "subtitle-generator",
   "image-crop": "crop-image",
   "image-text": "add-text-to-image",
   "image-colors": "color-palette-from-image",
@@ -118,6 +120,13 @@ export function howItWorks(t: ToolDefinition): string[] {
   }
   if (t.id === "text-to-image") {
     return ["Type your message or quote.", "Pick a background, font and size.", "Share it directly, or download the PNG."];
+  }
+  if (t.id === "transcribe-audio" || t.id === "auto-subtitles") {
+    return [
+      "Drop an audio or video file and pick the spoken language (or let it detect).",
+      "The speech model downloads once, then listens to your file right in the browser.",
+      t.id === "auto-subtitles" ? "Preview the subtitles on your video, then download SRT or VTT." : "Copy the text or download it as TXT, SRT or VTT.",
+    ];
   }
   if (t.id === "voice-recorder" || t.id === "screen-recorder") {
     return ["Allow access when your browser asks.", "Record, then stop when you're done.", "Save the recording to your device."];

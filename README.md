@@ -4,7 +4,7 @@
 
 🌐 **[ineedthis.site](https://ineedthis.site)**
 
-An ultra-fast, browser-based Swiss Army knife for files, media, and documents (56 tools). Most tools process **entirely on your device** with WebAssembly, Web Workers, and local canvas/decoders.
+An ultra-fast, browser-based Swiss Army knife for files, media, and documents (58 tools). Most tools process **entirely on your device** with WebAssembly, Web Workers, and local canvas/decoders.
 
 Built with Next.js, TypeScript, Tailwind CSS, Geist, and [Paper Shaders](https://shaders.paper.design) for the hero.
 
@@ -16,14 +16,14 @@ Built with Next.js, TypeScript, Tailwind CSS, Geist, and [Paper Shaders](https:/
 - **True 1-tap execution**: Drop or select files — optimal defaults process and auto-download (including multi-file batches).
 - **High-fidelity PDF → Word (DOCX)**: Reconstructs geometry, typography, native Word tables, headings, and page breaks.
 - **Universal video downloader**: Paste YouTube, X, TikTok, Instagram, Reddit, or direct MP4 links. **This tool is server-assisted** (resolves via the app API + third-party extractors).
-- **Every tool has its own page** (`/pdf-to-word`, `/compress-pdf`, …) with its own title, FAQ and share image — 56 statically generated pages in the sitemap.
-- **On-device AI**: background removal with an Apache-2.0 model (MODNet) via transformers.js; the model downloads once and the photo never leaves the device.
+- **Every tool has its own page** (`/pdf-to-word`, `/compress-pdf`, …) with its own title, FAQ and share image — 58 statically generated pages in the sitemap.
+- **On-device AI** (transformers.js, models download once and are cached): background removal (MODNet, Apache-2.0) and speech-to-text / subtitles in 99 languages (Whisper tiny/base, MIT) running in a Web Worker. Files never leave the device.
 - **Real WebRTC P2P**: Manual SDP offer/answer exchange for browser-to-browser transfer. STUN by default; add a TURN relay via env for strict NATs.
 - **PWA ready**: Installable on desktop and mobile. After a tool has been used once, its WASM / worker runtime is cached and works offline.
 
 ---
 
-## 56 Included Utilities
+## 58 Included Utilities
 
 ### PDF & Documents
 1. PDF to Word (DOCX)
@@ -58,38 +58,40 @@ Built with Next.js, TypeScript, Tailwind CSS, Geist, and [Paper Shaders](https:/
 28. Change Video Speed (0.25×–4×)
 29. Rotate & Flip Video
 30. Voice Recorder
+31. Transcribe Audio to Text (Whisper AI, on device)
+32. Subtitle Generator — SRT / VTT, translate to English (Whisper AI, on device)
 
 ### Image Lab
-31. HEIC / HEIF to JPG/PNG
-32. Target-KB Image Compressor
-33. EXIF & GPS Metadata Stripper
-34. Passport Photo Grid Generator
-35. Favicon & App Icon Generator
-36. High-DPI Image Resizer
-37. Universal Batch Image Converter
-38. Crop & Rotate Image
-39. Add Text / Watermark to Image
-40. Color Palette from Image
-41. Screenshot Beautifier
-42. Text to Image (Paper Shaders backgrounds, Hindi fonts)
-43. Remove Background (on-device AI)
+33. HEIC / HEIF to JPG/PNG
+34. Target-KB Image Compressor
+35. EXIF & GPS Metadata Stripper
+36. Passport Photo Grid Generator
+37. Favicon & App Icon Generator
+38. High-DPI Image Resizer
+39. Universal Batch Image Converter
+40. Crop & Rotate Image
+41. Add Text / Watermark to Image
+42. Color Palette from Image
+43. Screenshot Beautifier
+44. Text to Image (Paper Shaders backgrounds, Hindi fonts)
+45. Remove Background (on-device AI)
 
 ### Data, Security & P2P
-44. In-Browser ZIP Archiver & Extractor
-45. Tabular Data Format Converter (JSON ↔ CSV ↔ XLSX)
-46. File Checksum & Hash Generator
-47. Vector QR Code Studio (Text / Wi‑Fi / UPI / vCard)
-48. Live Encrypted P2P File Transfer
+46. In-Browser ZIP Archiver & Extractor
+47. Tabular Data Format Converter (JSON ↔ CSV ↔ XLSX)
+48. File Checksum & Hash Generator
+49. Vector QR Code Studio (Text / Wi‑Fi / UPI / vCard)
+50. Live Encrypted P2P File Transfer
 
 ### Text & Developer
-49. Word & Character Counter
-50. Text Case Converter
-51. JSON Formatter & Validator
-52. Base64 Encode & Decode
-53. URL Encode & Decode
-54. Password & UUID Generator
-55. Unix Timestamp Converter
-56. Text Diff Checker
+51. Word & Character Counter
+52. Text Case Converter
+53. JSON Formatter & Validator
+54. Base64 Encode & Decode
+55. URL Encode & Decode
+56. Password & UUID Generator
+57. Unix Timestamp Converter
+58. Text Diff Checker
 
 ---
 

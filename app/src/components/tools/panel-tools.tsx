@@ -865,11 +865,21 @@ const QuoteCard = dynamic(() => import("./quote/quote-card"), {
   loading: () => <div className="h-[420px] animate-pulse rounded-xl bg-muted" />,
 });
 
+// Speech-to-text loads transformers.js only when opened.
+const Transcriber = dynamic(() => import("./ai/transcriber"), {
+  ssr: false,
+  loading: () => <div className="h-[320px] animate-pulse rounded-xl bg-muted" />,
+});
+const TranscribeText = () => <Transcriber mode="text" />;
+const SubtitleGenerator = () => <Transcriber mode="subtitles" />;
+
 /** Panels that need a wider dialog. */
-export const WIDE_TOOLS = new Set(["text-to-image", "pdf-organize"]);
+export const WIDE_TOOLS = new Set(["text-to-image", "pdf-organize", "transcribe-audio", "auto-subtitles"]);
 
 export const PANEL_TOOLS: Record<string, React.ComponentType> = {
   "text-to-image": QuoteCard,
+  "transcribe-audio": TranscribeText,
+  "auto-subtitles": SubtitleGenerator,
   "word-counter": WordCounter,
   "case-converter": CaseConverter,
   "json-formatter": JsonFormatter,
