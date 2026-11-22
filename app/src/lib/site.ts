@@ -21,6 +21,6 @@ export function siteUrl(): URL {
  * Where "Request a feature" sends people. Set REQUEST_EMAIL to your address to
  * enable the email button (it is shown publicly). X DMs always work.
  */
-export const REQUEST_EMAIL = "";
+export const REQUEST_EMAIL = "sumitsharma9128@gmail.com";
 export const OWNER_X_HANDLE = "sumitthq";
 export const OWNER_SITE = "https://sumitsharma.pro";
