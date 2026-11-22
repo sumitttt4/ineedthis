@@ -95,16 +95,14 @@ Built with Next.js, TypeScript, Tailwind CSS, Geist, and [Paper Shaders](https:/
 
 ---
 
-## Open source
+## License
 
-INeedThis is free and open source under the [MIT License](LICENSE). Every tool on the site is in this repository — no locked features.
-
-Contributions are welcome: bug reports, new tools, translations. Each tool is one entry in `app/src/components/tools/tools-registry.ts` plus a runner (`extra-tools.tsx` for file tools, `panel-tools.tsx` for instant tools), and gets its own page automatically.
+Proprietary — © 2026 Sumit Sharma. All rights reserved. The website is free to use; the source code is not licensed for reuse. See [LICENSE](LICENSE). Third-party components keep their own licenses (listed at https://ineedthis.site/about).
 
 ### Roadmap
 
 - **Next:** noise remover (on device), "any object" background removal behind WebGPU, more presets.
-- **Later (undecided):** an optional Pro tier for heavy jobs. The free tools stay free and open source.
+- **Later (undecided):** an optional Pro tier for heavy jobs. The current tools stay free.
 
 ## Getting Started
 
@@ -195,6 +193,5 @@ CI runs all of the above plus `npm audit --audit-level=high`, and a Cloudflare W
 - **Sumit** — [sumitsharma.pro](https://sumitsharma.pro)
 - **X / Twitter** — [@sumitthq](https://x.com/sumitthq)
 - **Website** — [ineedthis.site](https://ineedthis.site)
-- **Repository** — [github.com/sumitttt4/ineedthis](https://github.com/sumitttt4/ineedthis)
 
-Licensed under the [MIT License](LICENSE).
+© 2026 Sumit Sharma. All rights reserved.

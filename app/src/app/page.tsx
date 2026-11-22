@@ -8,6 +8,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import Header from "@/components/header/header";
 import GlobalDropzone from "@/components/dropzone/global-dropzone";
 import Hero from "@/components/hero/hero";
+import FeatureRequest from "@/components/feedback/feature-request";
 import { EverydaySection, GemsSection, AllByCategory } from "@/components/home/home-sections";
 import ToolCard from "@/components/tools/tool-card";
 import ToolModal from "@/components/tools/tool-modal";
@@ -221,15 +222,14 @@ function Home() {
                   <div className="flex items-center gap-2">
                     <ShieldCheckIcon className="size-4 text-emerald-500 shrink-0" />
                     <span>
-                      Open source · MIT ·{" "}
-                      <a
-                        href="https://github.com/sumitttt4/ineedthis"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="font-medium text-foreground underline-offset-4 hover:underline"
-                      >
-                        View on GitHub
-                      </a>
+                      © {new Date().getFullYear()} Sumit Sharma · Free to use ·{" "}
+                      <FeatureRequest
+                        trigger={(open) => (
+                          <button type="button" onClick={open} className="font-medium text-foreground underline-offset-4 hover:underline">
+                            Request a feature
+                          </button>
+                        )}
+                      />
                     </span>
                   </div>
 

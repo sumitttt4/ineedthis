@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import GlobalDropzone from "@/components/dropzone/global-dropzone";
 import type { ToolDefinition } from "@/components/tools/tools-registry";
-import { ShieldCheckIcon, CpuIcon, DownloadIcon, GithubIcon } from "@/components/_ui/icons";
+import { ShieldCheckIcon, CpuIcon, DownloadIcon, CheckCircleIcon } from "@/components/_ui/icons";
 
 const HeroShader = dynamic(() => import("./hero-shader"), {
   ssr: false,
@@ -19,7 +19,7 @@ const PROOF: Array<{ icon: typeof ShieldCheckIcon; label: string; href?: string 
   { icon: ShieldCheckIcon, label: "Files never leave your device" },
   { icon: CpuIcon, label: "WebAssembly + Web Workers" },
   { icon: DownloadIcon, label: "Installable, works offline" },
-  { icon: GithubIcon, label: "Free & open source", href: "https://github.com/sumitttt4/ineedthis" },
+  { icon: CheckCircleIcon, label: "Free, no sign-up, no watermark" },
 ];
 
 export default function Hero({ toolCount, onSelectToolWithFile }: HeroProps) {

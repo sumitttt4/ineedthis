@@ -73,14 +73,13 @@ export default function PrivacyPage() {
       <p>INeedThis is a general-purpose tool and doesn&apos;t knowingly collect information from anyone, including children.</p>
 
       <h2>Changes</h2>
-      <p>If this policy changes, we&apos;ll update this page and the date at the top. The site&apos;s code is open source, so you can always check what it does.</p>
+      <p>If this policy changes, we&apos;ll update this page and the date at the top.</p>
 
       <h2>Contact</h2>
       <p>
         Questions? Reach out on{" "}
         <a href="https://x.com/sumitthq" target="_blank" rel="noopener noreferrer">X (@sumitthq)</a>, via{" "}
-        <a href="https://sumitsharma.pro" target="_blank" rel="noopener noreferrer">sumitsharma.pro</a>, or open an issue on{" "}
-        <a href="https://github.com/sumitttt4/ineedthis" target="_blank" rel="noopener noreferrer">GitHub</a>.
+        <a href="https://sumitsharma.pro" target="_blank" rel="noopener noreferrer">sumitsharma.pro</a>, or use &quot;Request a feature&quot; in the sidebar.
       </p>
     </LegalPage>
   );

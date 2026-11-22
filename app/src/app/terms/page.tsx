@@ -4,7 +4,7 @@ import { LegalPage } from "@/components/legal/legal-page";
 
 export const metadata: Metadata = {
   title: "Terms of Use",
-  description: "The terms for using INeedThis: free, open-source file tools provided as-is.",
+  description: "The terms for using INeedThis: free file tools provided as-is.",
   alternates: { canonical: "/terms" },
 };
 
@@ -12,7 +12,7 @@ export default function TermsPage() {
   return (
     <LegalPage
       title="Terms of Use"
-      intro="INeedThis is a free, open-source set of file tools. By using the site you agree to these terms. They're short on purpose."
+      intro="INeedThis is a free set of file tools. By using the site you agree to these terms. They're short on purpose."
     >
       <h2>Using the tools</h2>
       <ul>
@@ -44,11 +44,11 @@ export default function TermsPage() {
         them.
       </p>
 
-      <h2>Open-source license</h2>
+      <h2>Ownership</h2>
       <p>
-        The INeedThis source code is available under the{" "}
-        <a href="https://github.com/sumitttt4/ineedthis/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a>.
-        Third-party components keep their own licenses, listed on the <Link href="/about">About page</Link>.
+        The tools are free to use, but INeedThis itself — its code, design, name and logo — belongs to Sumit Sharma, all rights
+        reserved. Please don&apos;t copy, resell or republish the site or its code. Your files and the results you create are
+        yours. Third-party components keep their own licenses, listed on the <Link href="/about">About page</Link>.
       </p>
 
       <h2>Changes</h2>
@@ -56,8 +56,8 @@ export default function TermsPage() {
 
       <h2>Contact</h2>
       <p>
-        Reach out on <a href="https://x.com/sumitthq" target="_blank" rel="noopener noreferrer">X (@sumitthq)</a> or open an issue on{" "}
-        <a href="https://github.com/sumitttt4/ineedthis" target="_blank" rel="noopener noreferrer">GitHub</a>.
+        Reach out on <a href="https://x.com/sumitthq" target="_blank" rel="noopener noreferrer">X (@sumitthq)</a> or via{" "}
+        <a href="https://sumitsharma.pro" target="_blank" rel="noopener noreferrer">sumitsharma.pro</a>.
       </p>
     </LegalPage>
   );

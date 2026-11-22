@@ -4,7 +4,7 @@ import { TOOLS } from "@/components/tools/tools-registry";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Why INeedThis exists, how it keeps your files private, and the open-source projects it's built on.",
+  description: "Why INeedThis exists, how it keeps your files private, and who made it.",
   alternates: { canonical: "/about" },
 };
 
@@ -24,7 +24,7 @@ const CREDITS: Array<[string, string, string]> = [
   ["Transformers.js, ONNX Runtime Web", "Apache-2.0 / MIT", "https://github.com/huggingface/transformers.js"],
   ["MODNet model (background removal)", "Apache-2.0", "https://huggingface.co/Xenova/modnet"],
   ["Whisper models (speech to text)", "MIT", "https://github.com/openai/whisper"],
-  ["JSZip, fflate, qrcode, marked, diff, piexifjs", "MIT / BSD", "https://github.com/sumitttt4/ineedthis/blob/main/app/package.json"],
+  ["JSZip, fflate, qrcode, marked, diff, piexifjs", "MIT / BSD", "https://www.npmjs.com/package/jszip"],
   ["Manrope, Geist Mono, card fonts", "SIL Open Font License", "https://fonts.google.com"],
 ];
 
@@ -41,22 +41,20 @@ export default function AboutPage() {
         works offline once loaded, and your documents stay yours.
       </p>
 
-      <h2>Free and open source</h2>
+      <h2>Free to use</h2>
       <p>
-        Every tool is free, with no sign-up, watermark or limit on use. The code is public under the MIT License on{" "}
-        <a href="https://github.com/sumitttt4/ineedthis" target="_blank" rel="noopener noreferrer">GitHub</a> — read it, run it
-        yourself, or contribute a tool.
+        Every tool is free, with no sign-up, watermark or limit on use. Missing something? Use &quot;Request a feature&quot; in the
+        sidebar — requests come straight to me.
       </p>
 
       <h2>Who made it</h2>
       <p>
         Built by <a href="https://sumitsharma.pro" target="_blank" rel="noopener noreferrer">Sumit Sharma</a>. Say hi on{" "}
-        <a href="https://x.com/sumitthq" target="_blank" rel="noopener noreferrer">X (@sumitthq)</a>, or report a bug on{" "}
-        <a href="https://github.com/sumitttt4/ineedthis/issues" target="_blank" rel="noopener noreferrer">GitHub Issues</a>.
+        <a href="https://x.com/sumitthq" target="_blank" rel="noopener noreferrer">X (@sumitthq)</a>. © 2026 Sumit Sharma. All rights reserved.
       </p>
 
-      <h2>Built on open source</h2>
-      <p>INeedThis stands on these projects. Each keeps its own license.</p>
+      <h2>Third-party software</h2>
+      <p>INeedThis uses the following open-source components. Each is used under, and remains subject to, its own license.</p>
       <table>
         <thead>
           <tr>

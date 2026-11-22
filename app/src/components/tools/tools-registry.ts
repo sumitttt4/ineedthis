@@ -27,7 +27,6 @@ import {
   LinkIcon,
   SpeedIcon,
   MuteIcon,
-  SparklesIcon,
 } from "@/components/_ui/icons";
 
 export type ToolCategory = "pdf" | "image" | "media" | "data" | "text" | "p2p";
@@ -282,7 +281,7 @@ const BASE_TOOLS: ToolDefinition[] = [
     name: "Remove Background (AI)",
     description: "AI cuts people out of photos for a transparent PNG or a clean white, black or blue background. Runs on your device.",
     category: "image",
-    icon: SparklesIcon,
+    icon: ImageIcon,
     formats: ["JPG", "PNG", "WEBP", "HEIC"],
     action: "image-bg-remove",
   },
@@ -327,7 +326,7 @@ const BASE_TOOLS: ToolDefinition[] = [
     name: "Screenshot Beautifier",
     description: "Frame a screenshot on a gradient with padding, rounded corners and shadow.",
     category: "image",
-    icon: SparklesIcon,
+    icon: ImageIcon,
     formats: ["PNG", "JPG"],
     action: "screenshot-beautify",
   },

@@ -129,13 +129,6 @@ export function ShieldCheckIcon(props: IconProps) {
   );
 }
 
-export function SparklesIcon(props: IconProps) {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <path d="M8 1.5l1.5 4.5L14 7.5 9.5 9 8 13.5 6.5 9 2 7.5l4.5-1.5L8 1.5z" />
-    </svg>
-  );
-}
 
 export function UploadCloudIcon(props: IconProps) {
   return (

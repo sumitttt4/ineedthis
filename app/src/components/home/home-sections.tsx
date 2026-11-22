@@ -5,7 +5,8 @@ import { CATEGORIES, TOOLS, type ToolDefinition } from "@/components/tools/tools
 import { EVERYDAY, GEMS } from "@/components/tools/collections";
 import ToolCard from "@/components/tools/tool-card";
 import { toolSlug } from "@/lib/tool-pages";
-import { SparklesIcon, ChevronRightIcon } from "@/components/_ui/icons";
+import { ChevronRightIcon } from "@/components/_ui/icons";
+import { Gem } from "lucide-react";
 import { toolTexture, toolVariant } from "@/lib/category-style";
 
 const byId = (id: string) => TOOLS.find((t) => t.id === id);
@@ -70,7 +71,7 @@ export function GemsSection() {
                     <Icon className="size-4.5" aria-hidden="true" />
                   </span>
                   <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-                    <SparklesIcon className="size-3" aria-hidden="true" />
+                    <Gem className="size-3" aria-hidden="true" />
                     Gem
                   </span>
                 </div>
@@ -98,7 +99,7 @@ export function AllByCategory() {
   }));
   return (
     <section aria-labelledby="all-tools" className="flex flex-col gap-8">
-      <SectionHead id="all-tools" title={`All ${TOOLS.length} tools`} sub="Everything, grouped. Free and open source." />
+      <SectionHead id="all-tools" title={`All ${TOOLS.length} tools`} sub="Everything, grouped. Free to use, no sign-up." />
       {groups.map((g) => (
         <div key={g.id} className="flex flex-col gap-3">
           <h3 className="flex items-center gap-2 text-[14px] font-semibold text-foreground">

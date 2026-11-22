@@ -36,7 +36,7 @@ export function LegalFooter() {
         <Link href="/about" className="hover:text-foreground">About</Link>
         <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
         <Link href="/terms" className="hover:text-foreground">Terms</Link>
-        <a href="https://github.com/sumitttt4/ineedthis" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">GitHub</a>
+        <span className="sm:ml-auto">© 2026 Sumit Sharma</span>
       </nav>
     </footer>
   );

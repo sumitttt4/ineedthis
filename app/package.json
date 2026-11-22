@@ -71,5 +71,6 @@
   },
   "engines": {
     "node": ">=22.13"
-  }
+  },
+  "license": "UNLICENSED"
 }

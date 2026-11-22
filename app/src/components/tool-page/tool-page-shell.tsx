@@ -10,6 +10,7 @@ import { ThemeToggle } from "@/components/_ui/theme-toggle";
 import ToolModal from "@/components/tools/tool-modal";
 import P2PPanel from "@/components/p2p/p2p-panel";
 import Toaster from "@/components/_ui/toaster";
+import FeatureRequest from "@/components/feedback/feature-request";
 import { CATEGORIES, TOOLS } from "@/components/tools/tools-registry";
 import { toolSlug } from "@/lib/tool-pages";
 
@@ -68,7 +69,15 @@ export default function ToolPageShell({ toolId, intro, children }: { toolId: str
             )}
             {children}
             <footer className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border pt-6 text-[13px] text-muted-foreground">
-              <span>Free & open source · files stay on your device</span>
+              <span>Free to use · files stay on your device</span>
+              <FeatureRequest
+                defaultTool={tool.id}
+                trigger={(open) => (
+                  <button type="button" onClick={open} className="font-medium text-foreground underline-offset-4 hover:underline">
+                    Request a feature
+                  </button>
+                )}
+              />
               <nav aria-label="Legal" className="flex gap-3 sm:ml-auto">
                 <Link href="/about" className="hover:text-foreground">About</Link>
                 <Link href="/privacy" className="hover:text-foreground">Privacy</Link>

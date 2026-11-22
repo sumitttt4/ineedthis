@@ -16,3 +16,11 @@ export function siteUrl(): URL {
     (process.env.NODE_ENV === "production" ? SITE_URL : "http://localhost:3000");
   return new URL(raw);
 }
+
+/**
+ * Where "Request a feature" sends people. Set REQUEST_EMAIL to your address to
+ * enable the email button (it is shown publicly). X DMs always work.
+ */
+export const REQUEST_EMAIL = "";
+export const OWNER_X_HANDLE = "sumitthq";
+export const OWNER_SITE = "https://sumitsharma.pro";

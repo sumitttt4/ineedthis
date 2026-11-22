@@ -3,6 +3,8 @@
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import { MessageSquarePlus } from "lucide-react";
+import FeatureRequest from "@/components/feedback/feature-request";
 import {
   Sidebar,
   SidebarContent,
@@ -144,6 +146,18 @@ export default function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter>
+        <FeatureRequest
+          trigger={(openRequest) => (
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton tooltip="Request a feature" onClick={() => { closeOnMobile(); openRequest(); }}>
+                  <MessageSquarePlus aria-hidden="true" />
+                  <span>Request a feature</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          )}
+        />
         {!isMobile && <MakerCard />}
       </SidebarFooter>
 

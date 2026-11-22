@@ -3,7 +3,7 @@ import type { IconProps } from "@/components/_ui/icons";
 import {
   FileText, FileOutput, Combine, Split, Shrink, Images, Sheet, FileCode, Presentation, Stamp, EyeOff, Signature,
   LockOpen, ImagePlus, LayoutGrid, SquareStack, FileType, Camera, Minimize2, MapPinOff, RefreshCw, IdCard, AppWindow,
-  Scaling, Eraser, Quote, Crop, Type, Palette, Sparkles, Download, FileVideo, Gauge, Scissors, Film, Music, Volume2,
+  Scaling, Eraser, Quote, Crop, Type, Palette, Frame, Download, FileVideo, Gauge, Scissors, Film, Music, Volume2,
   ScreenShare, AudioLines, Captions, VolumeX, AudioWaveform, FastForward, RotateCw, Mic, FileArchive, ArrowLeftRight,
   Fingerprint, QrCode, WholeWord, CaseSensitive, Braces, Binary, Link, KeyRound, Clock, Diff, Send,
 } from "lucide-react";
@@ -42,7 +42,7 @@ export const TOOL_ICONS: Record<string, ComponentType<IconProps>> = {
   "image-crop": Crop,
   "image-text": Type,
   "image-colors": Palette,
-  "screenshot-beautify": Sparkles,
+  "screenshot-beautify": Frame,
   "universal-video-downloader": Download,
   "video-to-mp4": FileVideo,
   "video-compress-mb": Gauge,
