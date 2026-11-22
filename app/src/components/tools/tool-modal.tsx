@@ -2,7 +2,7 @@
 
 import { fileSizeError } from "@/lib/limits";
 import { EXTRA_TOOLS, type ExtraOpts } from "./extra-tools";
-import { PANEL_TOOLS } from "./panel-tools";
+import { PANEL_TOOLS, WIDE_TOOLS } from "./panel-tools";
 import { useState, useRef, useEffect } from "react";
 import Dialog from "@/components/_ui/dialog";
 import Button from "@/components/_ui/button";
@@ -759,6 +759,7 @@ export default function ToolModal({
       onClose={onClose}
       title={tool.name}
       description={tool.description}
+      maxWidth={WIDE_TOOLS.has(tool.id) ? "sm:max-w-[920px]" : undefined}
       footer={
         <div className="flex w-full items-center justify-between gap-3">
           <div className="text-[12px] text-muted-foreground">

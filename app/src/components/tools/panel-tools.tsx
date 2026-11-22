@@ -7,6 +7,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import dynamic from "next/dynamic";
 import Button from "@/components/_ui/button";
 
 /* ------------------------------------------------------------------ */
@@ -858,7 +859,17 @@ function VoiceRecorder() {
 
 /* ------------------------------------------------------------------ */
 
-export const PANEL_TOOLS: Record<string, () => ReactNode> = {
+// Fonts + shaders for the card maker load only when it's opened.
+const QuoteCard = dynamic(() => import("./quote/quote-card"), {
+  ssr: false,
+  loading: () => <div className="h-[420px] animate-pulse rounded-xl bg-muted" />,
+});
+
+/** Panels that need a wider dialog. */
+export const WIDE_TOOLS = new Set(["text-to-image", "pdf-organize"]);
+
+export const PANEL_TOOLS: Record<string, React.ComponentType> = {
+  "text-to-image": QuoteCard,
   "word-counter": WordCounter,
   "case-converter": CaseConverter,
   "json-formatter": JsonFormatter,
