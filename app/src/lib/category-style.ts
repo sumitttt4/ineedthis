@@ -1,24 +1,35 @@
-import type { ToolCategory } from "@/components/tools/tools-registry";
+import { TOOLS } from "@/components/tools/tools-registry";
 
 /**
- * Paper Shaders mesh textures, pre-rendered once per category
- * (public/textures/*.webp, ~1.5 KB each). Using images instead of live WebGL
- * keeps 70+ cards cheap — browsers cap live WebGL contexts at ~16 per page.
- * Colours are Glaze's tones: clay, fern, iris, ocean, sun, cobalt.
+ * Paper Shaders mesh textures, pre-rendered once (public/textures/*.webp,
+ * ~1.5 KB each). Static images instead of live WebGL keep 70+ cards cheap —
+ * browsers cap live WebGL contexts at ~16 per page.
+ *
+ * Colour rotates per card (not per category) so a grid never turns one colour.
+ * With 8 colourways and ≤4 columns, horizontal and vertical neighbours differ.
  */
-export function categoryTexture(category: ToolCategory): string {
-  return `/textures/${category}.webp`;
+const PALETTE = ["cobalt", "fern", "iris", "sun", "ocean", "clay", "teal", "dusk"] as const;
+
+function indexInCategory(id: string): number {
+  const t = TOOLS.find((x) => x.id === id);
+  if (!t) return 0;
+  return TOOLS.filter((x) => x.category === t.category).findIndex((x) => x.id === id);
 }
 
-/** Stable per-tool variation: a different crop of the category texture and a slight hue shift. */
+/** Texture for a tool. Pass `position` when the tool appears in a custom list (Everyday, Gems). */
+export function toolTexture(id: string, position?: number): string {
+  const i = position ?? indexInCategory(id);
+  return `/textures/${PALETTE[((i % PALETTE.length) + PALETTE.length) % PALETTE.length]}.webp`;
+}
+
+/** Stable per-tool variation: a different crop of the texture. */
 export function toolVariant(id: string) {
   let h = 2166136261;
   for (let i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619) >>> 0;
   const x = h % 101;
   const y = (h >>> 8) % 101;
-  const hue = ((h >>> 16) % 41) - 20; // -20..20 deg
   return {
     chip: { backgroundSize: "320%", backgroundPosition: `${x}% ${y}%` },
-    wash: { backgroundPosition: `${100 - x}% ${100 - y}%`, filter: `blur(28px) hue-rotate(${hue}deg)` },
+    wash: { backgroundPosition: `${100 - x}% ${100 - y}%` },
   };
 }

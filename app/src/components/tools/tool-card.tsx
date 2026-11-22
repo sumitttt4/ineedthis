@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ToolDefinition } from "./tools-registry";
 import { toolSlug } from "@/lib/tool-pages";
-import { categoryTexture, toolVariant } from "@/lib/category-style";
+import { toolTexture, toolVariant } from "@/lib/category-style";
 import { ChevronRightIcon } from "@/components/_ui/icons";
 import { cn } from "@/lib/utils";
 
@@ -23,10 +23,10 @@ export default function ToolCard({ tool, className }: ToolCardProps) {
         className
       )}
     >
-      <span aria-hidden="true" className="shader-wash" style={{ backgroundImage: `url(${categoryTexture(tool.category)})`, ...toolVariant(tool.id).wash }} />
+      <span aria-hidden="true" className="shader-wash" style={{ backgroundImage: `url(${toolTexture(tool.id)})`, ...toolVariant(tool.id).wash }} />
       <div className="relative">
         <div className="mb-3.5 flex items-center justify-between">
-          <div className="shader-chip flex size-9 items-center justify-center rounded-xl" style={{ backgroundImage: `url(${categoryTexture(tool.category)})`, ...toolVariant(tool.id).chip }}>
+          <div className="shader-chip flex size-9 items-center justify-center rounded-xl" style={{ backgroundImage: `url(${toolTexture(tool.id)})`, ...toolVariant(tool.id).chip }}>
             <Icon className="size-4.5" aria-hidden="true" />
           </div>
         </div>
