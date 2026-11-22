@@ -1,29 +1,22 @@
 "use client";
 
+import Link from "next/link";
 import type { ToolDefinition } from "./tools-registry";
+import { toolSlug } from "@/lib/tool-pages";
 import { ChevronRightIcon } from "@/components/_ui/icons";
 import { cn } from "@/lib/utils";
 
 export interface ToolCardProps {
   tool: ToolDefinition;
-  onClick: (tool: ToolDefinition) => void;
   className?: string;
 }
 
-export default function ToolCard({ tool, onClick, className }: ToolCardProps) {
+export default function ToolCard({ tool, className }: ToolCardProps) {
   const Icon = tool.icon;
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={() => onClick(tool)}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onClick(tool);
-        }
-      }}
+    <Link
+      href={`/${toolSlug(tool.id)}`}
       className={cn(
         "group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-card border border-card-border p-4 sm:p-5 shadow-card transition-[box-shadow,border-color,transform] duration-200 ease-power2-out hover:shadow-card-hover hover:border-border cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary/60 active:scale-[0.99]",
         className
@@ -66,6 +59,6 @@ export default function ToolCard({ tool, onClick, className }: ToolCardProps) {
           <ChevronRightIcon className="size-3.5" />
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

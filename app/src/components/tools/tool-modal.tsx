@@ -1,6 +1,7 @@
 "use client";
 
 import { fileSizeError } from "@/lib/limits";
+import { useMounted } from "@/lib/use-mounted";
 import { EXTRA_TOOLS, type ExtraOpts } from "./extra-tools";
 import { PANEL_TOOLS, WIDE_TOOLS } from "./panel-tools";
 import { useState, useRef, useEffect } from "react";
@@ -73,6 +74,18 @@ export interface ToolModalProps {
   initialFiles?: File[];
   open: boolean;
   onClose: () => void;
+  /** Render in the page (tool pages) instead of a dialog. */
+  inline?: boolean;
+}
+
+/** Same frame as Dialog, but laid out in the page flow. */
+function InlineFrame({ children, footer }: { children: React.ReactNode; footer?: React.ReactNode }) {
+  return (
+    <section className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+      <div className="p-4 sm:p-6">{children}</div>
+      {footer && <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border bg-secondary/30 p-4 sm:px-6">{footer}</div>}
+    </section>
+  );
 }
 
 export default function ToolModal({
@@ -80,6 +93,7 @@ export default function ToolModal({
   initialFiles,
   open,
   onClose,
+  inline = false,
 }: ToolModalProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -118,6 +132,7 @@ export default function ToolModal({
   const [pdfPassword, setPdfPassword] = useState("");
   const [pdfSecurityAction, setPdfSecurityAction] = useState<"unlock" | "protect">("unlock");
   const [extraOpts, setExtraOpts] = useState<ExtraOpts>({});
+  const mounted = useMounted();
   const extra = tool ? EXTRA_TOOLS[tool.id] : undefined;
   const Panel = tool ? PANEL_TOOLS[tool.id] : undefined;
   /** Tools that wait for options instead of running as soon as a file is chosen. */
@@ -753,8 +768,10 @@ export default function ToolModal({
 
   if (!tool) return null;
 
+  const Frame = (inline ? InlineFrame : Dialog) as typeof Dialog;
+
   return (
-    <Dialog
+    <Frame
       open={open}
       onClose={onClose}
       title={tool.name}
@@ -771,9 +788,11 @@ export default function ToolModal({
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="ghost" onClick={onClose} disabled={isProcessing}>
-              Close
-            </Button>
+            {!inline && (
+              <Button variant="ghost" onClick={onClose} disabled={isProcessing}>
+                Close
+              </Button>
+            )}
 
             {Panel ? null : tool.id === "universal-video-downloader" ? (
               <Button
@@ -842,7 +861,8 @@ export default function ToolModal({
     >
       <div className="flex flex-col gap-5">
         {/* File Dropzone or Input Area */}
-        {Panel && <Panel />}
+        {/* Panels use randomness / the clock, so render them only in the browser. */}
+        {Panel && (mounted ? <Panel /> : <div className="h-64 animate-pulse rounded-xl bg-muted" aria-hidden="true" />)}
 
         {!Panel && tool.id !== "screen-recorder" && tool.id !== "qr-studio" && tool.id !== "universal-video-downloader" && (
           <div
@@ -1625,6 +1645,6 @@ export default function ToolModal({
           </div>
         )}
       </div>
-    </Dialog>
+    </Frame>
   );
 }

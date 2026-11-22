@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import AppSidebar from "@/components/sidebar/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import Header from "@/components/header/header";
@@ -23,8 +24,23 @@ import {
 } from "@/components/_ui/icons";
 import PwaInstallButton from "@/components/_ui/pwa-install-button";
 
-export default function Home() {
-  const [activeCategory, setActiveCategory] = useState<ToolCategory | "all">("all");
+export default function Page() {
+  return (
+    <Suspense>
+      <Home />
+    </Suspense>
+  );
+}
+
+const CATEGORY_IDS = new Set(["all", "pdf", "image", "media", "data", "text", "p2p"]);
+
+function Home() {
+  // Sidebar links on tool pages come back as /?c=<category>.
+  const params = useSearchParams();
+  const fromUrl = params.get("c");
+  const [activeCategory, setActiveCategory] = useState<ToolCategory | "all">(
+    fromUrl && CATEGORY_IDS.has(fromUrl) ? (fromUrl as ToolCategory) : "all"
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTool, setSelectedTool] = useState<ToolDefinition | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -167,11 +183,7 @@ export default function Home() {
                 {filteredTools.length > 0 ? (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {filteredTools.map((tool) => (
-                      <ToolCard
-                        key={tool.id}
-                        tool={tool}
-                        onClick={() => handleOpenTool(tool)}
-                      />
+                      <ToolCard key={tool.id} tool={tool} />
                     ))}
                   </div>
                 ) : (
