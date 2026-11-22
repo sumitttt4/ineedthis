@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import dynamic from "next/dynamic";
+import { useState } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -22,7 +24,16 @@ import {
   QrCodeIcon,
   ShieldCheckIcon,
   VideoIcon,
+  XTwitterIcon,
 } from "@/components/_ui/icons";
+
+const MakerMesh = dynamic(() => import("@/components/shaders/maker-mesh"), {
+  ssr: false,
+  loading: () => null,
+});
+
+const PORTFOLIO_URL = "https://sumitsharma.pro";
+const X_URL = "https://x.com/sumitthq";
 
 const QUICK_LAUNCH = [
   { id: "universal-video-downloader", label: "Video downloader", icon: VideoIcon },
@@ -134,16 +145,87 @@ export default function AppSidebar({
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="flex items-start gap-2.5 rounded-lg border border-sidebar-border bg-card p-3 text-[12px] leading-snug text-muted-foreground group-data-[collapsible=icon]:hidden">
-          <ShieldCheckIcon className="mt-px size-4 shrink-0 text-success" aria-hidden="true" />
-          <span>
-            <span className="font-medium text-sidebar-foreground">Files stay on your device.</span>{" "}
-            Only the video downloader uses a server.
-          </span>
-        </div>
+        <p className="flex items-center gap-1.5 px-2 text-[12px] text-muted-foreground group-data-[collapsible=icon]:hidden">
+          <ShieldCheckIcon className="size-3.5 shrink-0 text-success" aria-hidden="true" />
+          Files never leave your device
+        </p>
+        {!isMobile && <MakerCard />}
       </SidebarFooter>
 
       <SidebarRail />
     </Sidebar>
+  );
+}
+
+/** Desktop-only credit: Paper Shaders card when expanded, monogram when collapsed. */
+function MakerCard() {
+  const [active, setActive] = useState(false);
+  const on = () => setActive(true);
+  const off = () => setActive(false);
+
+  return (
+    <>
+      {/* Expanded */}
+      <div
+        onPointerEnter={on}
+        onPointerLeave={off}
+        onFocus={on}
+        onBlur={off}
+        className="group/maker relative isolate overflow-hidden rounded-xl border border-white/10 text-white shadow-[0_8px_24px_-12px_rgb(36_69_230/0.6)] group-data-[collapsible=icon]:hidden"
+      >
+        <div className="absolute inset-0 bg-[#1b2fa8]" aria-hidden="true" />
+        <MakerMesh active={active} />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/15 to-transparent" aria-hidden="true" />
+
+        <div className="relative flex items-center gap-3 p-3">
+          <span
+            aria-hidden="true"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/15 text-[15px] font-semibold ring-1 ring-white/25"
+          >
+            S
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col leading-tight">
+            <span className="text-[11px] font-medium text-white/70">Made by</span>
+            <a
+              href={PORTFOLIO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="truncate text-[14px] font-semibold outline-none after:absolute after:inset-0 after:rounded-xl focus-visible:after:ring-2 focus-visible:after:ring-white/80"
+            >
+              Sumit Sharma
+            </a>
+            <span className="truncate text-[11px] text-white/70">sumitsharma.pro</span>
+          </span>
+          <a
+            href={X_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Sumit on X (@sumitthq)"
+            title="@sumitthq"
+            className="relative z-10 flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/20 transition-[background-color,transform] duration-150 ease-out outline-none hover:bg-white/20 focus-visible:ring-2 focus-visible:ring-white/80 active:scale-[0.96]"
+          >
+            <XTwitterIcon className="size-3.5" aria-hidden="true" />
+          </a>
+        </div>
+      </div>
+
+      {/* Collapsed to icons */}
+      <SidebarMenu className="hidden group-data-[collapsible=icon]:flex">
+        <SidebarMenuItem>
+          <SidebarMenuButton
+            tooltip="Made by Sumit · sumitsharma.pro"
+            render={<a href={PORTFOLIO_URL} target="_blank" rel="noopener noreferrer" />}
+          >
+            <span
+              aria-hidden="true"
+              className="flex size-4 shrink-0 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground"
+            >
+              S
+            </span>
+            <span className="group-data-[collapsible=icon]:sr-only">Made by Sumit</span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </>
   );
 }
