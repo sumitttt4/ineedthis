@@ -23,6 +23,7 @@ if (typeof ArrayBuffer !== "undefined" && !ArrayBuffer.prototype.toHex) {
   };
 }
 
+const API_BASE = process.env.TEST_BASE_URL || "http://localhost:3000";
 const RESULTS = [];
 
 function recordTest(name, passed, details) {
@@ -334,7 +335,7 @@ async function testVideoDownloaderApi() {
   console.log("\n--- TEST 6: Video Downloader API Route ---");
 
   try {
-    const res = await fetch("http://localhost:3000/api/video-downloader", {
+    const res = await fetch(`${API_BASE}/api/video-downloader`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url: "https://example.com/sample.mp4", quality: "720" }),
@@ -358,7 +359,7 @@ async function testVideoDownloaderApi() {
 
   // Test empty/invalid validation
   try {
-    const resInvalid = await fetch("http://localhost:3000/api/video-downloader", {
+    const resInvalid = await fetch(`${API_BASE}/api/video-downloader`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url: "" }),
@@ -371,6 +372,31 @@ async function testVideoDownloaderApi() {
     );
   } catch (err) {
     recordTest("API Input Validation (Empty URL)", false, err.message);
+  }
+
+  // SSRF guards: private / loopback / metadata targets must be refused
+  const blocked = [
+    "http://127.0.0.1/video.mp4",
+    "http://169.254.169.254/latest/meta-data/",
+    "http://localhost:3000/video.mp4",
+    "http://[::1]/video.mp4",
+    "file:///etc/passwd",
+  ];
+  for (const target of blocked) {
+    try {
+      const r = await fetch(`${API_BASE}/api/video-downloader`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: target }),
+      });
+      recordTest(`SSRF guard (POST) rejects ${target}`, r.status === 400, `Status: ${r.status}`);
+      const g = await fetch(
+        `${API_BASE}/api/video-downloader?url=${encodeURIComponent(target)}`
+      );
+      recordTest(`SSRF guard (GET proxy) rejects ${target}`, g.status === 400, `Status: ${g.status}`);
+    } catch (err) {
+      recordTest(`SSRF guard rejects ${target}`, false, err.message);
+    }
   }
 }
 

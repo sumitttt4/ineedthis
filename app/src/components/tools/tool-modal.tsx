@@ -1,5 +1,6 @@
 "use client";
 
+import { fileSizeError } from "@/lib/limits";
 import { useState, useRef, useEffect } from "react";
 import Dialog from "@/components/_ui/dialog";
 import Button from "@/components/_ui/button";
@@ -224,12 +225,12 @@ export default function ToolModal({
     a.click();
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 4000);
-    if (!quiet) toast(`Downloaded ${taskResult.filename}`);
+    if (!quiet) toast(`Downloaded ${taskResult.filename}`, { type: "success" });
   };
 
   const autoDownloadResult = (res: TaskResult | BatchTaskResult) => {
     if ("files" in res) {
-      res.files.forEach((f, i) => downloadFile(f, i > 0));
+      res.files.forEach((f) => downloadFile(f, true));
       toast(`Downloaded ${res.files.length} files`, { type: "success" });
       return;
     }
@@ -295,6 +296,13 @@ export default function ToolModal({
     const activeFiles = overrideFiles || files;
     if (tool.id !== "screen-recorder" && tool.id !== "qr-studio" && activeFiles.length === 0) {
       setErrorMsg("Please select at least one file to process.");
+      return;
+    }
+
+    const sizeError = fileSizeError(tool.category, activeFiles);
+    if (sizeError) {
+      setErrorMsg(sizeError);
+      setProgress({ state: "error", percent: 0, message: sizeError });
       return;
     }
 
@@ -624,9 +632,8 @@ export default function ToolModal({
       setProgress({
         state: "completed",
         percent: 100,
-        message: "1-Tap Complete! File downloaded.",
+        message: "Done — your file is downloading.",
       });
-      toast("1-Tap Complete! File downloaded.", { type: "success" });
 
       if (res) autoDownloadResult(res);
     } catch (err) {
@@ -639,9 +646,13 @@ export default function ToolModal({
     }
   };
 
+  // Reset the whole modal session each time it opens, then auto-run when files were
+  // dropped in. This is an intentional "sync with open prop" reset; executeTool is
+  // re-created every render and must not retrigger the run.
   useEffect(() => {
     if (open) {
       const init = initialFiles ?? [];
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFiles(init);
       setResult(null);
       setErrorMsg(null);
@@ -662,6 +673,7 @@ export default function ToolModal({
         executeTool(init);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initialFiles]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1191,6 +1203,8 @@ export default function ToolModal({
             </div>
             {qrPreviewUrl && (
               <div className="flex flex-col items-center gap-2 p-2">
+                {/* Blob URL preview — next/image can't optimise object URLs. */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={qrPreviewUrl}
                   alt="Generated QR"
@@ -1384,6 +1398,8 @@ export default function ToolModal({
               <div className="flex flex-col sm:flex-row items-start gap-4 rounded-2xl border border-border bg-card p-4 shadow-sm animate-in fade-in duration-200">
                 {videoData.thumbnail && (
                   <div className="relative size-28 shrink-0 overflow-hidden rounded-xl border border-border bg-black/40">
+                    {/* Arbitrary third-party thumbnail host; not routed through the optimiser. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={videoData.thumbnail}
                       alt={videoData.title}
@@ -1485,10 +1501,10 @@ export default function ToolModal({
 
         {/* Progress Bar & Status */}
         {isProcessing && (
-          <div className="border-border bg-secondary/50 flex flex-col gap-2 rounded-xl border p-4">
+          <div role="status" aria-live="polite" className="border-border bg-secondary/50 flex flex-col gap-2 rounded-xl border p-4">
             <div className="flex items-center justify-between text-[12px]">
               <span className="font-medium text-foreground flex items-center gap-1.5">
-                <RefreshCwIcon className="size-3.5 animate-spin text-primary" />
+                <RefreshCwIcon className="size-3.5 animate-spin text-primary" aria-hidden="true" />
                 {progress.message}
               </span>
               {progress.percent >= 0 && (
@@ -1497,11 +1513,18 @@ export default function ToolModal({
                 </span>
               )}
             </div>
-            <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
+            <div
+              role="progressbar"
+              aria-label="Processing progress"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progress.percent >= 0 ? Math.round(progress.percent) : undefined}
+              className="bg-muted h-1.5 w-full overflow-hidden rounded-full"
+            >
               <div
-                className="bg-primary h-full transition-all duration-200"
+                className="bg-primary h-full w-full origin-left transition-transform duration-200 ease-power2-out"
                 style={{
-                  width: progress.percent < 0 ? "100%" : `${Math.max(5, progress.percent)}%`,
+                  transform: `scaleX(${progress.percent < 0 ? 1 : Math.max(5, progress.percent) / 100})`,
                 }}
               />
             </div>
@@ -1511,13 +1534,13 @@ export default function ToolModal({
         {/* Checksum Hashes Result Display */}
         {hashesResult && (
           <div className="border-border bg-card flex flex-col gap-2 rounded-xl border p-4 text-[12px]">
-            <p className="font-semibold text-foreground">Computed File Hashes:</p>
+            <p className="font-semibold text-foreground">File hashes</p>
             {Object.entries(hashesResult).map(([algo, hash]) => (
               <div key={algo} className="flex flex-col gap-0.5 border-b border-border/50 pb-2">
                 <span className="text-[11px] uppercase text-muted-foreground font-semibold">
                   {algo}:
                 </span>
-                <span className="text-primary break-all select-all font-medium">{hash}</span>
+                <span className="font-mono text-[12.5px] text-foreground break-all select-all">{hash}</span>
               </div>
             ))}
           </div>
@@ -1525,7 +1548,7 @@ export default function ToolModal({
 
         {/* Error message */}
         {errorMsg && (
-          <div className="border-destructive/40 bg-destructive/10 text-destructive rounded-xl border p-3 text-[13px]">
+          <div role="alert" className="border-destructive/40 bg-destructive/10 text-destructive rounded-xl border p-3 text-[13px]">
             {errorMsg}
           </div>
         )}
@@ -1536,7 +1559,7 @@ export default function ToolModal({
             <div className="flex items-center gap-2.5">
               <CheckCircleIcon className="size-5 text-emerald-500 shrink-0" />
               <div>
-                <p className="text-[13px] font-semibold">Ready for download!</p>
+                <p className="text-[13px] font-semibold">Ready</p>
                 <p className="text-[12px] opacity-80">
                   {"files" in result
                     ? `${result.files.length} output files (${formatDuration(result.totalDurationMs)})`

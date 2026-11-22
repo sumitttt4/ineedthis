@@ -159,8 +159,6 @@ export async function compressImageToSize(
   const outputFormat: "jpg" | "webp" = "jpg"; // Lossy for compression
 
   let bestBlob: Blob | null = null;
-  let currentWidth = bitmap.width;
-  let currentHeight = bitmap.height;
   let scale = 1.0;
 
   // Binary search over quality and scale
@@ -177,8 +175,6 @@ export async function compressImageToSize(
 
       if (blob.size <= maxBytes) {
         bestBlob = blob;
-        currentWidth = w;
-        currentHeight = h;
         lo = mid; // Try higher quality
       } else {
         hi = mid; // Lower quality

@@ -17,7 +17,7 @@ async function testUploadE2E() {
   console.log("END-TO-END UPLOAD SIMULATION & ACTUAL FILE OUTPUT TEST");
   console.log("===============================================================");
 
-  const outputDir = path.resolve("public/test-results");
+  const outputDir = path.resolve(".test-output");
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
@@ -25,8 +25,8 @@ async function testUploadE2E() {
   // ---------------------------------------------------------------------------
   // 1. PDF TO WORD (DOCX) UPLOAD & CONVERSION
   // ---------------------------------------------------------------------------
-  console.log("\n[UPLOAD TEST 1] Uploading 'public/test-sample.pdf' (1197 bytes)...");
-  const pdfBytes = fs.readFileSync(path.resolve("public/test-sample.pdf"));
+  console.log("\n[UPLOAD TEST 1] Uploading 'fixtures/test-sample.pdf' (1197 bytes)...");
+  const pdfBytes = fs.readFileSync(path.resolve("fixtures/test-sample.pdf"));
   const pdfBuffer = pdfBytes.buffer.slice(pdfBytes.byteOffset, pdfBytes.byteOffset + pdfBytes.byteLength);
 
   const docxTaskResult = await pdfToDocx(pdfBuffer, "test-sample.pdf");
@@ -68,8 +68,8 @@ async function testUploadE2E() {
   // ---------------------------------------------------------------------------
   // 3. TABULAR DATA UPLOAD (JSON -> CSV & XLSX)
   // ---------------------------------------------------------------------------
-  console.log("\n[UPLOAD TEST 3] Uploading 'public/test-sample.json'...");
-  const jsonBytes = fs.readFileSync(path.resolve("public/test-sample.json"));
+  console.log("\n[UPLOAD TEST 3] Uploading 'fixtures/test-sample.json'...");
+  const jsonBytes = fs.readFileSync(path.resolve("fixtures/test-sample.json"));
   const jsonBuffer = jsonBytes.buffer.slice(jsonBytes.byteOffset, jsonBytes.byteOffset + jsonBytes.byteLength);
 
   const csvResult = await convertDataFormat(jsonBuffer, "test-sample.json", "json", "csv");

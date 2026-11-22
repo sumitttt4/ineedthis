@@ -4,10 +4,11 @@ import { useState, useMemo, useEffect } from "react";
 import Sidebar from "@/components/sidebar/sidebar";
 import Header from "@/components/header/header";
 import GlobalDropzone from "@/components/dropzone/global-dropzone";
+import Hero from "@/components/hero/hero";
 import ToolCard from "@/components/tools/tool-card";
 import ToolModal from "@/components/tools/tool-modal";
 import P2PPanel from "@/components/p2p/p2p-panel";
-import Toaster, { toast } from "@/components/_ui/toaster";
+import Toaster from "@/components/_ui/toaster";
 import Button from "@/components/_ui/button";
 import {
   TOOLS,
@@ -15,11 +16,9 @@ import {
   type ToolDefinition,
 } from "@/components/tools/tools-registry";
 import {
-  GridIcon,
-  SparklesIcon,
-  CpuIcon,
   ShieldCheckIcon,
   XTwitterIcon,
+  SearchIcon,
 } from "@/components/_ui/icons";
 import PwaInstallButton from "@/components/_ui/pwa-install-button";
 
@@ -39,7 +38,9 @@ export default function Home() {
         !["INPUT", "TEXTAREA"].includes((e.target as HTMLElement).tagName)
       ) {
         e.preventDefault();
-        document.getElementById("board-search")?.focus();
+        const inputs = document.querySelectorAll<HTMLInputElement>("[data-tool-search]");
+        const visible = Array.from(inputs).find((el) => el.offsetParent !== null);
+        visible?.focus();
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -75,6 +76,12 @@ export default function Home() {
 
   return (
     <div className="flex h-dvh max-w-full overflow-hidden bg-background text-foreground">
+      <a
+        href="#main"
+        className="skip-link rounded-lg bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground"
+      >
+        Skip to content
+      </a>
       {/* Resizable Sidebar */}
       <Sidebar
         activeCategory={activeCategory}
@@ -95,25 +102,56 @@ export default function Home() {
           totalToolsCount={TOOLS.length}
         />
 
-        <main className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 sm:py-8">
+        <main
+          id="main"
+          tabIndex={-1}
+          className="min-h-0 flex-1 overflow-y-auto px-4 py-6 outline-none sm:px-6 sm:py-8"
+        >
           <div className="mx-auto max-w-7xl flex flex-col gap-8">
+            {activeCategory !== "all" && (
+              <h1 className="sr-only">INeedThis — {activeCategory} tools</h1>
+            )}
             {activeCategory === "p2p" ? (
               <P2PPanel />
             ) : (
               <>
-                {/* Global File Dropzone */}
-                <GlobalDropzone
-                  onSelectToolWithFile={(tool, file) =>
-                    handleOpenTool(tool, [file])
-                  }
-                />
+                {activeCategory === "all" && !searchQuery ? (
+                  <Hero
+                    toolCount={TOOLS.length}
+                    onSelectToolWithFile={(tool, file) => handleOpenTool(tool, [file])}
+                  />
+                ) : (
+                  <GlobalDropzone
+                    onSelectToolWithFile={(tool, file) => handleOpenTool(tool, [file])}
+                  />
+                )}
+
+                {/* Mobile search (header search is md+) */}
+                <div className="relative md:hidden">
+                  <label htmlFor="mobile-search" className="sr-only">
+                    Search tools
+                  </label>
+                  <SearchIcon
+                    className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                  <input
+                    id="mobile-search"
+                    data-tool-search
+                    type="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={`Search ${TOOLS.length} tools`}
+                    className="h-11 w-full rounded-xl border border-input bg-secondary/80 pl-9 pr-3 text-[15px] text-foreground outline-none placeholder:text-muted-foreground focus:bg-background focus:ring-2 focus:ring-primary/40"
+                  />
+                </div>
 
                 {/* Toolbar Filter Info */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-[14px] font-semibold text-foreground">
-                      Available Utilities
-                    </span>
+                    <h2 className="text-[14px] font-semibold text-foreground">
+                      {searchQuery ? "Search results" : "All tools"}
+                    </h2>
                     <span className="bg-secondary text-muted-foreground border border-border rounded-full px-2 py-0.5 text-[11px] tabular-nums font-semibold">
                       {filteredTools.length} {filteredTools.length === 1 ? "tool" : "tools"}
                     </span>
@@ -125,12 +163,8 @@ export default function Home() {
                   </div>
 
                   <div className="flex items-center gap-2 text-[12px] text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <ShieldCheckIcon className="size-3.5 text-emerald-500" />
-                      Local-first processing
-                    </span>
-                    <span className="opacity-40">•</span>
-                    <span>File tools never upload</span>
+                    <ShieldCheckIcon className="size-3.5 text-success" aria-hidden="true" />
+                    <span>Only the video downloader touches a server</span>
                   </div>
                 </div>
 
@@ -146,9 +180,9 @@ export default function Home() {
                     ))}
                   </div>
                 ) : (
-                  <div className="border-border bg-card/40 rounded-2xl border p-12 text-center flex flex-col items-center justify-center gap-3">
+                  <div role="status" className="border-border bg-card/40 rounded-2xl border p-12 text-center flex flex-col items-center justify-center gap-3">
                     <p className="text-[15px] font-medium text-foreground">
-                      No utilities found matching &quot;{searchQuery}&quot;
+                      No tools match &quot;{searchQuery}&quot;
                     </p>
                     <p className="text-[13px] text-muted-foreground">
                       Try searching for PDF, HEIC, GIF, Video, EXIF, or Checksum.
@@ -158,7 +192,7 @@ export default function Home() {
                       size="sm"
                       onClick={() => setSearchQuery("")}
                     >
-                      Clear Search Filter
+                      Clear search
                     </Button>
                   </div>
                 )}
@@ -168,7 +202,15 @@ export default function Home() {
                   <div className="flex items-center gap-2">
                     <ShieldCheckIcon className="size-4 text-emerald-500 shrink-0" />
                     <span>
-                      File tools run in your browser. The video downloader is server-assisted.
+                      Open source · MIT ·{" "}
+                      <a
+                        href="https://github.com/sumitttt4/ineedthis"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-medium text-foreground underline-offset-4 hover:underline"
+                      >
+                        View on GitHub
+                      </a>
                     </span>
                   </div>
 

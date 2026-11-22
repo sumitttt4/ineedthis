@@ -2,7 +2,7 @@
   "name": "ineedthis",
   "version": "1.0.0",
   "private": true,
-  "description": "100% Private, Client-Side Media & Document Engine with One-Tap Workflows and PWA Support",
+  "description": "Local-first file, media and document tools that run in the browser",
   "scripts": {
     "dev": "npm run dev --prefix app",
     "build": "npm run build --prefix app",

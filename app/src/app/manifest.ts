@@ -2,28 +2,21 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "File Studio | Local-First File & Media Engine",
-    short_name: "File Studio",
+    name: "INeedThis — private file tools",
+    short_name: "INeedThis",
     description:
-      "Fast, private client-side file utilities for PDF, video transcoding, image compression, and direct one-tap conversion.",
+      "33 file tools that run in your browser. PDF, images, video, audio, ZIP and QR — your files never leave your device.",
     start_url: "/",
     display: "standalone",
     background_color: "#000000",
     theme_color: "#000000",
     orientation: "any",
+    categories: ["productivity", "utilities"],
     icons: [
-      {
-        src: "/icon.svg",
-        sizes: "any",
-        type: "image/svg+xml",
-        purpose: "any",
-      },
-      {
-        src: "/icon.svg",
-        sizes: "192x192 512x512",
-        type: "image/svg+xml",
-        purpose: "maskable",
-      },
+      { src: "/icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
+      { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
   };
 }

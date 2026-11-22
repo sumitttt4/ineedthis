@@ -375,12 +375,7 @@ export class P2PTransfer {
     this.events = events;
     this.chunkSize = options.chunkSize ?? 65536; // 64KB chunks
 
-    this.pc = new RTCPeerConnection({
-      iceServers: [
-        { urls: "stun:stun.l.google.com:19302" },
-        { urls: "stun:stun1.l.google.com:19302" },
-      ],
-    });
+    this.pc = new RTCPeerConnection({ iceServers: iceServers() });
 
     this.pc.onicecandidate = (e) => {
       if (!e.candidate) {
@@ -603,3 +598,23 @@ export const dataEngine = {
 } as const;
 
 export type DataEngine = typeof dataEngine;
+
+/**
+ * STUN by default. Set NEXT_PUBLIC_TURN_URL (+ _USERNAME / _CREDENTIAL) to add a
+ * TURN relay so transfers also work behind symmetric NATs / strict corporate networks.
+ * File data stays end-to-end encrypted by DTLS either way.
+ */
+function iceServers(): RTCIceServer[] {
+  const servers: RTCIceServer[] = [
+    { urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] },
+  ];
+  const turn = process.env.NEXT_PUBLIC_TURN_URL;
+  if (turn) {
+    servers.push({
+      urls: turn.split(",").map((u) => u.trim()),
+      username: process.env.NEXT_PUBLIC_TURN_USERNAME,
+      credential: process.env.NEXT_PUBLIC_TURN_CREDENTIAL,
+    });
+  }
+  return servers;
+}

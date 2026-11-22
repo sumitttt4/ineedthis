@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useMounted } from "@/lib/use-mounted";
+import { useEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 import Button from "./button";
@@ -25,12 +26,8 @@ export function Sheet({
   className,
   title = "Navigation",
 }: SheetProps) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!open) return;

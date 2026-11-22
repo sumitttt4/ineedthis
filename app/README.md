@@ -1,6 +1,6 @@
-# File Studio (app)
+# INeedThis (app)
 
-Next.js App Router application for INeedThis / File Studio.
+Next.js App Router application for INeedThis.
 
 ## Scripts
 
@@ -12,7 +12,8 @@ Next.js App Router application for INeedThis / File Studio.
 | `npm run lint` | ESLint |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run test:engine` | Engine + API smoke suite |
-| `npm run test:upload` | PDF/data conversion artifact suite |
+| `npm run test:upload` | PDF/data conversion round trips (writes to `.test-output/`) |
+| `npm run test:accuracy` | Registry ↔ modal ↔ router wiring audit |
 
 ## Architecture
 

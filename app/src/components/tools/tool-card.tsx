@@ -25,14 +25,14 @@ export default function ToolCard({ tool, onClick, className }: ToolCardProps) {
         }
       }}
       className={cn(
-        "group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-card border border-card-border p-4 sm:p-5 shadow-card transition-all duration-200 ease-power2-out hover:shadow-card-hover hover:border-border cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary/60 active:scale-[0.99]",
+        "group relative flex flex-col justify-between overflow-hidden rounded-2xl bg-card border border-card-border p-4 sm:p-5 shadow-card transition-[box-shadow,border-color,transform] duration-200 ease-power2-out hover:shadow-card-hover hover:border-border cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary/60 active:scale-[0.99]",
         className
       )}
     >
       <div>
         <div className="mb-3.5 flex items-center justify-between">
           <div className="bg-secondary text-foreground group-hover:text-primary group-hover:bg-primary/10 flex size-9 items-center justify-center rounded-xl border border-border/80 transition-colors">
-            <Icon className="size-4.5" />
+            <Icon className="size-4.5" aria-hidden="true" />
           </div>
         </div>
 
@@ -61,7 +61,7 @@ export default function ToolCard({ tool, onClick, className }: ToolCardProps) {
           )}
         </div>
 
-        <div className="text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 flex items-center gap-0.5 text-[12px] font-medium transition-all">
+        <div className="text-muted-foreground group-hover:text-primary [@media(hover:hover)]:group-hover:translate-x-0.5 flex items-center gap-0.5 text-[12px] font-medium transition-[color,transform] duration-150">
           <span>Run</span>
           <ChevronRightIcon className="size-3.5" />
         </div>

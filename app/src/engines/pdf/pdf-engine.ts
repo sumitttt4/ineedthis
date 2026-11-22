@@ -4,11 +4,10 @@
 // (no separate worker needed for most PDF ops since pdf-lib is fast & sync)
 // ============================================================================
 
-import { PDFDocument, degrees, rgb, StandardFonts, type PDFPage } from "pdf-lib";
+import { PDFDocument, degrees, rgb, StandardFonts } from "pdf-lib";
 import type {
   TaskResult,
   BatchTaskResult,
-  PdfMergeOptions,
   PdfSplitOptions,
   PdfOrganizeOptions,
   PdfCompressOptions,
@@ -620,7 +619,6 @@ export async function redactPdf(
     const pdfPage = await pdfDoc.getPage(i);
     const textContent = await pdfPage.getTextContent();
     const page = doc.getPage(i - 1);
-    const { height } = page.getSize();
 
     for (const item of textContent.items) {
       if (!("str" in item) || !item.str) continue;

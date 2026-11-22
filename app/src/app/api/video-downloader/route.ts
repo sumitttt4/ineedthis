@@ -1,4 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
+import {
+  GuardError,
+  assertPublicUrl,
+  clientKey,
+  contentDisposition,
+  rateLimit,
+  safeFetch,
+} from "./guard";
+
+export const runtime = "nodejs";
+
+const ALLOWED_QUALITIES = new Set(["144", "240", "360", "480", "720", "1080", "1440", "2160", "max"]);
 
 interface VideoResult {
   success: boolean;
@@ -36,6 +48,7 @@ async function resolveTwitter(url: string): Promise<VideoResult | null> {
         "User-Agent": "Mozilla/5.0 (compatible; FileStudio/1.0)",
         Accept: "application/json",
       },
+      signal: AbortSignal.timeout(8000),
     });
 
     if (!res.ok) return null;
@@ -84,6 +97,7 @@ async function resolveTikTok(url: string): Promise<VideoResult | null> {
       headers: {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
       },
+      signal: AbortSignal.timeout(8000),
     });
 
     if (!res.ok) return null;
@@ -188,18 +202,27 @@ async function resolveCobalt(
 
 // POST: Resolve video metadata & direct download link
 export async function POST(req: NextRequest) {
-  try {
-    const body = await req.json();
-    const { url, quality = "1080", isAudioOnly = false } = body;
+  if (!rateLimit(`post:${clientKey(req.headers)}`, 20, 60_000)) {
+    return NextResponse.json(
+      { success: false, error: "Too many requests. Please wait a minute and try again." },
+      { status: 429, headers: { "Retry-After": "60" } }
+    );
+  }
 
-    if (!url || typeof url !== "string") {
+  try {
+    const body = await req.json().catch(() => ({}));
+    const { url, quality: rawQuality = "1080", isAudioOnly: rawAudio = false } = body ?? {};
+
+    if (!url || typeof url !== "string" || url.length > 2048) {
       return NextResponse.json(
         { success: false, error: "Please enter a valid video link." },
         { status: 400 }
       );
     }
 
-    const trimmedUrl = url.trim();
+    const quality = ALLOWED_QUALITIES.has(String(rawQuality)) ? String(rawQuality) : "1080";
+    const isAudioOnly = rawAudio === true;
+    const trimmedUrl = (await assertPublicUrl(url.trim())).toString();
 
     // 1. Direct Video / Media URL
     if (/\.(mp4|webm|mov|mkv|m4v|mp3|wav|ogg)(\?.*)?$/i.test(trimmedUrl)) {
@@ -244,61 +267,67 @@ export async function POST(req: NextRequest) {
       { status: 422 }
     );
   } catch (err) {
+    if (err instanceof GuardError) {
+      return NextResponse.json({ success: false, error: err.message }, { status: err.status });
+    }
+    console.error("[video-downloader] resolve failed", err);
     return NextResponse.json(
-      {
-        success: false,
-        error: err instanceof Error ? err.message : "Internal server error resolving media.",
-      },
+      { success: false, error: "Something went wrong resolving this link. Please try again." },
       { status: 500 }
     );
   }
 }
 
 // GET: Stream proxy for instant one-tap attachment download
+const ALLOWED_MEDIA_TYPE = /^(video|audio)\/|^application\/(octet-stream|mp4|x-mpegurl|vnd\.apple\.mpegurl)/i;
+
 export async function GET(req: NextRequest) {
+  if (!rateLimit(`get:${clientKey(req.headers)}`, 30, 60_000)) {
+    return new NextResponse("Too many requests", { status: 429, headers: { "Retry-After": "60" } });
+  }
+
   const searchParams = req.nextUrl.searchParams;
   const targetUrl = searchParams.get("url");
   const filename = searchParams.get("filename") || "download.mp4";
 
-  if (!targetUrl) {
+  if (!targetUrl || targetUrl.length > 4096) {
     return new NextResponse("Missing url parameter", { status: 400 });
   }
 
   try {
-    const upstreamRes = await fetch(targetUrl, {
+    const upstreamRes = await safeFetch(targetUrl, {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       },
+      timeoutMs: 30_000,
     });
 
     if (!upstreamRes.ok || !upstreamRes.body) {
-      return new NextResponse(`Failed to fetch media: ${upstreamRes.statusText}`, {
-        status: upstreamRes.status,
+      return new NextResponse("The media host refused the download.", {
+        status: upstreamRes.status >= 400 ? upstreamRes.status : 502,
       });
     }
 
-    const contentType = upstreamRes.headers.get("content-type") || "video/mp4";
-    const contentLength = upstreamRes.headers.get("content-length");
+    const contentType = upstreamRes.headers.get("content-type") || "application/octet-stream";
+    if (!ALLOWED_MEDIA_TYPE.test(contentType)) {
+      upstreamRes.body.cancel().catch(() => {});
+      return new NextResponse("That link is not a downloadable media file.", { status: 415 });
+    }
 
     const headers = new Headers();
     headers.set("Content-Type", contentType);
-    headers.set(
-      "Content-Disposition",
-      `attachment; filename="${encodeURIComponent(filename.replace(/[/\\?%*:|"<>]/g, "_"))}"`
-    );
-    if (contentLength) {
-      headers.set("Content-Length", contentLength);
-    }
+    headers.set("Content-Disposition", contentDisposition(filename));
+    headers.set("X-Content-Type-Options", "nosniff");
+    headers.set("Cache-Control", "no-store");
+    const contentLength = upstreamRes.headers.get("content-length");
+    if (contentLength) headers.set("Content-Length", contentLength);
 
-    return new NextResponse(upstreamRes.body as unknown as BodyInit, {
-      status: 200,
-      headers,
-    });
+    return new NextResponse(upstreamRes.body as unknown as BodyInit, { status: 200, headers });
   } catch (err) {
-    return new NextResponse(
-      `Error proxying video download: ${err instanceof Error ? err.message : "Network error"}`,
-      { status: 502 }
-    );
+    if (err instanceof GuardError) {
+      return new NextResponse(err.message, { status: err.status });
+    }
+    return new NextResponse("Could not reach the media host.", { status: 502 });
   }
 }

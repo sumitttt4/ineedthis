@@ -11,7 +11,6 @@ import Button from "@/components/_ui/button";
 import {
   UploadCloudIcon,
   ShieldCheckIcon,
-  CpuIcon,
   ChevronRightIcon,
 } from "@/components/_ui/icons";
 import { TOOLS, type ToolDefinition } from "@/components/tools/tools-registry";
@@ -34,6 +33,8 @@ export default function GlobalDropzone({
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
+    // Moving across child nodes fires dragleave; only reset when truly leaving.
+    if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
     setIsDragging(false);
   };
 
@@ -87,60 +88,59 @@ export default function GlobalDropzone({
   return (
     <div className="flex flex-col gap-3">
       <div
+        role="button"
+        tabIndex={0}
+        aria-label="Choose a file, or drop one here"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`relative flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-7 text-center transition-all cursor-pointer ${
-          isDragging
-            ? "border-primary bg-primary/10 shadow-lg scale-[1.01]"
-            : "border-border bg-card/80 hover:bg-secondary/60 hover:border-border/90 shadow-sm"
-        }`}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            fileInputRef.current?.click();
+          }
+        }}
+        data-dragging={isDragging || undefined}
+        className="group relative flex cursor-pointer flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-border bg-card p-7 text-center shadow-card outline-none transition-[border-color,background-color,box-shadow,transform] duration-200 ease-power2-out focus-visible:ring-2 focus-visible:ring-primary/60 active:scale-[0.99] data-[dragging]:scale-[1.01] data-[dragging]:border-primary data-[dragging]:bg-primary/5 data-[dragging]:shadow-card-lift sm:p-9 [@media(hover:hover)]:hover:border-primary/50"
       >
         <input
           ref={fileInputRef}
           type="file"
+          tabIndex={-1}
+          aria-hidden="true"
           onChange={handleFileInput}
           className="hidden"
         />
 
-        <div className="bg-primary/10 text-primary flex size-12 items-center justify-center rounded-2xl border border-primary/20">
-          <UploadCloudIcon className="size-6" />
+        <div className="flex size-12 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary transition-transform duration-200 ease-power2-out group-data-[dragging]:-translate-y-0.5">
+          <UploadCloudIcon className="size-6" aria-hidden="true" />
         </div>
 
         <div>
-          <h2 className="text-[16px] font-semibold tracking-[-0.02em] text-foreground">
-            Drop any file to convert, compress, or edit
-          </h2>
-          <p className="text-muted-foreground mt-1 text-[13px] max-w-lg mx-auto">
-            PDFs, Word documents, spreadsheets, images, videos, audio, and archives.
+          <p className="text-[16px] font-semibold tracking-[-0.02em] text-foreground">
+            {isDragging ? "Release to inspect" : "Drop a file, or click to browse"}
+          </p>
+          <p className="mx-auto mt-1 max-w-sm text-[13px] text-muted-foreground">
+            PDF, Word, Excel, images, HEIC, video, audio and ZIP. We suggest the right tool.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-[11px] text-muted-foreground font-medium">
-          <span className="flex items-center gap-1">
-            <ShieldCheckIcon className="size-3.5 text-emerald-500" />
-            Local processing for file tools
-          </span>
-          <span className="opacity-40">•</span>
-          <span className="flex items-center gap-1">
-            <CpuIcon className="size-3.5 text-blue-500" />
-            Runs in your browser
-          </span>
-          <span className="opacity-40">•</span>
-          <span>Video download is server-assisted</span>
-        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
+          <ShieldCheckIcon className="size-3.5 text-success" aria-hidden="true" />
+          Processed locally, never uploaded
+        </span>
       </div>
 
       {inspectedFile && (
-        <div className="border-border bg-secondary/60 rounded-xl border p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in duration-200">
-          <div className="flex items-center gap-3">
+        <div role="status" className="animate-in flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-card">
+          <div className="flex min-w-0 items-center gap-3">
             <div className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-lg text-[11px] font-bold uppercase shrink-0">
               {inspectedFile.extension.slice(0, 4)}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[14px] font-semibold text-foreground">
+            <div className="min-w-0">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="truncate text-[14px] font-semibold text-foreground" title={inspectedFile.file.name}>
                   {inspectedFile.file.name}
                 </span>
                 <span className="bg-secondary text-foreground border border-border rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase">
@@ -153,7 +153,7 @@ export default function GlobalDropzone({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-1.5 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-[12px] font-medium text-muted-foreground mr-1">
               Actions:
             </span>

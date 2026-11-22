@@ -24,7 +24,6 @@ export default function Header({
   onOpenMobileSidebar,
   searchQuery,
   onSearchQueryChange,
-  totalToolsCount,
 }: HeaderProps) {
   const currentCategoryObj =
     CATEGORIES.find((c) => c.id === activeCategory) ?? CATEGORIES[0];
@@ -45,9 +44,9 @@ export default function Header({
           </Button>
 
           <div className="flex items-center gap-2 truncate">
-            <h1 className="text-[16px] font-semibold tracking-[-0.02em] text-foreground truncate">
+            <span className="text-[16px] font-semibold tracking-[-0.02em] text-foreground truncate">
               {currentCategoryObj.name}
-            </h1>
+            </span>
           </div>
         </div>
 
@@ -56,13 +55,17 @@ export default function Header({
           {/* Quick Search */}
           <div className="relative hidden md:block w-52 lg:w-64">
             <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground pointer-events-none" />
+            <label htmlFor="board-search" className="sr-only">
+              Search tools
+            </label>
             <input
               id="board-search"
-              type="text"
+              data-tool-search
+              type="search"
               value={searchQuery}
               onChange={(e) => onSearchQueryChange(e.target.value)}
-              placeholder="Search tools... (Press /)"
-              className="border-input bg-secondary/80 focus:bg-background text-foreground placeholder:text-muted-foreground h-8 w-full rounded-lg border pl-8 pr-3 text-[13px] outline-none transition-all focus:ring-2 focus:ring-primary/40"
+              placeholder="Search tools (press /)"
+              className="border-input bg-secondary/80 focus:bg-background text-foreground placeholder:text-muted-foreground h-8 w-full rounded-lg border pl-8 pr-3 text-[13px] outline-none transition-[background-color,box-shadow] focus:ring-2 focus:ring-primary/40"
             />
           </div>
 
@@ -83,6 +86,8 @@ export default function Header({
           return (
             <button
               key={cat.id}
+              type="button"
+              aria-pressed={isActive}
               onClick={() => onSelectCategory(cat.id)}
               className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1 text-[13px] font-medium transition-colors cursor-pointer select-none ${
                 isActive

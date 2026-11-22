@@ -17,7 +17,7 @@ async function main() {
   page.drawText("Client Latency         42ms        18ms        <50ms", { x: 50, y: 650, size: 11, font, color: rgb(0.3, 0.3, 0.3) });
 
   const bytes = await doc.save();
-  const outPath = path.resolve("public/test-sample.pdf");
+  const outPath = path.resolve("fixtures/test-sample.pdf");
   fs.writeFileSync(outPath, Buffer.from(bytes));
   console.log("Successfully wrote", bytes.length, "bytes to", outPath);
 }

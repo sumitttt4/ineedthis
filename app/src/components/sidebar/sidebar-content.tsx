@@ -1,10 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Button from "@/components/_ui/button";
 import CountBadge from "@/components/_ui/count-badge";
 import { CATEGORIES, type ToolCategory } from "@/components/tools/tools-registry";
 import {
-  SparklesIcon,
   ShieldCheckIcon,
   CpuIcon,
   CameraIcon,
@@ -27,15 +27,13 @@ export default function SidebarContent({
     <div className="flex h-full min-h-0 flex-col bg-sidebar text-sidebar-foreground">
       {/* Brand Header */}
       <div className="border-sidebar-border bg-sidebar-accent/50 flex shrink-0 items-center gap-3 border-b p-4">
-        <div className="bg-primary text-primary-foreground flex size-8 shrink-0 items-center justify-center rounded-xl font-bold shadow-sm">
-          <SparklesIcon className="size-4" />
-        </div>
+        <Image src="/icon.svg" alt="" width={32} height={32} unoptimized className="size-8 shrink-0 rounded-[9px]" priority />
         <div className="flex min-w-0 flex-1 flex-col">
           <span className="truncate text-[14px] font-semibold text-foreground tracking-[-0.01em]">
-            File Studio
+            INeedThis
           </span>
           <span className="text-[11px] text-muted-foreground truncate">
-            Local File Utilities
+            Private file tools
           </span>
         </div>
       </div>
@@ -44,7 +42,7 @@ export default function SidebarContent({
       <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
         <div className="mb-2 px-2.5">
           <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">
-            Pipelines & Modules
+            Categories
           </span>
         </div>
 
@@ -75,7 +73,7 @@ export default function SidebarContent({
         {/* Quick Launch Utilities */}
         <div className="mt-6 mb-2 px-2.5">
           <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">
-            Instant Tools & Recorders
+            Quick launch
           </span>
         </div>
 
@@ -86,7 +84,7 @@ export default function SidebarContent({
             onClick={() => onOpenToolModal("universal-video-downloader")}
             className="justify-start gap-2 text-muted-foreground hover:text-foreground"
           >
-            <VideoIcon className="size-3.5 text-primary" />
+            <VideoIcon className="size-3.5 text-icon" aria-hidden="true" />
             <span>One-Tap Video Downloader</span>
           </Button>
 
@@ -96,7 +94,7 @@ export default function SidebarContent({
             onClick={() => onOpenToolModal("screen-recorder")}
             className="justify-start gap-2 text-muted-foreground hover:text-foreground"
           >
-            <CameraIcon className="size-3.5 text-rose-500" />
+            <CameraIcon className="size-3.5 text-icon" aria-hidden="true" />
             <span>Screen & Tab Recorder</span>
           </Button>
 
@@ -106,7 +104,7 @@ export default function SidebarContent({
             onClick={() => onOpenToolModal("qr-studio")}
             className="justify-start gap-2 text-muted-foreground hover:text-foreground"
           >
-            <QrCodeIcon className="size-3.5 text-blue-500" />
+            <QrCodeIcon className="size-3.5 text-icon" aria-hidden="true" />
             <span>QR Code Studio</span>
           </Button>
         </div>
@@ -119,7 +117,7 @@ export default function SidebarContent({
           <span className="truncate">File tools stay on-device</span>
         </div>
         <div className="flex items-center gap-2 text-muted-foreground">
-          <CpuIcon className="size-4 text-purple-500 shrink-0" />
+          <CpuIcon className="size-4 text-primary shrink-0" aria-hidden="true" />
           <span className="truncate">Runs directly on your device</span>
         </div>
       </div>

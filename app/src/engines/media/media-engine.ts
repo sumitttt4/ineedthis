@@ -2,8 +2,6 @@
 // FFmpeg Worker Manager — Singleton managing @ffmpeg/ffmpeg WASM instance
 // ============================================================================
 
-// Dynamic import types
-type FFmpegInstance = any;
 import type {
   TaskResult,
   VideoCompressOptions,
@@ -195,7 +193,7 @@ export async function compressVideo(
   onProgress?: ProgressCallback
 ): Promise<TaskResult> {
   const t = performance.now();
-  const ff = await ffmpegManager.ensureLoaded(onProgress);
+  await ffmpegManager.ensureLoaded(onProgress);
   const inputName = `input.${getExtension(file.name) || "mp4"}`;
   const outputName = "output.mp4";
 

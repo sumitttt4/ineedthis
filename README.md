@@ -1,8 +1,10 @@
-# INeedThis — Local-First File & Media Studio
+# INeedThis
+
+**Every file tool you need. None of the uploads.**
 
 An ultra-fast, browser-based Swiss Army knife for files, media, and documents (33 tools). Most tools process **entirely on your device** with WebAssembly, Web Workers, and local canvas/decoders.
 
-Built with Next.js, TypeScript, Tailwind CSS, and Geist typography.
+Built with Next.js, TypeScript, Tailwind CSS, Geist, and [Paper Shaders](https://shaders.paper.design) for the hero.
 
 ---
 
@@ -12,8 +14,8 @@ Built with Next.js, TypeScript, Tailwind CSS, and Geist typography.
 - **True 1-tap execution**: Drop or select files — optimal defaults process and auto-download (including multi-file batches).
 - **High-fidelity PDF → Word (DOCX)**: Reconstructs geometry, typography, native Word tables, headings, and page breaks.
 - **Universal video downloader**: Paste YouTube, X, TikTok, Instagram, Reddit, or direct MP4 links. **This tool is server-assisted** (resolves via the app API + third-party extractors).
-- **Real WebRTC P2P**: Manual SDP offer/answer exchange for browser-to-browser file transfer (STUN only).
-- **PWA ready**: Installable on desktop and mobile with a local service worker and offline-friendly WASM/worker assets.
+- **Real WebRTC P2P**: Manual SDP offer/answer exchange for browser-to-browser transfer. STUN by default; add a TURN relay via env for strict NATs.
+- **PWA ready**: Installable on desktop and mobile. After a tool has been used once, its WASM / worker runtime is cached and works offline.
 
 ---
 
@@ -68,38 +70,67 @@ Built with Next.js, TypeScript, Tailwind CSS, and Geist typography.
 - Node.js 20+
 - npm
 
-### Installation & Run
+### Run locally
 
 ```bash
 git clone https://github.com/sumitttt4/ineedthis.git
-cd ineedthis
-cd app
+cd ineedthis/app
 npm install
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### Production Build
+### Environment
+
+Copy `app/.env.example` to `app/.env.local`.
+
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | In production | Absolute URL for canonical, Open Graph and sitemap links |
+| `NEXT_PUBLIC_TURN_URL` / `_USERNAME` / `_CREDENTIAL` | No | TURN relay for P2P transfer behind symmetric NATs |
+
+### Production
 
 ```bash
 npm run build
 npm run start
 ```
 
-### Quality scripts (from `app/`)
+Deploys as a standard Next.js app (Vercel, Node server, or container). The only server route is `/api/video-downloader`.
+
+### Quality checks (from `app/`)
 
 ```bash
 npm run lint
 npm run typecheck
-npm run test:engine      # requires `npm run start` for the video API check
-npm run test:upload
+npm run test:accuracy   # every registry tool is wired
+npm run test:upload     # PDF→DOCX→PDF and JSON→CSV/XLSX round trips
+npm run test:engine     # engines + API; needs `npm run start` running
 ```
+
+CI runs all of the above plus `npm audit --audit-level=high` on every push and PR.
 
 ---
 
-## Author & Links
+## Limits & browser support
+
+- Works in current Chrome, Edge, Firefox and Safari (desktop and mobile). Video tools use the single-threaded ffmpeg.wasm build, so no cross-origin isolation headers are required.
+- Per-file ceilings (to avoid tab crashes): **video/audio 1 GB**, **PDF 300 MB**, **images 150 MB**, **data / hash / ZIP 1 GB**.
+- Screen recording requires `getDisplayMedia` (desktop browsers).
+
+## Security
+
+- `/api/video-downloader` validates every target (http/https only, default ports, DNS-resolved public IPs only, redirects re-validated) to block SSRF, is rate limited per IP, streams only audio/video content types, and never logs URLs.
+- Security headers (`X-Content-Type-Options`, `Referrer-Policy`, `X-Frame-Options`, `Permissions-Policy`) are set for every route.
+- Found an issue? Please open a private security advisory on GitHub.
+
+---
+
+## Author & links
 
 - **Sumit** — [sumitsharma.pro](https://sumitsharma.pro)
 - **X / Twitter** — [@sumitthq](https://x.com/sumitthq)
 - **Repository** — [github.com/sumitttt4/ineedthis](https://github.com/sumitttt4/ineedthis)
+
+Licensed under the [MIT License](LICENSE).

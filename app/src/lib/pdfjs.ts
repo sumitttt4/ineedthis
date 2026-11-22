@@ -1,7 +1,6 @@
 /** Configure pdfjs-dist for browser (local worker) or Node (legacy build). */
 export async function loadPdfJs() {
   // pdfjs-dist 6 expects Promise.try (ES2025); polyfill for older runtimes.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const P: any = Promise;
   if (typeof P.try !== "function") {
     P.try = (callbackFn: (...a: unknown[]) => unknown, ...args: unknown[]) =>

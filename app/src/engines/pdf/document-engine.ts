@@ -2,7 +2,7 @@
 // Document Converter Engine — DOCX, XLSX, CSV, Markdown, PPTX ↔ PDF
 // ============================================================================
 
-import type { TaskResult, BatchTaskResult } from "@/lib/types";
+import type { TaskResult } from "@/lib/types";
 import { loadPdfJs } from "@/lib/pdfjs";
 
 // ============================================================================
@@ -257,7 +257,6 @@ export async function markdownToPdf(
   const html = await marked(text);
 
   // Reuse the DOCX→PDF text renderer by creating a temporary buffer
-  const encoder = new TextEncoder();
   const htmlBlob = new Blob(
     [`<html><body>${html}</body></html>`],
     { type: "text/html" }
@@ -416,7 +415,6 @@ export async function pptxToPdf(
     for (const shape of shapes) {
       // Try to get position from <a:off> and <a:ext>
       const offset = shape.querySelector("off");
-      const extent = shape.querySelector("ext");
 
       let x = 40;
       let y = textY;

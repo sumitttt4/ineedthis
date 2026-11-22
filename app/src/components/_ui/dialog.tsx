@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useMounted } from "@/lib/use-mounted";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Button from "./button";
@@ -29,14 +30,10 @@ export default function Dialog({
   className,
   maxWidth = "sm:max-w-[560px]",
 }: DialogProps) {
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const reduceMotion = useReducedMotion();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!open) return;
