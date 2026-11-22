@@ -1,4 +1,3 @@
-import { lookup } from "node:dns/promises";
 import { isIP } from "node:net";
 
 /**
@@ -10,7 +9,21 @@ import { isIP } from "node:net";
  *  - resolves DNS and rejects private, loopback, link-local and metadata IPs,
  *  - follows redirects manually and re-validates every hop,
  *  - enforces a timeout.
+ *
+ * On Cloudflare Workers there is no system resolver; there the platform's
+ * `global_fetch_strictly_public` compatibility flag (wrangler.jsonc) blocks any
+ * fetch to private / internal destinations, including after redirects, so the
+ * DNS step is skipped and literal-IP / hostname checks still apply.
  */
+
+const IS_WORKERS =
+  typeof navigator !== "undefined" && navigator.userAgent === "Cloudflare-Workers";
+
+async function resolveAll(host: string): Promise<string[]> {
+  const { lookup } = await import("node:dns/promises");
+  const records = await lookup(host, { all: true });
+  return records.map((r) => r.address);
+}
 
 export class GuardError extends Error {
   status: number;
@@ -88,12 +101,15 @@ export async function assertPublicUrl(raw: string): Promise<URL> {
   if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".internal") || host.endsWith(".local")) {
     throw new GuardError("Private network addresses are not allowed.");
   }
-  const addresses = isIP(host)
-    ? [{ address: host }]
-    : await lookup(host, { all: true }).catch(() => {
-        throw new GuardError("Could not resolve that host.", 422);
-      });
-  if (addresses.length === 0 || addresses.some((a) => isPrivateAddress(a.address))) {
+  if (isIP(host)) {
+    if (isPrivateAddress(host)) throw new GuardError("Private network addresses are not allowed.");
+    return url;
+  }
+  if (IS_WORKERS) return url;
+  const addresses = await resolveAll(host).catch(() => {
+    throw new GuardError("Could not resolve that host.", 422);
+  });
+  if (addresses.length === 0 || addresses.some((a) => isPrivateAddress(a))) {
     throw new GuardError("Private network addresses are not allowed.");
   }
   return url;

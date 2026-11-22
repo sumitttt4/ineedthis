@@ -32,7 +32,7 @@ self.addEventListener("activate", (event) => {
 });
 
 async function putInCache(request, response) {
-  if (response && response.ok && response.type === "basic") {
+  if (response && response.ok && (response.type === "basic" || response.type === "cors")) {
     const cache = await caches.open(CACHE);
     await cache.put(request, response.clone());
   }
@@ -59,6 +59,12 @@ self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
+
+  // Version-pinned ffmpeg core from jsDelivr (Cloudflare build): immutable, cache forever.
+  if (url.hostname === "cdn.jsdelivr.net" && url.pathname.startsWith("/npm/@ffmpeg/core@")) {
+    event.respondWith(cacheFirst(request));
+    return;
+  }
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/api/")) return;
 

@@ -35,3 +35,11 @@ copyFile(
   path.join(ffmpegDir, "ffmpeg-core.wasm"),
   path.join(root, "public/ffmpeg/ffmpeg-core.wasm")
 );
+
+// @ffmpeg/ffmpeg's class worker must be served unbundled: when webpack bundles
+// it, its dynamic import(coreURL) of the blob: core fails with
+// "Cannot find module 'blob:...'". These three ESM files are the whole worker.
+const ffmpegClassDir = path.join(root, "node_modules/@ffmpeg/ffmpeg/dist/esm");
+for (const f of ["worker.js", "const.js", "errors.js"]) {
+  copyFile(path.join(ffmpegClassDir, f), path.join(root, "public/ffmpeg/class", f));
+}

@@ -65,11 +65,16 @@ class FFmpegManager {
         });
       });
 
-      // Load from CDN with proper CORS headers
-      // Prefer locally hosted core assets for offline/PWA reliability.
+      // Self-hosted by default (/ffmpeg). On Cloudflare Workers the 32 MB wasm
+      // exceeds the 25 MiB static-asset limit, so that build points this at a
+      // version-pinned jsDelivr copy (see next.config.ts). Only the engine code is
+      // downloaded; user files never leave the device either way.
+      const base = process.env.NEXT_PUBLIC_FFMPEG_BASE_URL || "/ffmpeg";
       await this.ffmpeg.load({
-        coreURL: await toBlobURL("/ffmpeg/ffmpeg-core.js", "text/javascript"),
-        wasmURL: await toBlobURL("/ffmpeg/ffmpeg-core.wasm", "application/wasm"),
+        // Unbundled ffmpeg class worker, always same-origin (Workers must be).
+        classWorkerURL: new URL("/ffmpeg/class/worker.js", window.location.origin).href,
+        coreURL: await toBlobURL(`${base}/ffmpeg-core.js`, "text/javascript"),
+        wasmURL: await toBlobURL(`${base}/ffmpeg-core.wasm`, "application/wasm"),
       });
 
       this.loaded = true;

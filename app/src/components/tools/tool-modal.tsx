@@ -637,7 +637,13 @@ export default function ToolModal({
 
       if (res) autoDownloadResult(res);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
+      console.error(`[${tool.id}]`, err);
+      const msg =
+        err instanceof Error
+          ? err.message
+          : typeof err === "string" && err
+            ? err
+            : "Something went wrong processing this file.";
       setErrorMsg(msg);
       setProgress({ state: "error", percent: 0, message: msg });
       toast("Processing failed", { description: msg, type: "error" });

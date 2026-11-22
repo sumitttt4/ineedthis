@@ -1,0 +1,32 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ineedthis",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-11-15",
+  // nodejs_compat: Next.js server runtime.
+  // global_fetch_strictly_public: outbound fetch() can only reach the public
+  // internet — platform-level SSRF protection for /api/video-downloader.
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      // Self-reference required by OpenNext; must match "name" above.
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "ineedthis"
+    }
+  ],
+  // Requires the ineedthis.site zone to be on this Cloudflare account.
+  "routes": [
+    { "pattern": "ineedthis.site", "custom_domain": true },
+    { "pattern": "www.ineedthis.site", "custom_domain": true }
+  ],
+  "vars": {
+    "NEXT_PUBLIC_SITE_URL": "https://ineedthis.site"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

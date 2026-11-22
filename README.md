@@ -99,7 +99,31 @@ npm run build
 npm run start
 ```
 
-Deploys as a standard Next.js app (Vercel, Node server, or container). The only server route is `/api/video-downloader`.
+Deploys as a standard Next.js app (Node server or container). The only server route is `/api/video-downloader`.
+
+### Deploy to Cloudflare Workers (ineedthis.site)
+
+Production runs on Cloudflare Workers via [OpenNext](https://opennext.js.org/cloudflare). Config lives in `app/wrangler.jsonc` and `app/open-next.config.ts`.
+
+```bash
+cd app
+npx wrangler login          # once
+npm run cf:preview          # build + run locally in workerd at http://localhost:8787
+npm run cf:deploy           # build + deploy to Cloudflare
+```
+
+**One-time setup**
+
+1. Add `ineedthis.site` as a zone in your Cloudflare account (point the registrar's nameservers at Cloudflare).
+2. The first `npm run cf:deploy` creates the `ineedthis` Worker and attaches `ineedthis.site` and `www.ineedthis.site` as custom domains (`routes` in `wrangler.jsonc`). `www` 308-redirects to the apex.
+3. For automatic deploys on every push to `main`, add two GitHub repository secrets: `CLOUDFLARE_API_TOKEN` (template "Edit Cloudflare Workers") and `CLOUDFLARE_ACCOUNT_ID`. The `Deploy to Cloudflare` workflow uses them.
+
+**How the Workers build differs**
+
+- `ffmpeg-core.wasm` is 32 MB, over Workers' 25 MiB per-asset limit, so the Cloudflare build (`FFMPEG_FROM_CDN=1`) loads the core from jsDelivr pinned to the exact installed `@ffmpeg/core` version. Only engine code is downloaded; user files still never leave the device. `scripts/cf-check-assets.mjs` fails the build if any asset exceeds 25 MiB.
+- Pages are prerendered and served from Workers static assets (read-only incremental cache), so no R2 / KV bindings are needed.
+- `global_fetch_strictly_public` makes Cloudflare refuse outbound fetches to private or internal addresses, which backs up the downloader's SSRF guard.
+- The in-app rate limit is per Worker isolate. For a hard global limit, add a Cloudflare WAF rate-limiting rule on `/api/video-downloader`.
 
 ### Quality checks (from `app/`)
 
@@ -109,9 +133,10 @@ npm run typecheck
 npm run test:accuracy   # every registry tool is wired
 npm run test:upload     # PDF→DOCX→PDF and JSON→CSV/XLSX round trips
 npm run test:engine     # engines + API; needs `npm run start` running
+                        # (TEST_BASE_URL=http://localhost:8787 to test the Workers preview)
 ```
 
-CI runs all of the above plus `npm audit --audit-level=high` on every push and PR.
+CI runs all of the above plus `npm audit --audit-level=high`, and a Cloudflare Workers build, on every push and PR.
 
 ---
 
