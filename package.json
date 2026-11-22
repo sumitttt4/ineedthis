@@ -13,7 +13,7 @@
     "test:upload": "npm run test:upload --prefix app"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.13"
   },
   "author": "Sumit",
   "license": "MIT"

@@ -69,7 +69,7 @@ Built with Next.js, TypeScript, Tailwind CSS, Geist, and [Paper Shaders](https:/
 ## Getting Started
 
 ### Prerequisites
-- Node.js 20+
+- Node.js 22.13+ (required by pdfjs-dist 6; see `.nvmrc`)
 - npm
 
 ### Run locally
