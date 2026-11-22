@@ -81,6 +81,12 @@ for (const action of new Set(actionIds)) {
   }
 }
 
+// Curated home collections must point at real tools.
+const collectionsSrc = fs.readFileSync(path.join(root, "src/components/tools/collections.ts"), "utf8");
+for (const [, id] of collectionsSrc.matchAll(/id: "([^"]+)"/g)) {
+  if (!uniqueIds.includes(id)) failures.push(`COLLECTION REFERENCES UNKNOWN TOOL: ${id}`);
+}
+
 console.log(`Tools in registry: ${uniqueIds.length}`);
 console.log(`Category count literals: ${countMatch.join(", ")}`);
 if (failures.length) {

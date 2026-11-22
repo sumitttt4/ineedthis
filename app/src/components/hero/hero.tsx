@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import GlobalDropzone from "@/components/dropzone/global-dropzone";
 import type { ToolDefinition } from "@/components/tools/tools-registry";
-import { ShieldCheckIcon, CpuIcon, DownloadIcon } from "@/components/_ui/icons";
+import { ShieldCheckIcon, CpuIcon, DownloadIcon, GithubIcon } from "@/components/_ui/icons";
 
 const HeroShader = dynamic(() => import("./hero-shader"), {
   ssr: false,
@@ -15,10 +15,11 @@ export interface HeroProps {
   onSelectToolWithFile: (tool: ToolDefinition, file: File) => void;
 }
 
-const PROOF = [
+const PROOF: Array<{ icon: typeof ShieldCheckIcon; label: string; href?: string }> = [
   { icon: ShieldCheckIcon, label: "Files never leave your device" },
   { icon: CpuIcon, label: "WebAssembly + Web Workers" },
   { icon: DownloadIcon, label: "Installable, works offline" },
+  { icon: GithubIcon, label: "Free & open source", href: "https://github.com/sumitttt4/ineedthis" },
 ];
 
 export default function Hero({ toolCount, onSelectToolWithFile }: HeroProps) {
@@ -55,10 +56,16 @@ export default function Hero({ toolCount, onSelectToolWithFile }: HeroProps) {
           </p>
 
           <ul className="flex flex-col gap-2 text-[13px] text-foreground/80 sm:flex-row sm:flex-wrap sm:gap-x-5">
-            {PROOF.map(({ icon: Icon, label }) => (
+            {PROOF.map(({ icon: Icon, label, href }) => (
               <li key={label} className="flex items-center gap-2">
                 <Icon className="size-4 text-primary" aria-hidden="true" />
-                {label}
+                {href ? (
+                  <a href={href} target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:underline">
+                    {label}
+                  </a>
+                ) : (
+                  label
+                )}
               </li>
             ))}
           </ul>

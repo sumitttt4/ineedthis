@@ -95,6 +95,17 @@ Built with Next.js, TypeScript, Tailwind CSS, Geist, and [Paper Shaders](https:/
 
 ---
 
+## Open source
+
+INeedThis is free and open source under the [MIT License](LICENSE). Every tool on the site is in this repository — no locked features.
+
+Contributions are welcome: bug reports, new tools, translations. Each tool is one entry in `app/src/components/tools/tools-registry.ts` plus a runner (`extra-tools.tsx` for file tools, `panel-tools.tsx` for instant tools), and gets its own page automatically.
+
+### Roadmap
+
+- **Next:** noise remover (on device), "any object" background removal behind WebGPU, more presets.
+- **Later (undecided):** an optional Pro tier for heavy jobs. The free tools stay free and open source.
+
 ## Getting Started
 
 ### Prerequisites

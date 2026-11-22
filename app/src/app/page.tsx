@@ -7,6 +7,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import Header from "@/components/header/header";
 import GlobalDropzone from "@/components/dropzone/global-dropzone";
 import Hero from "@/components/hero/hero";
+import { EverydaySection, GemsSection, AllByCategory } from "@/components/home/home-sections";
 import ToolCard from "@/components/tools/tool-card";
 import ToolModal from "@/components/tools/tool-modal";
 import P2PPanel from "@/components/p2p/p2p-panel";
@@ -157,6 +158,14 @@ function Home() {
                   />
                 </div>
 
+                {activeCategory === "all" && !searchQuery ? (
+                  <>
+                    <EverydaySection />
+                    <GemsSection />
+                    <AllByCategory />
+                  </>
+                ) : (
+                <>
                 {/* Toolbar Filter Info */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
                   <div className="flex items-center gap-2">
@@ -202,6 +211,8 @@ function Home() {
                       Clear search
                     </Button>
                   </div>
+                )}
+                </>
                 )}
 
                 {/* Studio Footer */}
