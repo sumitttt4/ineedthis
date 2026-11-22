@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import AppSidebar from "@/components/sidebar/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import Header from "@/components/header/header";
@@ -233,6 +234,12 @@ function Home() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-3">
+                    <nav aria-label="Legal" className="flex items-center gap-3">
+                      <Link href="/about" className="hover:text-foreground">About</Link>
+                      <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
+                      <Link href="/terms" className="hover:text-foreground">Terms</Link>
+                    </nav>
+                    <span className="text-border" aria-hidden="true">•</span>
                     <PwaInstallButton />
 
                     <span className="text-border" aria-hidden="true">•</span>

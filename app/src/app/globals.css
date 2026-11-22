@@ -133,3 +133,48 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Card shader accents (static Paper Shaders textures)                */
+/* ------------------------------------------------------------------ */
+.shader-chip {
+  background-size: cover;
+  background-position: center;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.14);
+}
+.shader-chip svg {
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.25));
+}
+.shader-wash {
+  position: absolute;
+  inset: -40% -40% auto auto;
+  width: 70%;
+  aspect-ratio: 1;
+  background-size: cover;
+  border-radius: 9999px;
+  filter: blur(28px);
+  opacity: 0.11;
+  pointer-events: none;
+  transition: opacity 220ms var(--ease-out-strong);
+}
+.dark .shader-wash {
+  opacity: 0.14;
+}
+@media (hover: hover) and (pointer: fine) {
+  .group:hover .shader-wash {
+    opacity: 0.26;
+  }
+}
+
+/* Legal / about pages */
+.legal-prose { font-size: 15px; line-height: 1.7; color: color-mix(in oklab, var(--foreground) 88%, transparent); }
+.legal-prose h2 { margin-top: 2.25rem; margin-bottom: 0.6rem; font-size: 19px; font-weight: 600; letter-spacing: -0.02em; color: var(--foreground); }
+.legal-prose p { margin-top: 0.75rem; }
+.legal-prose ul { margin-top: 0.75rem; padding-left: 1.2rem; list-style: disc; }
+.legal-prose li { margin-top: 0.4rem; }
+.legal-prose a { color: var(--primary); text-decoration: underline; text-underline-offset: 3px; }
+.legal-prose strong { color: var(--foreground); font-weight: 600; }
+.legal-prose table { width: 100%; margin-top: 1rem; border-collapse: collapse; font-size: 13.5px; }
+.legal-prose th, .legal-prose td { border-bottom: 1px solid var(--border); padding: 0.5rem 0.5rem 0.5rem 0; text-align: left; vertical-align: top; }
+.legal-prose th { color: var(--foreground); font-weight: 600; }

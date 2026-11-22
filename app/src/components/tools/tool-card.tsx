@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { ToolDefinition } from "./tools-registry";
 import { toolSlug } from "@/lib/tool-pages";
+import { categoryTexture, toolVariant } from "@/lib/category-style";
 import { ChevronRightIcon } from "@/components/_ui/icons";
 import { cn } from "@/lib/utils";
 
@@ -22,9 +23,10 @@ export default function ToolCard({ tool, className }: ToolCardProps) {
         className
       )}
     >
-      <div>
+      <span aria-hidden="true" className="shader-wash" style={{ backgroundImage: `url(${categoryTexture(tool.category)})`, ...toolVariant(tool.id).wash }} />
+      <div className="relative">
         <div className="mb-3.5 flex items-center justify-between">
-          <div className="bg-secondary text-foreground group-hover:text-primary group-hover:bg-primary/10 flex size-9 items-center justify-center rounded-xl border border-border/80 transition-colors">
+          <div className="shader-chip flex size-9 items-center justify-center rounded-xl" style={{ backgroundImage: `url(${categoryTexture(tool.category)})`, ...toolVariant(tool.id).chip }}>
             <Icon className="size-4.5" aria-hidden="true" />
           </div>
         </div>
@@ -37,7 +39,7 @@ export default function ToolCard({ tool, className }: ToolCardProps) {
         </p>
       </div>
 
-      <div className="border-border/60 mt-4 flex items-center justify-between border-t pt-3">
+      <div className="border-border/60 relative mt-4 flex items-center justify-between border-t pt-3">
         <div className="flex flex-wrap gap-1">
           {tool.formats.slice(0, 3).map((fmt) => (
             <span

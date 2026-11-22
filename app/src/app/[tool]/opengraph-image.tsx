@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { allToolSlugs, toolBySlug } from "@/lib/tool-pages";
 import { SITE_DOMAIN } from "@/lib/site";
+import { LOGO_DATA_URI } from "@/lib/logo";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -28,7 +29,11 @@ export default async function Image({ params }: { params: Promise<{ tool: string
             "radial-gradient(70% 90% at 88% 18%, rgba(79,107,255,0.55), transparent 60%), radial-gradient(60% 70% at 70% 110%, rgba(31,53,184,0.6), transparent 70%), #000",
         }}
       >
-        <div style={{ display: "flex", fontSize: 28, color: "#a1a1a1" }}>INeedThis · free · private</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 28, color: "#a1a1a1" }}>
+          {/* eslint-disable-next-line jsx-a11y/alt-text */}
+          <img src={LOGO_DATA_URI} width={48} height={48} />
+          INeedThis · free · private
+        </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div style={{ fontSize: 80, fontWeight: 700, letterSpacing: -3, lineHeight: 1.02 }}>{t?.name ?? "INeedThis"}</div>
           <div style={{ fontSize: 30, color: "#a1a1a1", lineHeight: 1.3, maxWidth: 980 }}>{t?.description ?? ""}</div>

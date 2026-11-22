@@ -67,6 +67,14 @@ export default function ToolPageShell({ toolId, intro, children }: { toolId: str
               <ToolModal tool={tool} open inline onClose={() => router.push("/")} />
             )}
             {children}
+            <footer className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border pt-6 text-[13px] text-muted-foreground">
+              <span>Free & open source · files stay on your device</span>
+              <nav aria-label="Legal" className="flex gap-3 sm:ml-auto">
+                <Link href="/about" className="hover:text-foreground">About</Link>
+                <Link href="/privacy" className="hover:text-foreground">Privacy</Link>
+                <Link href="/terms" className="hover:text-foreground">Terms</Link>
+              </nav>
+            </footer>
           </div>
         </div>
       </SidebarInset>

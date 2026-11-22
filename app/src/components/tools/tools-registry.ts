@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import type { IconProps } from "@/components/_ui/icons";
+import { TOOL_ICONS } from "./tool-icons";
 import {
   FilePdfIcon,
   ImageIcon,
@@ -56,7 +57,7 @@ export const CATEGORIES: Array<{
   { id: "p2p", name: "Live P2P Transfer", count: 1, icon: ShareP2PIcon },
 ];
 
-export const TOOLS: ToolDefinition[] = [
+const BASE_TOOLS: ToolDefinition[] = [
   // PDF & Documents
   {
     id: "pdf-to-docx",
@@ -589,3 +590,6 @@ export const TOOLS: ToolDefinition[] = [
     action: "p2p-transfer",
   },
 ];
+
+/** Registry with each tool's own icon applied (see tool-icons.ts). */
+export const TOOLS: ToolDefinition[] = BASE_TOOLS.map((t) => ({ ...t, icon: TOOL_ICONS[t.id] ?? t.icon }));

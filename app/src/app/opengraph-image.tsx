@@ -1,16 +1,13 @@
 import { ImageResponse } from "next/og";
 import { SITE_DOMAIN, SITE_NAME } from "@/lib/site";
+import { LOGO_DATA_URI } from "@/lib/logo";
 
 export const alt = `${SITE_NAME} — every file tool you need, none of the uploads`;
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-// Inlined (not read from disk) so the route also renders on edge runtimes
-// without a filesystem, e.g. Cloudflare Workers. Keep in sync with public/icon.svg.
-const ICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none"><rect width="512" height="512" rx="120" fill="#0a0a0c"/><path d="M176 128h120l64 64v192a16 16 0 0 1-16 16H176a16 16 0 0 1-16-16V144a16 16 0 0 1 16-16Z" fill="#3b82f6" fill-opacity="0.14" stroke="#3b82f6" stroke-width="22" stroke-linejoin="round"/><path d="M292 128v52a12 12 0 0 0 12 12h56" stroke="#3b82f6" stroke-width="22" stroke-linejoin="round"/><path d="M262 236l-44 72h40l-8 56 44-72h-40l8-56Z" fill="#f4f4f5"/></svg>`;
 
 export default function OpengraphImage() {
-  const icon = Buffer.from(ICON_SVG).toString("base64");
 
   return new ImageResponse(
     (
@@ -29,7 +26,7 @@ export default function OpengraphImage() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 30, fontWeight: 600 }}>
           {/* eslint-disable-next-line jsx-a11y/alt-text */}
-          <img src={`data:image/svg+xml;base64,${icon}`} width={52} height={52} />
+          <img src={LOGO_DATA_URI} width={52} height={52} />
           {SITE_NAME}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
