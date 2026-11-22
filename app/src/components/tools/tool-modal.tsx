@@ -78,6 +78,22 @@ export interface ToolModalProps {
   inline?: boolean;
 }
 
+/** Built-in tools whose result depends on a choice, so they wait for the button. */
+const OPTION_FIRST = new Set(["image-passport", "image-compress-kb", "video-compress-mb"]);
+
+/** Passport / ID photo sizes, grouped by the size each country uses. */
+const PASSPORT_PRESETS: Array<{
+  id: string;
+  label: string;
+  who: string;
+  size: "35x45mm" | "2x2inch" | { widthMm: number; heightMm: number };
+}> = [
+  { id: "35x45", label: "35 × 45 mm", who: "India passport, UK, EU / Schengen, Australia", size: "35x45mm" },
+  { id: "2x2", label: "2 × 2 in", who: "USA, India visa & OCI", size: "2x2inch" },
+  { id: "50x70", label: "50 × 70 mm", who: "Canada", size: { widthMm: 50, heightMm: 70 } },
+  { id: "33x48", label: "33 × 48 mm", who: "China", size: { widthMm: 33, heightMm: 48 } },
+];
+
 /** Same frame as Dialog, but laid out in the page flow. */
 function InlineFrame({ children, footer }: { children: React.ReactNode; footer?: React.ReactNode }) {
   return (
@@ -132,11 +148,14 @@ export default function ToolModal({
   const [pdfPassword, setPdfPassword] = useState("");
   const [pdfSecurityAction, setPdfSecurityAction] = useState<"unlock" | "protect">("unlock");
   const [extraOpts, setExtraOpts] = useState<ExtraOpts>({});
+  const [passportSize, setPassportSize] = useState("35x45");
+  const [passportCopies, setPassportCopies] = useState<4 | 6 | 8>(6);
+  const [passportSheet, setPassportSheet] = useState<"4x6" | "A4">("4x6");
   const mounted = useMounted();
   const extra = tool ? EXTRA_TOOLS[tool.id] : undefined;
   const Panel = tool ? PANEL_TOOLS[tool.id] : undefined;
   /** Tools that wait for options instead of running as soon as a file is chosen. */
-  const waitsForOptions = !!extra?.manual;
+  const waitsForOptions = !!extra?.manual || (!!tool && OPTION_FIRST.has(tool.id));
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
   const [signPage, setSignPage] = useState(0);
   const [signX, setSignX] = useState(72);
@@ -483,10 +502,11 @@ export default function ToolModal({
           break;
         }
         case "image-passport": {
+          const preset = PASSPORT_PRESETS.find((p) => p.id === passportSize) ?? PASSPORT_PRESETS[0];
           res = await generatePassportGrid(activeFiles[0], {
-            size: "35x45mm",
-            copies: 6,
-            sheetSize: "4x6",
+            size: preset.size,
+            copies: passportCopies,
+            sheetSize: passportSheet,
           });
           break;
         }
@@ -702,6 +722,7 @@ export default function ToolModal({
         tool.id !== "qr-studio" &&
         tool.id !== "universal-video-downloader" &&
         !EXTRA_TOOLS[tool.id]?.manual &&
+        !OPTION_FIRST.has(tool.id) &&
         !PANEL_TOOLS[tool.id]
       ) {
         executeTool(init);
@@ -923,9 +944,66 @@ export default function ToolModal({
           />
         )}
 
+        {tool.id === "image-passport" && (
+          <div className="border-border bg-card flex flex-col gap-3 rounded-xl border p-4 shadow-sm">
+            <span className="text-[13px] font-medium">Photo size</span>
+            <div role="radiogroup" aria-label="Photo size" className="grid gap-1.5 sm:grid-cols-2">
+              {PASSPORT_PRESETS.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={passportSize === p.id}
+                  onClick={() => setPassportSize(p.id)}
+                  className={`flex flex-col items-start rounded-lg border px-3 py-2 text-left transition-colors duration-150 ${
+                    passportSize === p.id ? "border-primary bg-primary/10" : "border-border bg-background hover:bg-secondary"
+                  }`}
+                >
+                  <span className="text-[13px] font-medium tabular-nums text-foreground">{p.label}</span>
+                  <span className="text-[11px] text-muted-foreground">{p.who}</span>
+                </button>
+              ))}
+            </div>
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[12px] text-muted-foreground">Copies</span>
+                {([4, 6, 8] as const).map((n) => (
+                  <Button key={n} size="xs" variant={passportCopies === n ? "primary" : "secondary"} aria-pressed={passportCopies === n} onClick={() => setPassportCopies(n)}>
+                    {n}
+                  </Button>
+                ))}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-[12px] text-muted-foreground">Print on</span>
+                {(["4x6", "A4"] as const).map((sh) => (
+                  <Button key={sh} size="xs" variant={passportSheet === sh ? "primary" : "secondary"} aria-pressed={passportSheet === sh} onClick={() => setPassportSheet(sh)}>
+                    {sh === "4x6" ? "4×6 in photo" : "A4"}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Use a front-facing photo on a plain light background. Check your country&apos;s current rules before printing.
+            </p>
+          </div>
+        )}
+
         {/* Dynamic Tool Options */}
         {tool.id === "image-compress-kb" && (
           <div className="border-border bg-card flex flex-col gap-2 rounded-xl border p-4 shadow-sm">
+            <div role="group" aria-label="Quick sizes" className="flex flex-wrap gap-1.5">
+              {[
+                { kb: 20, label: "20 KB · signature" },
+                { kb: 50, label: "50 KB · form photo" },
+                { kb: 100, label: "100 KB" },
+                { kb: 200, label: "200 KB" },
+                { kb: 500, label: "500 KB · web" },
+              ].map((p) => (
+                <Button key={p.kb} size="xs" variant={targetKb === p.kb ? "primary" : "secondary"} aria-pressed={targetKb === p.kb} onClick={() => setTargetKb(p.kb)}>
+                  {p.label}
+                </Button>
+              ))}
+            </div>
             <div className="flex items-center justify-between">
               <label className="text-[13px] font-medium">Target File Size Limit</label>
               <span className="text-[13px] font-semibold text-primary tabular-nums">
@@ -951,6 +1029,18 @@ export default function ToolModal({
 
         {tool.id === "video-compress-mb" && (
           <div className="border-border bg-card flex flex-col gap-2 rounded-xl border p-4 shadow-sm">
+            <div role="group" aria-label="Quick sizes" className="flex flex-wrap gap-1.5">
+              {[
+                { mb: 10, label: "10 MB · Discord" },
+                { mb: 16, label: "16 MB" },
+                { mb: 25, label: "25 MB · Email" },
+                { mb: 50, label: "50 MB" },
+              ].map((p) => (
+                <Button key={p.mb} size="xs" variant={targetMb === p.mb ? "primary" : "secondary"} aria-pressed={targetMb === p.mb} onClick={() => setTargetMb(p.mb)}>
+                  {p.label}
+                </Button>
+              ))}
+            </div>
             <div className="flex items-center justify-between">
               <label className="text-[13px] font-medium">Target Video Size</label>
               <span className="text-[13px] font-semibold text-primary tabular-nums">
@@ -967,8 +1057,7 @@ export default function ToolModal({
               className="accent-primary w-full cursor-pointer"
             />
             <div className="flex justify-between text-[11px] text-muted-foreground">
-              <span>8 MB (Discord Free)</span>
-              <span>25 MB (Email Attachment)</span>
+              <span>4 MB</span>
               <span>100 MB</span>
             </div>
           </div>
