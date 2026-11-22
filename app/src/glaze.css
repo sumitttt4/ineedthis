@@ -1,0 +1,356 @@
+/*
+ * Glaze — the theme. Built on Solid Glass and shadcn/ui; see LICENSE and NOTICE.md.
+ *
+ * Neutral surfaces (zinc), one signature colour (indigo), five tones for categories and
+ * emphasis, one typeface (Manrope). Import after Tailwind and shadcn's stylesheet, then import
+ * materials.css for Glass, Frost and Aurora. Solid Glass's own hooks stay in place underneath,
+ * so every inherited component keeps working.
+ */
+@import "./solid-glass.css";
+/* materials.css is imported after this file: it adds Glass, Frost and Aurora beside Normal. */
+
+@theme inline {
+  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-heading: "Manrope Variable", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+:root {
+  --font-secondary: var(--font-sans);
+  /* Motion (Emil Kowalski's curves): ease-out for anything entering or leaving, ease-in-out
+     for things moving on screen, the drawer curve for sheets. Never ease-in. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* ---- Normal, light: porcelain, ink and cobalt ----------------------------------------- */
+:root, [data-material="solid"] {
+  /* The hue materials tint their glass with: cobalt. */
+  --study-hue: 264;
+  --study-support: 170;
+  --study-warmth: 240;
+  --radius: 0.875rem;
+  --radius-control: 0.625rem;
+
+  --background: #f3f5f7;
+  --foreground: #15171c;
+  --panel: #eef1f4;
+  --card: #ffffff;
+  --card-foreground: var(--foreground);
+  --popover: #ffffff;
+  --popover-foreground: var(--foreground);
+  --primary: #2445e6;
+  --primary-foreground: #ffffff;
+  --secondary: #e9edf2;
+  --secondary-foreground: #15171c;
+  --muted: #eceff3;
+  --muted-foreground: #5b6270;
+  --accent: #eceff4;
+  --accent-foreground: #15171c;
+  --border: #dfe3e9;
+  --input: #cfd5de;
+  --ring: #2445e6;
+  --destructive: #b42318;
+  --study-error: #fdf0ee;
+  --success: #17795e;
+  --status-done: var(--success);
+  --status-running: #2445e6;
+  --status-interrupted: #b45309;
+  --brand: #2445e6;
+  --brand-foreground: #ffffff;
+  --brand-muted: #2445e61a;
+  --celadon: #8fc9b6;
+  --link: #2445e6;
+
+  --chart-1: #2445e6;
+  --chart-2: #5fb39b;
+  --chart-3: #8c9bff;
+  --chart-4: #e3a93b;
+  --chart-5: #c2410c;
+
+  --sidebar: #eef1f4;
+  --sidebar-foreground: var(--foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-ring: var(--ring);
+  --sidebar-border: var(--border);
+
+  /* Solid Glass's finish, turned off: Normal is opaque. */
+  --glass-blur: none;
+  --glass-blur-control: none;
+  --glass-control: var(--card);
+  --glass-state: var(--accent);
+  --glass-state-edge: var(--border);
+  --glass-state-armed: var(--primary);
+  --glass-rim: transparent;
+  --glass-inner: transparent;
+  --glass-control-rim: transparent;
+  --glass-state-rim: transparent;
+  --glass-edge: var(--border);
+  --glass-shade: #15171c1f;
+  --glass-contact: #15171c0d;
+  --glass-lift: #15171c14;
+  --popover-edge: var(--border);
+  --popover-under: transparent;
+  --primary-solid: 100%;
+  --primary-rim: #ffffff2e;
+  --primary-under: transparent;
+  --primary-inner: transparent;
+  --primary-edge: transparent;
+  --field: var(--card);
+  --field-rim: transparent;
+  --field-edge: var(--input);
+  --focus-line: var(--primary);
+  --hover: var(--accent);
+  --hover-faint: var(--muted);
+  --knob: #ffffff;
+  --light-1: transparent;
+  --light-2: transparent;
+  --light-3: transparent;
+
+  /* Material switches (see materials.css). */
+  --surface-solid: 100%;
+  --mat-outline-bg: var(--card);
+  --mat-pane: 0 0 0 1px var(--border), 0 1px 2px #15171c0a;
+  --mat-popover: 0 0 0 1px #15171c14, 0 16px 36px -12px #15171c2e, 0 4px 10px -4px #15171c12;
+  color-scheme: light;
+  background: var(--background);
+}
+
+/* ---- Normal, dark: kiln black, cobalt lifted ------------------------------------------ */
+.dark, .dark [data-material="solid"] {
+  /* Pure black, built in steps: the page is #000, cards one step up, popovers two, hairlines
+     solid so they read evenly on every step. Text is soft white, never #fff on #000. */
+  color-scheme: dark;
+  --background: #000000;
+  --foreground: #ededed;
+  --panel: #050505;
+  --card: #0a0a0a;
+  --popover: #111111;
+  --primary: #4f6bff;
+  --primary-foreground: #ffffff;
+  --secondary: #161616;
+  --secondary-foreground: #ededed;
+  --muted: #141414;
+  --muted-foreground: #a1a1a1;
+  --accent: #1a1a1a;
+  --accent-foreground: #ededed;
+  --border: #1f1f1f;
+  --input: #2e2e2e;
+  --ring: #6f86ff;
+  --destructive: #ff6b5e;
+  --study-error: #2a0f0c;
+  --success: #4fd1a5;
+  --status-running: #8c9bff;
+  --status-interrupted: #f0b25a;
+  --brand: #6f86ff;
+  --celadon: #6fc4aa;
+  --link: #8c9bff;
+  --chart-1: #6f86ff;
+  --chart-2: #6fc4aa;
+  --chart-3: #a9b4ff;
+  --chart-4: #f0b25a;
+  --chart-5: #f08a5d;
+  --sidebar: #050505;
+  --glass-shade: #000000cc;
+  --glass-contact: #00000080;
+  --glass-lift: #00000080;
+  --knob: #ffffff;
+  --mat-outline-bg: #0a0a0a;
+  --mat-pane: 0 0 0 1px var(--border);
+  --mat-popover: 0 0 0 1px #262626, 0 24px 48px -12px #000000;
+}
+
+/* ---- Panes, popovers, states -------------------------------------------------------- */
+:root :is(.glass-panel,.glass-control,.bg-card) { box-shadow: var(--mat-pane); }
+:root .bg-popover { box-shadow: var(--mat-popover); }
+:root .glass-chosen { background: var(--accent); color: var(--accent-foreground); box-shadow: none; }
+:root [data-slot="panel-row"][aria-current] { font-weight: 500; }
+:root :is(button,a,[tabindex]):not(input,textarea):focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+:root :is(input,textarea):focus-visible { outline: none; }
+:root :is(button,[role="button"]):disabled { opacity: .5; cursor: not-allowed; }
+:root [data-slot="composer"]:focus-within { box-shadow: var(--mat-pane), 0 0 0 3px color-mix(in oklab, var(--ring) 22%, transparent); }
+:root [data-slot="composer"] button[aria-label="Send"]:not(:disabled) { background: var(--primary); color: var(--primary-foreground); }
+:root .study-error { color: var(--destructive); background: var(--study-error); border-color: currentColor; }
+:root ::selection { background: color-mix(in oklab, var(--primary) 22%, transparent); }
+
+/* Fields: a hairline, a whisper of shadow, and a soft ring of the signature colour on focus. */
+:root :is([data-slot="input"],[data-slot="textarea"],[data-slot="select-trigger"],[data-slot="native-select"],[data-slot="input-group"],[data-slot="combobox-chips"]):not([aria-invalid="true"]) {
+  border-color: var(--input);
+  box-shadow: 0 1px 2px #15171c0a;
+}
+:root :is([data-slot="input"],[data-slot="textarea"],[data-slot="select-trigger"],[data-slot="native-select"]):focus-visible,
+:root [data-slot="input-group"]:focus-within {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 20%, transparent);
+}
+
+/* ---- Tones -----------------------------------------------------------------------------
+   Five named tones for categories and emphasis (the names are kept from earlier releases):
+   iris = violet, fern = emerald, clay = rose, sun = amber, ocean = sky. Unset is indigo. */
+:root { --tone-solid: #2445e6; --tone-soft: #eef1ff; --tone-ink: #1c36b8; --tone-edge: #b3c0ff; --tone-on: #fff; }
+[data-tone="iris"]  { --tone-solid: #7c3aed; --tone-soft: #f5f3ff; --tone-ink: #6d28d9; --tone-edge: #c4b5fd; --tone-on: #fff; }
+[data-tone="fern"]  { --tone-solid: #047857; --tone-soft: #ecfdf5; --tone-ink: #047857; --tone-edge: #6ee7b7; --tone-on: #fff; }
+[data-tone="clay"]  { --tone-solid: #e11d48; --tone-soft: #fff1f2; --tone-ink: #be123c; --tone-edge: #fda4af; --tone-on: #fff; }
+[data-tone="sun"]   { --tone-solid: #b45309; --tone-soft: #fffbeb; --tone-ink: #92400e; --tone-edge: #fcd34d; --tone-on: #fff; }
+[data-tone="ocean"] { --tone-solid: #0369a1; --tone-soft: #f0f9ff; --tone-ink: #075985; --tone-edge: #7dd3fc; --tone-on: #fff; }
+.dark { --tone-solid: #4f6bff; --tone-soft: #4f6bff24; --tone-ink: #c3ccff; --tone-edge: #4f6bff59; --tone-on: #fff; }
+.dark [data-tone="iris"]  { --tone-solid: #a78bfa; --tone-soft: #a78bfa24; --tone-ink: #ddd6fe; --tone-edge: #a78bfa59; --tone-on: #2e1065; }
+.dark [data-tone="fern"]  { --tone-solid: #34d399; --tone-soft: #34d39921; --tone-ink: #a7f3d0; --tone-edge: #34d39952; --tone-on: #022c22; }
+.dark [data-tone="clay"]  { --tone-solid: #fb7185; --tone-soft: #fb718521; --tone-ink: #fecdd3; --tone-edge: #fb718552; --tone-on: #4c0519; }
+.dark [data-tone="sun"]   { --tone-solid: #fbbf24; --tone-soft: #fbbf241f; --tone-ink: #fde68a; --tone-edge: #fbbf244d; --tone-on: #451a03; }
+.dark [data-tone="ocean"] { --tone-solid: #38bdf8; --tone-soft: #38bdf821; --tone-ink: #bae6fd; --tone-edge: #38bdf852; --tone-on: #082f49; }
+[data-tone] { --primary: var(--tone-solid); --primary-foreground: var(--tone-on); --ring: var(--tone-solid); }
+.cw-tone-soft { background: var(--tone-soft); color: var(--tone-ink); border-color: var(--tone-edge); }
+[data-slot="tone-badge"] { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--tone-edge); border-radius: 999px; background: color-mix(in oklab,var(--tone-soft) var(--surface-solid,100%),transparent); color: var(--tone-ink); padding: 3px 10px; font-size: 12px; font-weight: 500; line-height: 1.4; }
+[data-slot="color-surface"] { -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); background: color-mix(in oklab,var(--tone-soft) var(--surface-solid,100%),transparent); color: var(--tone-ink); border: 1px solid var(--tone-edge); border-radius: var(--radius); padding: 24px; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+
+/* ---- Buttons --------------------------------------------------------------------------
+   Primary is cobalt with a soft inner highlight. Secondary and outline stay neutral unless the
+   button itself carries a tone. Press feedback is a 0.97 scale on a strong ease-out; colour
+   changes on hover only where there is a real pointer. */
+:root [data-slot="button"] {
+  cursor: pointer;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  transition: transform 160ms var(--ease-out), background-color 150ms ease, border-color 150ms ease, color 150ms ease, box-shadow 150ms ease;
+}
+:root [data-slot="button"][data-variant="default"] {
+  background: color-mix(in oklab, var(--primary) var(--primary-solid), transparent);
+  -webkit-backdrop-filter: var(--glass-blur-control);
+  backdrop-filter: var(--glass-blur-control);
+  color: var(--primary-foreground);
+  border: 1px solid color-mix(in oklab, var(--primary), black 14%);
+  box-shadow: inset 0 1px 0 var(--primary-rim), 0 1px 2px #0000001f, 0 3px 8px -3px color-mix(in oklab, var(--primary) 50%, transparent);
+}
+:root [data-slot="button"][data-variant="secondary"] {
+  -webkit-backdrop-filter: var(--glass-blur-control);
+  backdrop-filter: var(--glass-blur-control);
+  background: color-mix(in oklab, var(--secondary) var(--surface-solid), transparent);
+  color: var(--secondary-foreground);
+  border: 1px solid transparent;
+  box-shadow: none;
+}
+:root [data-slot="button"][data-variant="outline"] {
+  background: var(--mat-outline-bg);
+  color: var(--foreground);
+  border: 1px solid var(--input);
+  box-shadow: 0 1px 2px #15171c0d;
+}
+.dark [data-slot="button"][data-variant="outline"] { box-shadow: none; }
+:root [data-slot="button"][data-tone][data-variant="secondary"] { background: color-mix(in oklab, var(--tone-soft) var(--surface-solid), transparent); color: var(--tone-ink); border-color: var(--tone-edge); }
+:root [data-slot="button"][data-tone][data-variant="outline"] { color: var(--tone-ink); border-color: var(--tone-edge); }
+@media (hover: hover) and (pointer: fine) {
+  :root [data-slot="button"][data-variant="default"]:not(:disabled):hover { background: color-mix(in oklab, color-mix(in oklab, var(--primary), white 10%) var(--primary-solid), transparent); }
+  :root [data-slot="button"]:is([data-variant="secondary"],[data-variant="outline"]):not(:disabled):hover { background: var(--accent); color: var(--accent-foreground); }
+  :root [data-slot="button"][data-tone]:is([data-variant="secondary"],[data-variant="outline"]):not(:disabled):hover { background: color-mix(in oklab, var(--tone-soft), var(--tone-solid) 8%); color: var(--tone-ink); border-color: var(--tone-solid); }
+}
+:root [data-slot="button"]:not(:disabled):active { transform: scale(0.97); }
+:root [data-slot="button"]:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+:root [data-slot="button"]:disabled { cursor: not-allowed; opacity: .5; box-shadow: none; }
+/* Any other pressable thing gets the same press. */
+:root :is([data-slot="toggle"],[data-slot="toggle-group-item"],[data-slot="tabs-trigger"],[data-slot="model-picker"],[data-slot="token-counter"],[data-press]) { transition: transform 160ms var(--ease-out), background-color 150ms ease, color 150ms ease; }
+:root :is([data-slot="toggle"],[data-slot="toggle-group-item"],[data-slot="model-picker"],[data-slot="token-counter"],[data-press]):not(:disabled):active { transform: scale(0.97); }
+
+/* ---- Overlays -------------------------------------------------------------------------
+   Popovers grow out of their trigger (Base UI's --transform-origin), open in 180ms and close
+   faster than they open. Modals stay centred. The command palette, opened from the keyboard
+   many times a day, does not animate at all. */
+:root :is([data-slot="popover-content"],[data-slot="dropdown-menu-content"],[data-slot="dropdown-menu-sub-content"],[data-slot="select-content"],[data-slot="combobox-content"],[data-slot="context-menu-content"],[data-slot="context-menu-sub-content"],[data-slot="menubar-content"],[data-slot="menubar-sub-content"],[data-slot="hover-card-content"],[data-slot="navigation-menu-popup"]) {
+  transform-origin: var(--transform-origin);
+  --tw-duration: 180ms;
+  --tw-ease: var(--ease-out);
+  --tw-enter-scale: .96;
+  --tw-exit-scale: .96;
+  border-radius: 12px;
+}
+:root :is([data-slot="popover-content"],[data-slot="dropdown-menu-content"],[data-slot="dropdown-menu-sub-content"],[data-slot="select-content"],[data-slot="combobox-content"],[data-slot="context-menu-content"],[data-slot="menubar-content"],[data-slot="hover-card-content"])[data-closed] { --tw-duration: 110ms; }
+:root [data-slot="tooltip-content"] { transform-origin: var(--transform-origin); --tw-duration: 125ms; --tw-ease: var(--ease-out); --tw-enter-scale: .97; --tw-exit-scale: .97; }
+:root [data-slot="tooltip-content"][data-instant] { animation: none !important; }
+:root :is([data-slot="dialog-content"],[data-slot="alert-dialog-content"]) { --tw-duration: 200ms; --tw-ease: var(--ease-out); --tw-enter-scale: .96; --tw-exit-scale: .97; }
+:root :is([data-slot="dialog-content"],[data-slot="alert-dialog-content"])[data-closed] { --tw-duration: 140ms; }
+:root :is([data-slot="dialog-overlay"],[data-slot="alert-dialog-overlay"]) { --tw-duration: 200ms; --tw-ease: var(--ease-out); }
+:root [data-slot="sheet-content"] { transition-timing-function: var(--ease-drawer); }
+:root [data-slot="command-dialog"] [data-slot="dialog-content"], :root [data-slot="dialog-content"]:has([data-slot="command"]) { animation: none !important; }
+/* Menu rows: 32px tall, 8px in, a quiet highlight. */
+:root :is([data-slot="dropdown-menu-item"],[data-slot="context-menu-item"],[data-slot="menubar-item"],[data-slot="combobox-item"]) { min-height: 32px; border-radius: 8px; }
+
+/* Public accent hook: set --accent-solid / --accent-on and data-accent on html. */
+html[data-accent] {
+  --primary: var(--accent-solid);
+  --primary-foreground: var(--accent-on);
+  --ring: var(--accent-solid);
+  --link: var(--accent-solid);
+}
+html[data-accent] [data-tone]:not([data-semantic]) {
+  --tone-solid: var(--accent-solid);
+  --tone-on: var(--accent-on);
+  --tone-soft: color-mix(in srgb, var(--accent-solid) 9%, white);
+  --tone-ink: color-mix(in srgb, var(--accent-solid) 70%, black);
+  --tone-edge: color-mix(in srgb, var(--accent-solid) 45%, white);
+}
+html[data-accent] { --tone-solid: var(--accent-solid); --tone-on: var(--accent-on); --tone-soft: color-mix(in srgb, var(--accent-solid) 9%, white); --tone-ink: color-mix(in srgb, var(--accent-solid) 70%, black); --tone-edge: color-mix(in srgb, var(--accent-solid) 45%, white); }
+html.dark[data-accent], html.dark[data-accent] [data-tone]:not([data-semantic]) {
+  --tone-soft: color-mix(in srgb, var(--accent-solid) 16%, transparent);
+  --tone-ink: color-mix(in srgb, var(--accent-solid) 35%, white);
+  --tone-edge: color-mix(in srgb, var(--accent-solid) 40%, transparent);
+}
+
+/* Type: Manrope throughout. Regular for reading, medium and semibold for controls and titles;
+   display headings are semibold and set tight, since Manrope is a wide face. */
+:root .font-display { font-family: var(--font-heading); font-weight: 600; letter-spacing: -0.035em; }
+:root :is([data-slot="dialog-title"],[data-slot="card-title"],[data-slot="alert-dialog-title"],[data-slot="sheet-title"],[data-slot="drawer-title"]) { letter-spacing: -0.01em; }
+:root body { font-family: var(--font-sans); font-weight: 400; }
+:root :is([data-slot="dialog-title"],[data-slot="card-title"],[data-slot="alert-dialog-title"],[data-slot="sheet-title"],[data-slot="drawer-title"]) { font-weight: 600; }
+:root [data-slot="badge"] { font-weight: 500; }
+
+/* Original Glaze components. */
+[data-slot="palette-picker"] { min-width: 0; padding: 20px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); }
+[data-slot="palette-picker"] legend { padding: 0 5px; font-weight: 500; font-size: 13px; }
+[data-slot="palette-picker"] > div { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+[data-slot="palette-picker"] button { width: 36px; height: 36px; border: 3px solid var(--card); border-radius: 50%; box-shadow: 0 0 0 1px var(--border); cursor: pointer; }
+[data-slot="palette-picker"] button[aria-pressed="true"] { outline: 2px solid var(--foreground); outline-offset: 2px; }
+[data-slot="palette-picker"] button span { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; background: #fff; color: #000; border-radius: 50%; font-size: 12px; }
+[data-slot="palette-picker"] label { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+[data-slot="palette-picker"] input { width: 30px; height: 32px; padding: 2px; }
+[data-slot="palette-picker"] output { display: block; margin-top: 16px; font-family: var(--font-mono); color: var(--muted-foreground); font-size: 12px; }
+[data-slot="palette-picker"]:disabled { opacity: .5; }
+[data-slot="option-card"] { display: flex; align-items: flex-start; gap: 12px; padding: 18px; border: 1px solid var(--border); border-radius: 10px; background: var(--card); cursor: pointer; }
+[data-slot="option-card"][data-checked] { background: var(--tone-soft); border-color: var(--tone-solid); color: var(--tone-ink); }
+[data-slot="option-card"] input { margin-top: 3px; width: 16px; height: 16px; accent-color: var(--tone-solid); flex-shrink: 0; }
+.cw-option-copy { display: flex; flex-direction: column; gap: 7px; min-width: 0; }.cw-option-copy strong { font-size: 14px; font-weight: 500; }.cw-option-copy > span:last-child { font-size: 12px; line-height: 1.5; }
+[data-slot="option-card"]:focus-within { outline: 2px solid var(--ring); outline-offset: 3px; }[data-slot="option-card"][data-disabled] { opacity: .5; cursor: not-allowed; }
+[data-slot="status-callout"] { display: flex; gap: 12px; align-items: flex-start; padding: 18px; background: var(--tone-soft); color: var(--tone-ink); border: 1px solid var(--tone-edge); border-radius: 10px; }
+[data-slot="status-callout"] > svg { width: 20px; height: 20px; flex-shrink: 0; }[data-slot="status-callout"] > div { flex: 1; min-width: 0; }[data-slot="status-callout"] strong { font-size: 14px; font-weight: 500; }[data-slot="status-callout"] > div > div { margin-top: 6px; font-size: 12px; line-height: 1.6; }
+[data-slot="copy-snippet"] { border: 1px solid var(--border); border-radius: 14px; background: var(--card); padding: 12px 12px 14px 16px; min-width: 0; }[data-slot="copy-snippet"] > div { display: flex; justify-content: space-between; align-items: center; gap: 16px; font-size: 12px; }[data-slot="copy-snippet"] pre { max-width: 100%; overflow: auto; padding: 10px 0 0; font-size: 12.5px; line-height: 1.7; }[data-slot="copy-snippet"] p { color: var(--muted-foreground); font-size: 12px; }[data-slot="copy-snippet"] p:empty { display: none; }
+
+/* Opaque themed controls, including portals. Native menus aren't used by the browser UI. */
+:root [data-slot="select-content"],:root [data-slot="dropdown-menu-content"],:root [data-slot="popover-content"] { background: var(--popover); color: var(--popover-foreground); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+:root [data-slot="select-content"]::before { backdrop-filter: none; }
+:root [data-slot="select-item"] { min-height: 36px; font-weight: 500; padding: 9px 28px 9px 12px; }
+:root [data-slot="select-item"][data-highlighted] { background: var(--accent); color: var(--accent-foreground); }
+:root [data-slot="palette-picker"] { width: 100%; min-width: 0; max-width: 720px; padding: 16px; background: var(--card); color: var(--card-foreground); }
+:root [data-slot="palette-picker"] .palette-picker-intro { display: flex; justify-content: space-between; align-items: start; gap: 12px; flex-wrap: wrap; margin: 0 0 12px; font-size: 12px; }
+:root [data-slot="palette-picker"] output { display: inline; margin: 0; font-size: 11px; color: var(--muted-foreground); text-transform: capitalize; }
+:root [data-slot="palette-picker"] .palette-scroll { display: block; overflow: auto; max-height: 390px; overscroll-behavior: contain; padding: 4px; border: 1px solid var(--border); border-radius: 7px; }
+.palette-family,.palette-shade-labels { display: grid; grid-template-columns: 65px repeat(11,minmax(24px,1fr)); gap: 4px; align-items: center; min-width: 370px; }
+.palette-shade-labels { position: sticky; top: -4px; z-index: 1; background: var(--card); padding: 4px 0 8px; font-size: 9px; color: var(--muted-foreground); text-align: center; }
+.palette-family { margin-bottom: 5px; }.palette-family > span,.palette-shade-labels > span:first-child { font-size: 10px; text-transform: capitalize; text-align: left; }
+:root [data-slot="palette-picker"] button[data-shade] { width: 100%; min-width: 24px; height: 28px; border: 1px solid #00000012; border-radius: 4px; box-shadow: none; }
+:root [data-slot="palette-picker"] button[data-shade][aria-pressed="true"] { outline: 2px solid var(--foreground); outline-offset: 1px; }
+:root [data-slot="palette-picker"] button[data-shade] span { width: 16px; height: 16px; font-size: 10px; box-shadow: 0 0 0 1px #00000020; }
+:root [data-slot="palette-picker"] .palette-custom { display: flex; align-items: end; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-top: 14px; }
+:root [data-slot="palette-picker"] .palette-custom label { display: flex; gap: 7px; align-items: center; font-size: 11px; }
+:root [data-slot="palette-picker"] input[type="text"],:root [data-slot="palette-picker"] input:not([type]) { width: 88px; height: 34px; background: var(--background); color: var(--foreground); border: 1px solid var(--input); border-radius: 5px; padding: 6px; font-family: var(--font-mono); font-size: 12px; }
+:root [data-slot="palette-picker"] input[aria-invalid="true"] { border-color: var(--destructive); }
+:root [data-slot="palette-picker"] .palette-reset { width: auto; height: 34px; border: 1px solid var(--border); border-radius: 5px; background: var(--background); color: var(--foreground); box-shadow: none; padding: 0 12px; font-size: 12px; }
+:root [data-slot="palette-picker"] .palette-error { font-size: 12px; margin-top: 12px; color: var(--destructive); }
+:root [data-slot="palette-picker"] .palette-quick { display: flex; gap: 12px; flex-wrap: wrap; }
+.palette-mobile-hint { display: none; }@media(max-width:480px) { .palette-mobile-hint { display: block; font-size: 10px; line-height: 1.5; color: var(--muted-foreground); margin-top: 10px; } }
+
+/* Dense list rows (file trees): focus shows as the row's own fill, never a ring drawn outside it. */
+:root button.tree-row:focus-visible { outline: none; }

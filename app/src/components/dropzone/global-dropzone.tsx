@@ -133,7 +133,7 @@ export default function GlobalDropzone({
       </div>
 
       {inspectedFile && (
-        <div role="status" className="animate-in flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-card">
+        <div role="status" className="animate-in fade-in-0 slide-in-from-bottom-1 duration-200 flex flex-col gap-3 rounded-xl border border-border bg-card p-4 shadow-card">
           <div className="flex min-w-0 items-center gap-3">
             <div className="bg-primary text-primary-foreground flex size-9 items-center justify-center rounded-lg text-[11px] font-bold uppercase shrink-0">
               {inspectedFile.extension.slice(0, 4)}

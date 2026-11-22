@@ -1,0 +1,325 @@
+/*
+ * Materials: one set of components, four finishes.
+ *
+ *   Normal  — data-material="solid"   opaque, color-led (Glaze's own look)
+ *   Glass   — data-material="glass"   thick smoky glass: the Solid Glass material
+ *   Frost   — data-material="frost"   clear frosted glass over vivid light
+ *   Aurora  — data-material="aurora"  frost over light that moves
+ *
+ * Put the attribute on <html> for the whole app, or on any element to finish just that part
+ * of the page (a preview, a card, a side-by-side comparison). Everything is done with the
+ * tokens the components already use, so a material set on a subtree is fully its own, even
+ * inside a page with a different one. Colours (primary, tones, the accent picker) carry over:
+ * the glass is tinted by them.
+ *
+ * Import after glaze.css. A glass material needs something behind it to be seen as glass:
+ * the page gets lights of its own, and `.mat-stage` gives any box the same backdrop.
+ */
+
+/* ---- Glass: the Solid Glass material, tinted by the Glaze hue ------------------------ */
+
+[data-material="glass"] {
+  color-scheme: light;
+  --background: oklch(0.925 0.01 var(--study-hue));
+  --foreground: oklch(0.2 0.02 var(--study-hue));
+  --panel: oklch(0.975 0.004 var(--study-hue) / 44%);
+  --card: oklch(0.98 0.004 var(--study-hue) / 60%);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.985 0.003 var(--study-hue) / 92%);
+  --popover-foreground: var(--foreground);
+  --secondary: oklch(0.3 0.02 var(--study-hue) / 9%);
+  --muted: oklch(0.3 0.02 var(--study-hue) / 7%);
+  --muted-foreground: oklch(0.45 0.02 var(--study-hue));
+  --accent: oklch(0.3 0.02 var(--study-hue) / 9%);
+  --border: oklch(0.3 0.02 var(--study-hue) / 13%);
+  --input: oklch(0.3 0.02 var(--study-hue) / 22%);
+  --sidebar: oklch(0.97 0.004 var(--study-hue) / 50%);
+
+  --glass-rim: oklch(1 0 0 / 90%);
+  --glass-inner: oklch(1 0 0 / 35%);
+  --glass-edge: oklch(0.38 0.03 var(--study-hue) / 12%);
+  --popover-edge: oklch(0.38 0.03 var(--study-hue) / 22%);
+  --popover-under: oklch(0.38 0.03 var(--study-hue) / 16%);
+  --glass-shade: oklch(0.3 0.06 var(--study-hue) / 28%);
+  --glass-contact: oklch(0.25 0.03 var(--study-hue) / 6%);
+  --glass-lift: oklch(0.25 0.03 var(--study-hue) / 14%);
+  --glass-control: oklch(1 0 0 / 55%);
+  --glass-control-rim: oklch(1 0 0 / 80%);
+  --glass-state: oklch(0.3 0.02 var(--study-hue) / 9%);
+  --glass-state-rim: oklch(1 0 0 / 85%);
+  --glass-state-edge: oklch(0.3 0.02 var(--study-hue) / 13%);
+  --glass-state-armed: oklch(0.3 0.02 var(--study-hue) / 26%);
+  --hover: oklch(0.3 0.02 var(--study-hue) / 10%);
+  --hover-faint: oklch(0.3 0.02 var(--study-hue) / 5.5%);
+  --primary-solid: 92%;
+  --primary-rim: oklch(1 0 0 / 30%);
+  --primary-under: oklch(0 0 0 / 35%);
+  --primary-inner: oklch(1 0 0 / 7%);
+  --primary-edge: oklch(0.2 0 0 / 30%);
+  --field: oklch(1 0 0 / 60%);
+  --field-rim: oklch(1 0 0);
+  --field-edge: oklch(0.3 0.02 var(--study-hue) / 18%);
+  --glass-blur: blur(26px) saturate(180%);
+  --glass-blur-control: blur(14px);
+  --light-1: oklch(0.7 0.14 var(--study-hue) / 16%);
+  --light-2: oklch(0.75 0.12 200 / 16%);
+  --light-3: oklch(0.72 0.13 var(--study-support) / 12%);
+
+  --surface-solid: 62%;
+  --mat-outline-bg: var(--glass-control);
+  --mat-pane: inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-inner), 0 0 0 1px var(--glass-edge), 0 1px 2px var(--glass-contact), 0 12px 32px -14px var(--glass-shade);
+  --mat-popover: inset 0 1px 0 var(--glass-rim), inset 0 -1px 0 var(--popover-under), 0 0 0 1px var(--popover-edge), 0 24px 60px -18px var(--glass-shade), 0 6px 16px -6px var(--glass-lift);
+}
+
+.dark[data-material="glass"],
+.dark [data-material="glass"] {
+  color-scheme: dark;
+  --background: #000000;
+  --foreground: oklch(0.97 0.005 var(--study-hue));
+  --panel: oklch(1 0 0 / 4.5%);
+  --card: oklch(0.31 0.01 var(--study-hue) / 46%);
+  --popover: oklch(0.22 0.01 var(--study-hue) / 92%);
+  --secondary: oklch(1 0 0 / 10%);
+  --muted: oklch(1 0 0 / 7%);
+  --muted-foreground: oklch(0.76 0.01 var(--study-hue));
+  --accent: oklch(1 0 0 / 9%);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 18%);
+  --sidebar: oklch(0.11 0 0 / 50%);
+
+  --glass-rim: oklch(1 0 0 / 16%);
+  --glass-inner: oklch(1 0 0 / 4%);
+  --glass-edge: oklch(1 0 0 / 7%);
+  --popover-edge: oklch(1 0 0 / 9%);
+  --popover-under: oklch(0 0 0 / 0%);
+  --glass-shade: oklch(0 0 0 / 60%);
+  --glass-contact: oklch(0 0 0 / 10%);
+  --glass-lift: oklch(0 0 0 / 22%);
+  --glass-control: oklch(1 0 0 / 7%);
+  --glass-control-rim: oklch(1 0 0 / 11%);
+  --glass-state: oklch(1 0 0 / 7%);
+  --glass-state-rim: oklch(1 0 0 / 11%);
+  --glass-state-edge: oklch(1 0 0 / 7%);
+  --glass-state-armed: oklch(1 0 0 / 11%);
+  --hover: oklch(1 0 0 / 8%);
+  --hover-faint: oklch(1 0 0 / 4%);
+  --primary-solid: 90%;
+  --primary-rim: oklch(1 0 0 / 30%);
+  --primary-under: oklch(0 0 0 / 22%);
+  --field: oklch(1 0 0 / 6%);
+  --field-rim: oklch(1 0 0 / 15%);
+  --field-edge: oklch(1 0 0 / 10%);
+  --glass-blur: blur(26px);
+  --light-1: oklch(0.6 0.14 var(--study-hue) / 22%);
+  --light-2: oklch(0.6 0.12 200 / 14%);
+  --light-3: oklch(0.6 0.13 var(--study-support) / 12%);
+}
+
+/* ---- Frost: clear glass, a bright edge, vivid light behind ----------------------------- */
+
+[data-material="frost"],
+[data-material="aurora"] {
+  color-scheme: light;
+  --background: oklch(0.95 0.015 var(--study-hue));
+  --foreground: oklch(0.2 0.03 var(--study-hue));
+  --panel: oklch(1 0 0 / 30%);
+  --card: oklch(1 0 0 / 40%);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0 / 74%);
+  --popover-foreground: var(--foreground);
+  --secondary: oklch(1 0 0 / 45%);
+  --muted: oklch(1 0 0 / 35%);
+  --muted-foreground: oklch(0.42 0.03 var(--study-hue));
+  --accent: oklch(1 0 0 / 55%);
+  --border: oklch(1 0 0 / 70%);
+  --input: oklch(0.3 0.04 var(--study-hue) / 22%);
+  --sidebar: oklch(1 0 0 / 35%);
+
+  --glass-rim: oklch(1 0 0 / 100%);
+  --glass-inner: oklch(1 0 0 / 50%);
+  --glass-edge: oklch(1 0 0 / 60%);
+  --popover-edge: oklch(1 0 0 / 70%);
+  --popover-under: oklch(0.4 0.05 var(--study-hue) / 10%);
+  --glass-shade: oklch(0.35 0.1 var(--study-hue) / 30%);
+  --glass-contact: oklch(0.3 0.05 var(--study-hue) / 8%);
+  --glass-lift: oklch(0.3 0.08 var(--study-hue) / 14%);
+  --glass-control: oklch(1 0 0 / 45%);
+  --glass-control-rim: oklch(1 0 0 / 95%);
+  --glass-state: oklch(1 0 0 / 55%);
+  --glass-state-rim: oklch(1 0 0);
+  --glass-state-edge: oklch(1 0 0 / 70%);
+  --glass-state-armed: oklch(1 0 0 / 80%);
+  --hover: oklch(1 0 0 / 50%);
+  --hover-faint: oklch(1 0 0 / 28%);
+  --primary-solid: 92%;
+  --primary-rim: oklch(1 0 0 / 45%);
+  --primary-under: oklch(0 0 0 / 25%);
+  --primary-inner: oklch(1 0 0 / 12%);
+  --primary-edge: oklch(1 0 0 / 40%);
+  --field: oklch(1 0 0 / 50%);
+  --field-rim: oklch(1 0 0);
+  --field-edge: oklch(1 0 0 / 80%);
+  --glass-blur: blur(28px) saturate(190%) brightness(1.04);
+  --glass-blur-control: blur(16px) saturate(170%);
+  --light-1: oklch(0.72 0.17 var(--study-hue) / 45%);
+  --light-2: oklch(0.8 0.14 200 / 42%);
+  --light-3: oklch(0.78 0.15 340 / 34%);
+
+  --surface-solid: 50%;
+  --mat-outline-bg: var(--glass-control);
+  --mat-pane: inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-inner), inset 0 -10px 24px -18px oklch(1 0 0 / 60%), 0 0 0 1px var(--glass-edge), 0 1px 2px var(--glass-contact), 0 18px 40px -18px var(--glass-shade);
+  --mat-popover: inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-inner), 0 0 0 1px var(--popover-edge), 0 24px 60px -18px var(--glass-shade), 0 6px 16px -6px var(--glass-lift);
+}
+
+.dark[data-material="frost"],
+.dark [data-material="frost"],
+.dark[data-material="aurora"],
+.dark [data-material="aurora"] {
+  color-scheme: dark;
+  --background: #000000;
+  --foreground: oklch(0.98 0.005 var(--study-hue));
+  --panel: oklch(1 0 0 / 5%);
+  --card: oklch(1 0 0 / 7%);
+  --popover: oklch(0.24 0.02 var(--study-hue) / 78%);
+  --secondary: oklch(1 0 0 / 12%);
+  --muted: oklch(1 0 0 / 8%);
+  --muted-foreground: oklch(0.8 0.015 var(--study-hue));
+  --accent: oklch(1 0 0 / 14%);
+  --border: oklch(1 0 0 / 16%);
+  --input: oklch(1 0 0 / 22%);
+  --sidebar: oklch(1 0 0 / 5%);
+
+  --glass-rim: oklch(1 0 0 / 32%);
+  --glass-inner: oklch(1 0 0 / 7%);
+  --glass-edge: oklch(1 0 0 / 12%);
+  --popover-edge: oklch(1 0 0 / 16%);
+  --popover-under: oklch(0 0 0 / 0%);
+  --glass-shade: oklch(0 0 0 / 55%);
+  --glass-contact: oklch(0 0 0 / 12%);
+  --glass-lift: oklch(0 0 0 / 25%);
+  --glass-control: oklch(1 0 0 / 9%);
+  --glass-control-rim: oklch(1 0 0 / 24%);
+  --glass-state: oklch(1 0 0 / 12%);
+  --glass-state-rim: oklch(1 0 0 / 26%);
+  --glass-state-edge: oklch(1 0 0 / 14%);
+  --glass-state-armed: oklch(1 0 0 / 26%);
+  --hover: oklch(1 0 0 / 10%);
+  --hover-faint: oklch(1 0 0 / 5%);
+  --primary-solid: 90%;
+  --primary-rim: oklch(1 0 0 / 35%);
+  --primary-under: oklch(0 0 0 / 22%);
+  --field: oklch(1 0 0 / 7%);
+  --field-rim: oklch(1 0 0 / 22%);
+  --field-edge: oklch(1 0 0 / 12%);
+  --glass-blur: blur(30px) saturate(170%);
+  --light-1: oklch(0.55 0.2 var(--study-hue) / 50%);
+  --light-2: oklch(0.6 0.15 200 / 36%);
+  --light-3: oklch(0.55 0.2 340 / 30%);
+  --mat-pane: inset 0 1px 0 var(--glass-rim), inset 0 0 0 1px var(--glass-inner), 0 0 0 1px var(--glass-edge), 0 1px 2px var(--glass-contact), 0 18px 40px -18px var(--glass-shade);
+}
+
+/* ---- The light behind the glass ------------------------------------------------------------
+
+   On the page: the body's own lights (solid-glass.css draws them from --light-1…3), seen
+   through the site's wrappers. On `.mat-stage`: the same three lights, inside the box. */
+
+html[data-material]:not([data-material="solid"]) :is(.cw-site, .cw-main) {
+  background: transparent;
+}
+
+.mat-stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: var(--background);
+  background-image:
+    radial-gradient(60% 70% at 12% 8%, var(--light-1), transparent 70%),
+    radial-gradient(55% 60% at 92% 20%, var(--light-2), transparent 70%),
+    radial-gradient(70% 70% at 55% 105%, var(--light-3), transparent 70%);
+  color: var(--foreground);
+}
+
+/* Aurora: the lights drift, so the glass is always showing something new. */
+html[data-material="aurora"] body {
+  background: transparent;
+}
+html[data-material="aurora"] body::before,
+.mat-stage[data-material="aurora"]::before {
+  content: "";
+  position: fixed;
+  inset: -20%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(34% 40% at 20% 25%, var(--light-1), transparent 70%),
+    radial-gradient(30% 36% at 80% 30%, var(--light-2), transparent 70%),
+    radial-gradient(38% 42% at 50% 85%, var(--light-3), transparent 70%),
+    radial-gradient(26% 30% at 85% 85%, oklch(0.75 0.15 100 / 22%), transparent 70%);
+  filter: blur(20px);
+  animation: mat-aurora 18s ease-in-out infinite alternate;
+}
+.mat-stage[data-material="aurora"]::before {
+  position: absolute;
+}
+@keyframes mat-aurora {
+  0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+  33% { transform: translate(6%, -4%) rotate(25deg) scale(1.08); }
+  66% { transform: translate(-5%, 5%) rotate(-15deg) scale(0.95); }
+  100% { transform: translate(3%, 2%) rotate(40deg) scale(1.05); }
+}
+
+/* Aurora's primary buttons carry a slow sheen across their face. */
+[data-material="aurora"] [data-slot="button"][data-variant="default"] {
+  background-size: 100% 100%;
+  position: relative;
+  overflow: hidden;
+}
+[data-material="aurora"] [data-slot="button"][data-variant="default"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, oklch(1 0 0 / 35%) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: mat-sheen 3.6s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes mat-sheen {
+  0%, 55% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-material="aurora"] body::before,
+  .mat-stage[data-material="aurora"]::before,
+  [data-material="aurora"] [data-slot="button"]::after {
+    animation: none;
+  }
+}
+
+/* Where transparency is turned down in the system, the panes go nearly opaque. */
+@media (prefers-reduced-transparency: reduce) {
+  [data-material]:not([data-material="solid"]) {
+    --card: var(--popover);
+    --panel: var(--popover);
+    --surface-solid: 100%;
+  }
+}
+
+/* ---- Shader stages (the site's ShaderStage) ----------------------------------------------- */
+.shader-stage {
+  background-image: none;
+}
+.shader-stage-light {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.shader-stage-light canvas {
+  display: block;
+}
+.mat-stage.shader-stage[data-material="aurora"]::before {
+  content: none;
+}

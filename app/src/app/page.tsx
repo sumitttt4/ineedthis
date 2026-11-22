@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import Sidebar from "@/components/sidebar/sidebar";
+import AppSidebar from "@/components/sidebar/app-sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import Header from "@/components/header/header";
 import GlobalDropzone from "@/components/dropzone/global-dropzone";
 import Hero from "@/components/hero/hero";
@@ -24,7 +25,6 @@ import PwaInstallButton from "@/components/_ui/pwa-install-button";
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState<ToolCategory | "all">("all");
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTool, setSelectedTool] = useState<ToolDefinition | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
@@ -75,34 +75,29 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-dvh max-w-full overflow-hidden bg-background text-foreground">
+    <SidebarProvider className="h-dvh max-w-full overflow-hidden bg-background text-foreground">
       <a
         href="#main"
         className="skip-link rounded-lg bg-primary px-3 py-2 text-[13px] font-semibold text-primary-foreground"
       >
         Skip to content
       </a>
-      {/* Resizable Sidebar */}
-      <Sidebar
+      <AppSidebar
         activeCategory={activeCategory}
         onSelectCategory={setActiveCategory}
         onOpenToolModal={handleOpenToolById}
-        mobileOpen={mobileSidebarOpen}
-        onMobileOpenChange={setMobileSidebarOpen}
       />
 
-      {/* Main Studio Work Area */}
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <SidebarInset className="min-w-0 overflow-hidden">
         <Header
           activeCategory={activeCategory}
           onSelectCategory={setActiveCategory}
-          onOpenMobileSidebar={() => setMobileSidebarOpen(true)}
           searchQuery={searchQuery}
           onSearchQueryChange={setSearchQuery}
           totalToolsCount={TOOLS.length}
         />
 
-        <main
+        <div
           id="main"
           tabIndex={-1}
           className="min-h-0 flex-1 overflow-y-auto px-4 py-6 outline-none sm:px-6 sm:py-8"
@@ -247,8 +242,8 @@ export default function Home() {
               </>
             )}
           </div>
-        </main>
-      </div>
+        </div>
+      </SidebarInset>
 
       {/* Execution Dialog */}
       <ToolModal
@@ -264,6 +259,6 @@ export default function Home() {
 
       {/* Toaster Popups */}
       <Toaster />
-    </div>
+    </SidebarProvider>
   );
 }

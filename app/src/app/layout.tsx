@@ -1,15 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, siteUrl } from "@/lib/site";
 import { ThemeProvider } from "@/components/theme-provider";
-import { SIDEBAR_WIDTH_SCRIPT } from "@/lib/sidebar";
 import "./globals.css";
-
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist",
-  display: "swap",
-});
 
 const geistMono = Geist_Mono({
   subsets: ["latin"],
@@ -74,15 +67,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable} font-sans`} suppressHydrationWarning>
+    <html
+      lang="en"
+      data-material="solid"
+      className={`${geistMono.variable} font-sans`}
+      suppressHydrationWarning
+    >
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `history.scrollRestoration="manual";${SIDEBAR_WIDTH_SCRIPT};if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js?v=${process.env.NEXT_PUBLIC_BUILD_ID}').catch(()=>{});});}`,
+            __html: `history.scrollRestoration="manual";if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('/sw.js?v=${process.env.NEXT_PUBLIC_BUILD_ID}').catch(()=>{});});}`,
           }}
         />
       </head>
-      <body className={`${geist.className} font-sans antialiased selection:bg-primary/20 selection:text-primary`}>
+      <body className="font-sans antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

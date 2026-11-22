@@ -10,13 +10,14 @@ import { useTheme } from "next-themes";
  * ShaderMount already pauses rAF when the canvas is off-screen or the tab is hidden.
  */
 const PALETTES = {
+  // Glaze palette: porcelain + cobalt (light), black + indigo (dark), celadon support.
   light: {
-    colorBack: "#f4f6fb",
-    colors: ["#dbe5ff", "#9db8ff", "#3b6cf6", "#c7f0ff"],
+    colorBack: "#f3f5f7",
+    colors: ["#dfe5ff", "#a9b4ff", "#2445e6", "#cfeee4"],
   },
   dark: {
     colorBack: "#000000",
-    colors: ["#061233", "#163fb0", "#3b82f6", "#0b2a4a"],
+    colors: ["#0b1240", "#1f35b8", "#4f6bff", "#0c2c25"],
   },
 };
 

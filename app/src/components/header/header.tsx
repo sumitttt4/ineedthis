@@ -1,9 +1,9 @@
 "use client";
 
-import Button from "@/components/_ui/button";
 import { ThemeToggle } from "@/components/_ui/theme-toggle";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
 import {
-  MenuIcon,
   SearchIcon,
   ShieldCheckIcon,
 } from "@/components/_ui/icons";
@@ -12,7 +12,6 @@ import { CATEGORIES, type ToolCategory } from "@/components/tools/tools-registry
 export interface HeaderProps {
   activeCategory: ToolCategory | "all";
   onSelectCategory: (cat: ToolCategory | "all") => void;
-  onOpenMobileSidebar: () => void;
   searchQuery: string;
   onSearchQueryChange: (q: string) => void;
   totalToolsCount: number;
@@ -21,7 +20,6 @@ export interface HeaderProps {
 export default function Header({
   activeCategory,
   onSelectCategory,
-  onOpenMobileSidebar,
   searchQuery,
   onSearchQueryChange,
 }: HeaderProps) {
@@ -31,17 +29,10 @@ export default function Header({
   return (
     <header className="shrink-0 border-b border-border bg-card/60 backdrop-blur-md sticky top-0 z-40">
       <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
-        {/* Left: Mobile menu + Category title */}
+        {/* Left: sidebar toggle + current category */}
         <div className="flex min-w-0 items-center gap-2.5">
-          <Button
-            variant="secondary"
-            size="icon"
-            className="lg:hidden shrink-0"
-            aria-label="Open sidebar"
-            onClick={onOpenMobileSidebar}
-          >
-            <MenuIcon className="size-4" />
-          </Button>
+          <SidebarTrigger className="-ml-1 shrink-0" />
+          <Separator orientation="vertical" className="h-4 self-center" />
 
           <div className="flex items-center gap-2 truncate">
             <span className="text-[16px] font-semibold tracking-[-0.02em] text-foreground truncate">
@@ -80,7 +71,7 @@ export default function Header({
       </div>
 
       {/* Category Tabs Scroll Bar */}
-      <div className="flex items-center gap-1 px-4 sm:px-6 overflow-x-auto no-scrollbar border-t border-border/40 py-1.5">
+      <div className="flex items-center gap-1 px-4 sm:px-6 overflow-x-auto no-scrollbar border-t border-border/40 py-1.5 md:hidden">
         {CATEGORIES.map((cat) => {
           const isActive = activeCategory === cat.id;
           return (
