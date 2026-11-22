@@ -31,15 +31,23 @@ const ids = [...registrySrc.matchAll(/id:\s*"([^"]+)"/g)]
         "media",
         "data",
         "p2p",
+        "text",
       ].includes(id)
   );
 
 const uniqueIds = [...new Set(ids)];
+const extraSrc = fs.readFileSync(path.join(root, "src/components/tools/extra-tools.tsx"), "utf8");
+const panelSrc = fs.readFileSync(path.join(root, "src/components/tools/panel-tools.tsx"), "utf8");
+// Tools defined in the extra/panel modules are wired through their registries.
+const moduleWired = (id) =>
+  new RegExp(`"${id}":\\s*\\w+`).test(extraSrc.split("export const EXTRA_TOOLS")[1] ?? "") ||
+  new RegExp(`"${id}":\\s*\\w+`).test(panelSrc.split("export const PANEL_TOOLS")[1] ?? "");
 const failures = [];
 
 for (const id of uniqueIds) {
   const hasCase =
     modalSrc.includes(`case "${id}"`) ||
+    moduleWired(id) ||
     // Special UI-only paths
     (id === "universal-video-downloader" &&
       modalSrc.includes("universal-video-downloader")) ||
@@ -61,7 +69,7 @@ if (allCount && Number(allCount[1]) !== uniqueIds.length) {
 }
 
 const actionIds = [
-  ...routerSrc.matchAll(/"(pdf-[^"]+|image-[^"]+|video-[^"]+|audio-[^"]+|docx-[^"]+|xlsx-[^"]+|md-[^"]+|archive-[^"]+|data-[^"]+|file-[^"]+|qr-[^"]+|universal-[^"]+)"/g),
+  ...routerSrc.matchAll(/"(pdf-[^"]+|image-[^"]+|images-[^"]+|video-[^"]+|audio-[^"]+|docx-[^"]+|xlsx-[^"]+|md-[^"]+|archive-[^"]+|data-[^"]+|file-[^"]+|qr-[^"]+|json-[^"]+|screenshot-[^"]+|universal-[^"]+)"/g),
 ].map((m) => m[1]);
 
 for (const action of new Set(actionIds)) {

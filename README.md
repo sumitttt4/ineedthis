@@ -4,7 +4,7 @@
 
 🌐 **[ineedthis.site](https://ineedthis.site)**
 
-An ultra-fast, browser-based Swiss Army knife for files, media, and documents (33 tools). Most tools process **entirely on your device** with WebAssembly, Web Workers, and local canvas/decoders.
+An ultra-fast, browser-based Swiss Army knife for files, media, and documents (54 tools). Most tools process **entirely on your device** with WebAssembly, Web Workers, and local canvas/decoders.
 
 Built with Next.js, TypeScript, Tailwind CSS, Geist, and [Paper Shaders](https://shaders.paper.design) for the hero.
 
@@ -21,7 +21,7 @@ Built with Next.js, TypeScript, Tailwind CSS, Geist, and [Paper Shaders](https:/
 
 ---
 
-## 33 Included Utilities
+## 54 Included Utilities
 
 ### PDF & Documents
 1. PDF to Word (DOCX)
@@ -37,32 +37,55 @@ Built with Next.js, TypeScript, Tailwind CSS, Geist, and [Paper Shaders](https:/
 11. PII & Pattern Redactor (true redaction)
 12. PDF Digital Signature
 13. PDF Password Unlock & Protect (AES-256)
+14. Images to PDF
+15. Organize PDF Pages (rotate, reorder, delete)
+16. Flatten PDF Forms
+17. PDF to Text
 
 ### Video & Audio Lab
-14. Universal Video Downloader *(server-assisted)*
-15. Convert to MP4 (MOV / WEBM / MKV → MP4)
-16. Target-MB Video Compressor
-17. Precision Video Trimmer
-18. Video to GIF Converter
-19. Audio Extractor & Converter
-20. Audio Volume Booster
-21. Live Screen & Audio Recorder
+18. Universal Video Downloader *(server-assisted)*
+19. Convert to MP4 (MOV / WEBM / MKV → MP4)
+20. Target-MB Video Compressor
+21. Precision Video Trimmer
+22. Video to GIF Converter
+23. Audio Extractor & Converter
+24. Audio Volume Booster
+25. Live Screen & Audio Recorder
+26. Mute Video
+27. Audio Trimmer & Ringtone Maker (MP3 / M4R)
+28. Change Video Speed (0.25×–4×)
+29. Rotate & Flip Video
+30. Voice Recorder
 
 ### Image Lab
-22. HEIC / HEIF to JPG/PNG
-23. Target-KB Image Compressor
-24. EXIF & GPS Metadata Stripper
-25. Passport Photo Grid Generator
-26. Favicon & App Icon Generator
-27. High-DPI Image Resizer
-28. Universal Batch Image Converter
+31. HEIC / HEIF to JPG/PNG
+32. Target-KB Image Compressor
+33. EXIF & GPS Metadata Stripper
+34. Passport Photo Grid Generator
+35. Favicon & App Icon Generator
+36. High-DPI Image Resizer
+37. Universal Batch Image Converter
+38. Crop & Rotate Image
+39. Add Text / Watermark to Image
+40. Color Palette from Image
+41. Screenshot Beautifier
 
 ### Data, Security & P2P
-29. In-Browser ZIP Archiver & Extractor
-30. Tabular Data Format Converter
-31. File Checksum & Hash Generator
-32. Vector QR Code Studio (Text / Wi‑Fi / UPI / vCard)
-33. Live Encrypted P2P File Transfer
+42. In-Browser ZIP Archiver & Extractor
+43. Tabular Data Format Converter (JSON ↔ CSV ↔ XLSX)
+44. File Checksum & Hash Generator
+45. Vector QR Code Studio (Text / Wi‑Fi / UPI / vCard)
+46. Live Encrypted P2P File Transfer
+
+### Text & Developer
+47. Word & Character Counter
+48. Text Case Converter
+49. JSON Formatter & Validator
+50. Base64 Encode & Decode
+51. URL Encode & Decode
+52. Password & UUID Generator
+53. Unix Timestamp Converter
+54. Text Diff Checker
 
 ---
 

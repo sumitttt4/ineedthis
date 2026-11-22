@@ -13,7 +13,7 @@ export default function NotFound() {
           There&apos;s no tool here
         </h1>
         <p className="mx-auto max-w-sm text-[14px] text-muted-foreground">
-          The page you were looking for doesn&apos;t exist. All 33 tools are one click away.
+          The page you were looking for doesn&apos;t exist. All 54 tools are one click away.
         </p>
       </div>
       <Link

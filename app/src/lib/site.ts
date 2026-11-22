@@ -3,7 +3,7 @@ export const SITE_DOMAIN = "ineedthis.site";
 export const SITE_URL = `https://${SITE_DOMAIN}`;
 export const SITE_TAGLINE = "Every file tool you need. None of the uploads.";
 export const SITE_DESCRIPTION =
-  "33 free file tools that run in your browser: PDF to Word, video compression, HEIC to JPG, EXIF removal, ZIP, QR codes and more. Your files never leave your device.";
+  "54 free tools that run in your browser: PDF to Word, organize PDF pages, compress video, HEIC to JPG, remove EXIF, JSON formatter, password generator and more. Your files never leave your device.";
 
 /**
  * Canonical origin for metadata, OG and sitemap URLs.

@@ -596,6 +596,8 @@ export async function trimAudio(
   };
 
   args.push("-c:a", codecMap[outputFormat] ?? "libmp3lame");
+  // ffmpeg doesn't map the .m4r extension to a muxer; iPhone ringtones are MP4/ipod.
+  if (outputFormat === "m4r") args.push("-b:a", "192k", "-f", "ipod");
   args.push("-y", outputName);
 
   onProgress?.({
@@ -716,3 +718,76 @@ export const mediaEngine = {
 } as const;
 
 export type MediaEngine = typeof mediaEngine;
+
+// ============================================================================
+// Video speed & rotation (re-encode; exit codes are checked by ffmpegManager)
+// ============================================================================
+
+const VIDEO_ENCODE = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p"];
+
+/** atempo accepts 0.5–2.0 per stage, so chain stages for wider ranges. */
+function atempoChain(speed: number): string {
+  const stages: number[] = [];
+  let s = speed;
+  while (s > 2) { stages.push(2); s /= 2; }
+  while (s < 0.5) { stages.push(0.5); s /= 0.5; }
+  stages.push(s);
+  return stages.map((v) => `atempo=${v.toFixed(4)}`).join(",");
+}
+
+export async function changeVideoSpeed(
+  file: File,
+  speed: number,
+  onProgress?: ProgressCallback
+): Promise<TaskResult> {
+  const t = performance.now();
+  if (!(speed > 0)) throw new Error("Speed must be greater than zero.");
+  await ffmpegManager.ensureLoaded(onProgress);
+  const inExt = getExtension(file.name) || "mp4";
+  const inputName = `input.${inExt}`;
+  await ffmpegManager.writeFile(inputName, file);
+  onProgress?.({ state: "processing", percent: 30, message: `Changing speed to ${speed}×…` });
+  const base = ["-i", inputName, "-filter:v", `setpts=PTS/${speed}`, ...VIDEO_ENCODE];
+  try {
+    await ffmpegManager.exec([...base, "-filter:a", atempoChain(speed), "-c:a", "aac", "-movflags", "+faststart", "-y", "output.mp4"]);
+  } catch {
+    // No audio track: retry video-only.
+    await ffmpegManager.exec([...base, "-an", "-movflags", "+faststart", "-y", "output.mp4"]);
+  }
+  const data = await ffmpegManager.readFile("output.mp4");
+  await ffmpegManager.deleteFile(inputName);
+  await ffmpegManager.deleteFile("output.mp4");
+  const baseName = file.name.replace(/\.[^.]+$/, "");
+  return makeResult(data, `${baseName}_${speed}x.mp4`, "video/mp4", t);
+}
+
+export type VideoRotation = "90" | "180" | "270" | "flip-h" | "flip-v";
+
+export async function rotateVideo(
+  file: File,
+  rotation: VideoRotation,
+  onProgress?: ProgressCallback
+): Promise<TaskResult> {
+  const t = performance.now();
+  await ffmpegManager.ensureLoaded(onProgress);
+  const inExt = getExtension(file.name) || "mp4";
+  const inputName = `input.${inExt}`;
+  await ffmpegManager.writeFile(inputName, file);
+  const filter = {
+    "90": "transpose=1",
+    "180": "transpose=1,transpose=1",
+    "270": "transpose=2",
+    "flip-h": "hflip",
+    "flip-v": "vflip",
+  }[rotation];
+  onProgress?.({ state: "processing", percent: 30, message: "Rotating video…" });
+  await ffmpegManager.exec([
+    "-i", inputName, "-vf", filter, ...VIDEO_ENCODE,
+    "-c:a", "copy", "-movflags", "+faststart", "-y", "output.mp4",
+  ]);
+  const data = await ffmpegManager.readFile("output.mp4");
+  await ffmpegManager.deleteFile(inputName);
+  await ffmpegManager.deleteFile("output.mp4");
+  const baseName = file.name.replace(/\.[^.]+$/, "");
+  return makeResult(data, `${baseName}_rotated.mp4`, "video/mp4", t);
+}

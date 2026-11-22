@@ -102,8 +102,12 @@ const CATEGORY_ACTIONS: Record<FileCategory, string[]> = {
     "pdf-sign",
     "pdf-unlock",
     "pdf-to-pptx",
+    "pdf-organize",
+    "pdf-to-text",
+    "pdf-flatten",
   ],
   image: [
+    "image-crop",
     "image-convert",
     "image-compress-kb",
     "image-resize",
@@ -111,6 +115,10 @@ const CATEGORY_ACTIONS: Record<FileCategory, string[]> = {
     "image-heic",
     "image-passport",
     "image-favicon",
+    "images-to-pdf",
+    "image-text",
+    "image-colors",
+    "screenshot-beautify",
   ],
   video: [
     "video-to-mp4",
@@ -118,13 +126,16 @@ const CATEGORY_ACTIONS: Record<FileCategory, string[]> = {
     "video-trim",
     "video-to-gif",
     "audio-extract-convert",
+    "video-rotate",
+    "video-mute",
+    "video-speed",
   ],
-  audio: ["audio-extract-convert", "audio-booster", "file-hash"],
+  audio: ["audio-extract-convert", "audio-trim", "audio-booster", "file-hash"],
   document: ["docx-to-pdf", "file-hash"],
   spreadsheet: ["xlsx-to-pdf", "data-convert", "file-hash"],
   presentation: ["file-hash"],
   archive: ["archive-zip", "file-hash"],
-  data: ["data-convert", "file-hash", "qr-studio"],
+  data: ["data-convert", "json-formatter", "file-hash", "qr-studio"],
   text: ["md-to-pdf", "file-hash", "qr-studio"],
   unknown: ["file-hash", "archive-zip"],
 };
@@ -219,7 +230,7 @@ export async function inspectFile(file: File): Promise<InspectedFile> {
 /** Map inspected file categories onto tool registry categories. */
 export function fileCategoryToToolCategory(
   category: FileCategory
-): Array<"pdf" | "image" | "media" | "data" | "p2p"> {
+): Array<"pdf" | "image" | "media" | "data" | "text" | "p2p"> {
   switch (category) {
     case "pdf":
     case "document":

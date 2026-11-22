@@ -12,6 +12,7 @@ const LIMITS: Record<ToolCategory, number> = {
   pdf: 300 * 1024 * 1024,
   image: 150 * 1024 * 1024,
   data: 1024 * 1024 * 1024,
+  text: 50 * 1024 * 1024,
   p2p: Number.POSITIVE_INFINITY,
 };
 

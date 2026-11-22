@@ -286,3 +286,107 @@ export function ExternalLinkIcon(props: IconProps) {
   );
 }
 
+
+const stroke = { viewBox: "0 0 16 16", fill: "none", stroke: "currentColor", strokeWidth: 1.5, strokeLinecap: "round", strokeLinejoin: "round" } as const;
+
+export function TypeIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M3 4V3h10v1M8 3v10M6 13h4" />
+    </svg>
+  );
+}
+
+export function BracesIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M5.5 2.5c-1.5 0-2 .7-2 2v1.5c0 1-.5 2-1.5 2 1 0 1.5 1 1.5 2v1.5c0 1.3.5 2 2 2M10.5 2.5c1.5 0 2 .7 2 2v1.5c0 1 .5 2 1.5 2-1 0-1.5 1-1.5 2v1.5c0 1.3-.5 2-2 2" />
+    </svg>
+  );
+}
+
+export function MicIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <rect x="6" y="1.75" width="4" height="8" rx="2" />
+      <path d="M3.5 8a4.5 4.5 0 009 0M8 12.5v2" />
+    </svg>
+  );
+}
+
+export function RotateIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M13.5 8a5.5 5.5 0 11-1.6-3.9M13.5 2.5v3h-3" />
+    </svg>
+  );
+}
+
+export function CropIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M4 1.5V12h10.5M1.5 4H12v10.5" />
+    </svg>
+  );
+}
+
+export function PaletteIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M8 1.75a6.25 6.25 0 100 12.5c.9 0 1.3-.6 1.1-1.3-.3-1 .4-1.9 1.4-1.9h1.3a2.5 2.5 0 002.45-2.4A6.3 6.3 0 008 1.75z" />
+      <circle cx="5" cy="7" r=".75" fill="currentColor" />
+      <circle cx="7.5" cy="4.75" r=".75" fill="currentColor" />
+      <circle cx="10.5" cy="5.5" r=".75" fill="currentColor" />
+    </svg>
+  );
+}
+
+export function KeyIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <circle cx="5" cy="11" r="3" />
+      <path d="M7.2 8.8l6.3-6.3M11.5 4.5l1.5 1.5M10 6l1 1" />
+    </svg>
+  );
+}
+
+export function ClockIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <circle cx="8" cy="8" r="6.25" />
+      <path d="M8 4.5V8l2.5 1.5" />
+    </svg>
+  );
+}
+
+export function DiffIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M4.5 2v7M1.5 5.5h6M8.5 12.5h6M11.5 2.5v4" />
+    </svg>
+  );
+}
+
+export function LinkIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M6.5 9.5l3-3M7 4.5l1-1a2.8 2.8 0 014 4l-1 1M9 11.5l-1 1a2.8 2.8 0 01-4-4l1-1" />
+    </svg>
+  );
+}
+
+export function SpeedIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M2 12a6 6 0 1112 0M8 12l3-4" />
+    </svg>
+  );
+}
+
+export function MuteIcon(props: IconProps) {
+  return (
+    <svg {...stroke} {...props}>
+      <path d="M2.5 6h2.5l3.5-3v10L5 10H2.5zM11 6l3.5 4M14.5 6L11 10" />
+    </svg>
+  );
+}

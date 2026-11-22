@@ -185,7 +185,8 @@ export async function organizePdf(
       const pageIdx = indices.indexOf(rot.page);
       if (pageIdx >= 0 && pageIdx < doc.getPageCount()) {
         const page = doc.getPage(pageIdx);
-        page.setRotation(degrees(rot.degrees));
+        // Add to any rotation the page already has.
+        page.setRotation(degrees((page.getRotation().angle + rot.degrees) % 360));
       }
     }
   }

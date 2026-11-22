@@ -1,6 +1,8 @@
 "use client";
 
 import { fileSizeError } from "@/lib/limits";
+import { EXTRA_TOOLS, type ExtraOpts } from "./extra-tools";
+import { PANEL_TOOLS } from "./panel-tools";
 import { useState, useRef, useEffect } from "react";
 import Dialog from "@/components/_ui/dialog";
 import Button from "@/components/_ui/button";
@@ -115,6 +117,11 @@ export default function ToolModal({
   const [resizePercent, setResizePercent] = useState<number | "">("");
   const [pdfPassword, setPdfPassword] = useState("");
   const [pdfSecurityAction, setPdfSecurityAction] = useState<"unlock" | "protect">("unlock");
+  const [extraOpts, setExtraOpts] = useState<ExtraOpts>({});
+  const extra = tool ? EXTRA_TOOLS[tool.id] : undefined;
+  const Panel = tool ? PANEL_TOOLS[tool.id] : undefined;
+  /** Tools that wait for options instead of running as soon as a file is chosen. */
+  const waitsForOptions = !!extra?.manual;
   const [signatureFile, setSignatureFile] = useState<File | null>(null);
   const [signPage, setSignPage] = useState(0);
   const [signX, setSignX] = useState(72);
@@ -239,6 +246,7 @@ export default function ToolModal({
   };
 
   const acceptForTool = (id: string): string | undefined => {
+    if (EXTRA_TOOLS[id]) return EXTRA_TOOLS[id].accept;
     switch (id) {
       case "pdf-to-docx":
       case "pdf-merge":
@@ -625,7 +633,8 @@ export default function ToolModal({
           break;
         }
         default: {
-          throw new Error(`Tool "${tool.id}" is not implemented yet.`);
+          if (!extra) throw new Error(`Tool "${tool.id}" is not implemented yet.`);
+          res = await extra.run(activeFiles, extraOpts, (p) => setProgress(p));
         }
       }
 
@@ -661,6 +670,7 @@ export default function ToolModal({
       const init = initialFiles ?? [];
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFiles(init);
+      setExtraOpts(tool && EXTRA_TOOLS[tool.id] ? { ...EXTRA_TOOLS[tool.id].defaults } : {});
       setResult(null);
       setErrorMsg(null);
       setHashesResult(null);
@@ -675,7 +685,9 @@ export default function ToolModal({
         tool &&
         tool.id !== "screen-recorder" &&
         tool.id !== "qr-studio" &&
-        tool.id !== "universal-video-downloader"
+        tool.id !== "universal-video-downloader" &&
+        !EXTRA_TOOLS[tool.id]?.manual &&
+        !PANEL_TOOLS[tool.id]
       ) {
         executeTool(init);
       }
@@ -689,7 +701,7 @@ export default function ToolModal({
       setFiles(selected);
       setResult(null);
       setErrorMsg(null);
-      executeTool(selected);
+      if (!waitsForOptions) executeTool(selected);
     }
   };
 
@@ -700,7 +712,7 @@ export default function ToolModal({
       setFiles(dropped);
       setResult(null);
       setErrorMsg(null);
-      executeTool(dropped);
+      if (!waitsForOptions) executeTool(dropped);
     }
   };
 
@@ -762,7 +774,7 @@ export default function ToolModal({
               Close
             </Button>
 
-            {tool.id === "universal-video-downloader" ? (
+            {Panel ? null : tool.id === "universal-video-downloader" ? (
               <Button
                 variant="primary"
                 onClick={() => handleResolveAndDownload()}
@@ -829,7 +841,9 @@ export default function ToolModal({
     >
       <div className="flex flex-col gap-5">
         {/* File Dropzone or Input Area */}
-        {tool.id !== "screen-recorder" && tool.id !== "qr-studio" && tool.id !== "universal-video-downloader" && (
+        {Panel && <Panel />}
+
+        {!Panel && tool.id !== "screen-recorder" && tool.id !== "qr-studio" && tool.id !== "universal-video-downloader" && (
           <div
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
@@ -844,7 +858,8 @@ export default function ToolModal({
                 tool.id === "pdf-merge" ||
                 tool.id === "image-convert" ||
                 tool.id === "image-heic" ||
-                tool.id === "archive-zip"
+                tool.id === "archive-zip" ||
+                !!extra?.multiple
               }
               onChange={handleFileChange}
               className="hidden"
@@ -873,6 +888,18 @@ export default function ToolModal({
               </div>
             )}
           </div>
+        )}
+
+        {extra?.Options && (
+          <extra.Options
+            files={files}
+            value={extraOpts}
+            onChange={(next) => {
+              setExtraOpts(next);
+              // Options changed: the previous output no longer matches.
+              setResult(null);
+            }}
+          />
         )}
 
         {/* Dynamic Tool Options */}
