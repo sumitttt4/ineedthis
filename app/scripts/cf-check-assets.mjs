@@ -18,6 +18,16 @@ for (const f of ["ffmpeg-core.js", "ffmpeg-core.wasm"]) {
   fs.rmSync(path.join(assets, "ffmpeg", f), { force: true });
 }
 
+// onnxruntime-web's wasm binaries get emitted by webpack, but transformers.js
+// always loads them from jsDelivr at runtime (env.backends.onnx.wasm.wasmPaths),
+// and the asyncify build is over the 25 MiB limit. Drop the unused copies.
+const media = path.join(assets, "_next/static/media");
+if (fs.existsSync(media)) {
+  for (const f of fs.readdirSync(media)) {
+    if (/^ort-wasm.*\.wasm$/.test(f)) fs.rmSync(path.join(media, f), { force: true });
+  }
+}
+
 const LIMIT = 25 * 1024 * 1024;
 const tooBig = [];
 let count = 0;
@@ -37,4 +47,4 @@ if (tooBig.length) {
   console.error(`[cf-check-assets] Assets over 25 MiB:\n  ${tooBig.join("\n  ")}`);
   process.exit(1);
 }
-console.log(`[cf-check-assets] ${count} assets OK (all under 25 MiB, ffmpeg served from CDN).`);
+console.log(`[cf-check-assets] ${count} assets OK (all under 25 MiB, ffmpeg and ONNX runtime served from CDN).`);

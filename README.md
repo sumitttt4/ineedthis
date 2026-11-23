@@ -150,11 +150,13 @@ npm run cf:preview          # build + run locally in workerd at http://localhost
 npm run cf:deploy           # build + deploy to Cloudflare
 ```
 
-**One-time setup**
+**Deploying from Git (Cloudflare Workers Builds)**
+
+The repo root works with the dashboard's default settings (root directory `/`, build command `npm run build`, deploy command `npx wrangler deploy`). `scripts/cloudflare-build.mjs` installs `app/` dependencies, runs `cf:build`, and writes a root `wrangler.json` (generated, git-ignored) from `app/wrangler.jsonc` with paths pointing into `app/`. The Worker must be named `ineedthis` and the `ineedthis.site` zone must be on the same account.
 
 **How the Workers build differs**
 
-- `ffmpeg-core.wasm` is 32 MB, over Workers' 25 MiB per-asset limit, so the Cloudflare build (`FFMPEG_FROM_CDN=1`) loads the core from jsDelivr pinned to the exact installed `@ffmpeg/core` version. Only engine code is downloaded; user files still never leave the device. `scripts/cf-check-assets.mjs` fails the build if any asset exceeds 25 MiB.
+- `ffmpeg-core.wasm` is 32 MB, over Workers' 25 MiB per-asset limit, so the Cloudflare build (`FFMPEG_FROM_CDN=1`) loads the core from jsDelivr pinned to the exact installed `@ffmpeg/core` version. The ONNX Runtime wasm that webpack emits for transformers.js is dropped too: transformers.js always loads it from jsDelivr. Only engine code is downloaded; user files still never leave the device. `scripts/cf-check-assets.mjs` fails the build if any asset exceeds 25 MiB.
 - Pages are prerendered and served from Workers static assets (read-only incremental cache), so no R2 / KV bindings are needed.
 - `global_fetch_strictly_public` makes Cloudflare refuse outbound fetches to private or internal addresses, which backs up the downloader's SSRF guard.
 - The in-app rate limit is per Worker isolate. For a hard global limit, add a Cloudflare WAF rate-limiting rule on `/api/video-downloader`.

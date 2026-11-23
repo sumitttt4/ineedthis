@@ -5,7 +5,9 @@
   "description": "Local-first file, media and document tools that run in the browser",
   "scripts": {
     "dev": "npm run dev --prefix app",
-    "build": "npm run build --prefix app",
+    "build": "node scripts/cloudflare-build.mjs",
+    "deploy": "npx wrangler deploy",
+    "build:next": "npm run build --prefix app",
     "start": "npm run start --prefix app",
     "lint": "npm run lint --prefix app",
     "typecheck": "npm run typecheck --prefix app",
