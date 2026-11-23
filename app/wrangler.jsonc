@@ -7,6 +7,9 @@
   // global_fetch_strictly_public: outbound fetch() can only reach the public
   // internet — platform-level SSRF protection for /api/video-downloader.
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // Don't inject esbuild's __name helper: it breaks inline scripts that Next
+  // serializes with Function.toString() (e.g. the theme script).
+  "keep_names": false,
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
