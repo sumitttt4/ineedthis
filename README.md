@@ -152,7 +152,7 @@ npm run cf:deploy           # build + deploy to Cloudflare
 
 **Deploying from Git (Cloudflare Workers Builds)**
 
-The repo root works with the dashboard's default settings (root directory `/`, build command `npm run build`, deploy command `npx wrangler deploy`). `scripts/cloudflare-build.mjs` installs `app/` dependencies, runs `cf:build`, and writes a root `wrangler.json` (generated, git-ignored) from `app/wrangler.jsonc` with paths pointing into `app/`. The Worker must be named `ineedthis` and the `ineedthis.site` zone must be on the same account.
+The repo root works with the dashboard's default settings (root directory `/`, build command `npm run build`, deploy command `npx wrangler deploy`). `scripts/cloudflare-build.mjs` installs `app/` dependencies, runs `cf:build`, and writes a root `wrangler.json` (generated, git-ignored) from `app/wrangler.jsonc` with paths pointing into `app/`. The Worker must be named `ineedthis` and the `ineedthis.site` zone must be on the same account; it attaches via zone routes on `ineedthis.site/*` and `www.ineedthis.site/*`, which need proxied (orange-cloud) DNS records for both hosts.
 
 **How the Workers build differs**
 

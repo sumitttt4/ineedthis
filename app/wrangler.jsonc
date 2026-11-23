@@ -18,10 +18,12 @@
       "service": "ineedthis"
     }
   ],
-  // Requires the ineedthis.site zone to be on this Cloudflare account.
+  // Zone routes (not custom domains): the ineedthis.site zone already has
+  // proxied DNS records, so the Worker takes over all traffic on both hosts.
+  // www -> apex redirect happens in next.config.ts.
   "routes": [
-    { "pattern": "ineedthis.site", "custom_domain": true },
-    { "pattern": "www.ineedthis.site", "custom_domain": true }
+    { "pattern": "ineedthis.site/*", "zone_name": "ineedthis.site" },
+    { "pattern": "www.ineedthis.site/*", "zone_name": "ineedthis.site" }
   ],
   "vars": {
     "NEXT_PUBLIC_SITE_URL": "https://ineedthis.site"
