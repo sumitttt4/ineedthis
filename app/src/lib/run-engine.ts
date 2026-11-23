@@ -56,7 +56,7 @@ export async function runEngineAction(
       onProgress?.({
         state: "processing",
         percent: 20,
-        message: "Worker unavailable — continuing on main thread…",
+        message: "Worker unavailable, continuing on the main thread…",
       });
       return fallback();
     }

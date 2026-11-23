@@ -61,7 +61,7 @@ export default function FeatureRequest({
         open={open}
         onClose={() => setOpen(false)}
         title="Request a feature"
-        description="Missing a tool, or something not working the way you'd like? Tell me — I read every request."
+        description="Missing a tool, or something not working the way you'd like? Tell me, I read every request."
         maxWidth="sm:max-w-[520px]"
         footer={
           <>

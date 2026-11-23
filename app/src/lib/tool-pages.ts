@@ -106,8 +106,8 @@ export function privacyLine(t: ToolDefinition): string {
 }
 
 export function seoTitle(t: ToolDefinition): string {
-  if (NO_FILE_TOOLS.has(t.id)) return `${t.name} — free online, no sign-up`;
-  return `${t.name} — free, private, no upload`;
+  if (NO_FILE_TOOLS.has(t.id)) return `${t.name}: free online, no sign-up`;
+  return `${t.name}: free, private, no upload`;
 }
 
 export function seoDescription(t: ToolDefinition): string {
@@ -143,7 +143,7 @@ export function howItWorks(t: ToolDefinition): string[] {
   const formats = t.formats.slice(0, 3).join(", ");
   return [
     `Drop your ${formats} file${t.formats.length > 1 ? "s" : ""} or click to choose.`,
-    "Adjust the options if you want — sensible defaults are already set.",
+    "Adjust the options if you want. Sensible defaults are already set.",
     "Your result downloads automatically. Nothing is uploaded.",
   ];
 }

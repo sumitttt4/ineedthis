@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "INeedThis — private file tools",
+    name: "INeedThis: private file tools",
     short_name: "INeedThis",
     description:
-      "58 tools that run in your browser. PDF, images, video, audio, text and dev utilities — your files never leave your device.",
+      "58 tools that run in your browser. PDF, images, video, audio, text and dev utilities. Your files never leave your device.",
     start_url: "/",
     display: "standalone",
     background_color: "#000000",

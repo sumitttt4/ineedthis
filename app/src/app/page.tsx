@@ -123,7 +123,7 @@ function Home() {
         >
           <div className="mx-auto max-w-7xl flex flex-col gap-8">
             {activeCategory !== "all" && (
-              <h1 className="sr-only">INeedThis — {activeCategory} tools</h1>
+              <h1 className="sr-only">INeedThis: {activeCategory} tools</h1>
             )}
             {activeCategory === "p2p" ? (
               <P2PPanel />

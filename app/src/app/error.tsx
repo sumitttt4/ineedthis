@@ -20,7 +20,7 @@ export default function Error({
         Something broke on our side
       </h1>
       <p className="max-w-sm text-[14px] text-muted-foreground">
-        Your files were not uploaded anywhere. Reload the studio and try again — if it keeps
+        Your files were not uploaded anywhere. Reload the page and try again. If it keeps
         happening, a smaller file or a different browser usually helps.
       </p>
       <div className="flex gap-2">

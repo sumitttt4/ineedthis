@@ -46,7 +46,7 @@ export default function TermsPage() {
 
       <h2>Ownership</h2>
       <p>
-        The tools are free to use, but INeedThis itself — its code, design, name and logo — belongs to Sumit Sharma, all rights
+        The tools are free to use, but INeedThis itself (its code, design, name and logo) belongs to Sumit Sharma, all rights
         reserved. Please don&apos;t copy, resell or republish the site or its code. Your files and the results you create are
         yours. Third-party components keep their own licenses, listed on the <Link href="/about">About page</Link>.
       </p>

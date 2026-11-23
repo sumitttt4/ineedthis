@@ -137,7 +137,7 @@ export default function PwaInstallButton() {
                 </li>
                 <li className="flex items-start gap-2.5">
                   <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[11px] font-semibold tabular-nums text-primary">3</span>
-                  <span>Launch it from your apps — tools keep working offline once loaded.</span>
+                  <span>Launch it from your apps. Tools keep working offline once loaded.</span>
                 </li>
               </ol>
         )}

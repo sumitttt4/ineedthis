@@ -4,7 +4,7 @@ import { fileSizeError } from "@/lib/limits";
 import { useMounted } from "@/lib/use-mounted";
 import { EXTRA_TOOLS, type ExtraOpts } from "./extra-tools";
 import { PANEL_TOOLS, WIDE_TOOLS } from "./panel-tools";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Dialog from "@/components/_ui/dialog";
 import Button from "@/components/_ui/button";
 import { toast } from "@/components/_ui/toaster";
@@ -240,7 +240,7 @@ export default function ToolModal({
       if (text && text.startsWith("http")) {
         const trimmed = text.trim();
         setVideoUrl(trimmed);
-        toast("Pasted link — starting 1-tap download!");
+        toast("Link pasted. Starting your download.");
         handleResolveAndDownload(trimmed);
       } else {
         toast("Clipboard does not contain a URL", { type: "info" });
@@ -254,6 +254,15 @@ export default function ToolModal({
   const recorderRef = useRef<ScreenRecorder | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [micEnabled, setMicEnabled] = useState(false);
+  const [recStartedAt, setRecStartedAt] = useState<number | null>(null);
+  const [recNow, setRecNow] = useState(0);
+  useEffect(() => {
+    if (!recStartedAt) return;
+    const id = setInterval(() => setRecNow(Date.now()), 500);
+    return () => clearInterval(id);
+  }, [recStartedAt]);
+  // Release the screen and mic if the dialog/page goes away mid-recording.
+  useEffect(() => () => recorderRef.current?.cancel(), []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -677,7 +686,7 @@ export default function ToolModal({
       setProgress({
         state: "completed",
         percent: 100,
-        message: "Done — your file is downloading.",
+        message: "Done. Your file is downloading.",
       });
 
       if (res) autoDownloadResult(res);
@@ -752,16 +761,32 @@ export default function ToolModal({
     }
   };
 
+  const saveRecording = (recordResult: TaskResult) => {
+    recorderRef.current = null;
+    setRecStartedAt(null);
+    setIsRecording(false);
+    setResult(recordResult);
+    setProgress({ state: "completed", percent: 100, message: "Recording saved" });
+    toast("Recording saved", { description: recordResult.filename, type: "success" });
+    downloadFile(recordResult);
+  };
+
   const startScreenRecording = async () => {
+    setErrorMsg(null);
+    setResult(null);
+    setProgress({ state: "idle", percent: 0, message: "Ready" });
+    const rec = new ScreenRecorder({
+      onStatusChange: setIsRecording,
+      onAutoStop: saveRecording,
+    });
     try {
-      recorderRef.current = new ScreenRecorder();
-      await recorderRef.current.start({
-        includeMic: micEnabled,
-        includeSystemAudio: true,
-      });
-      setIsRecording(true);
-      toast("Screen recording started", { description: "Capturing browser/display media" });
+      await rec.start({ includeMic: micEnabled, includeSystemAudio: true });
+      recorderRef.current = rec;
+      setRecStartedAt(Date.now());
+      setRecNow(Date.now());
     } catch (err) {
+      // Closing the browser's share picker is a cancel, not an error.
+      if (err instanceof DOMException && err.name === "NotAllowedError") return;
       toast("Could not start recording", {
         description: err instanceof Error ? err.message : "Permission denied",
         type: "error",
@@ -770,16 +795,11 @@ export default function ToolModal({
   };
 
   const stopScreenRecording = async () => {
-    if (!recorderRef.current) return;
+    const rec = recorderRef.current;
+    if (!rec) return;
     try {
       setIsProcessing(true);
-      setProgress({ state: "processing", percent: 50, message: "Encoding recorded stream..." });
-      const recordResult = await recorderRef.current.stop();
-      setResult(recordResult);
-      setIsRecording(false);
-      setProgress({ state: "completed", percent: 100, message: "Recording saved!" });
-      toast("Screen recording saved & downloaded!", { type: "success" });
-      downloadFile(recordResult);
+      saveRecording(await rec.stop());
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Failed to save recording");
     } finally {
@@ -1116,7 +1136,7 @@ export default function ToolModal({
             <p className="text-[11px] text-muted-foreground">
               {pdfSecurityAction === "unlock"
                 ? "Decrypts the PDF on your device and saves a copy without a password."
-                : "Encrypts the PDF with AES-256 on your device. Keep the password safe — it can't be recovered."}
+                : "Encrypts the PDF with AES-256 on your device. Keep the password safe. It can't be recovered."}
             </p>
           </div>
         )}
@@ -1415,7 +1435,18 @@ export default function ToolModal({
           </div>
         )}
 
-        {tool.id === "screen-recorder" && (
+        {tool.id === "screen-recorder" && isRecording && recStartedAt && (
+          <div role="status" className="flex items-center gap-3 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-[13px]">
+            <span className="size-2.5 shrink-0 animate-pulse rounded-full bg-destructive" aria-hidden="true" />
+            <span className="font-medium text-foreground">Recording</span>
+            <span className="tabular-nums text-muted-foreground">
+              {(() => { const sec = Math.max(0, Math.floor((recNow - recStartedAt) / 1000)); return `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`; })()}
+            </span>
+            <span className="ml-auto text-[12px] text-muted-foreground">Stop here or use your browser&apos;s &ldquo;Stop sharing&rdquo;</span>
+          </div>
+        )}
+
+        {tool.id === "screen-recorder" && !isRecording && (
           <div className="border-border bg-card flex flex-col gap-3 rounded-xl border p-4 shadow-sm">
             <div className="flex items-center justify-between">
               <div>
@@ -1717,6 +1748,11 @@ export default function ToolModal({
           </div>
         )}
 
+        {/* Screen recording preview */}
+        {tool.id === "screen-recorder" && result && !("files" in result) && result.data instanceof Blob && (
+          <RecordingPreview result={result} onDownload={() => downloadFile(result)} />
+        )}
+
         {/* Completed Task Summary */}
         {result && (
           <div className="border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 rounded-xl border p-4 flex items-center justify-between">
@@ -1735,5 +1771,23 @@ export default function ToolModal({
         )}
       </div>
     </Frame>
+  );
+}
+
+/** Plays back a finished screen recording so people can check it before sharing. */
+function RecordingPreview({ result, onDownload }: { result: TaskResult; onDownload: () => void }) {
+  const url = useMemo(() => URL.createObjectURL(result.data as Blob), [result]);
+  useEffect(() => () => URL.revokeObjectURL(url), [url]);
+  return (
+    <div className="flex flex-col gap-2">
+      <video src={url} controls playsInline className="aspect-video w-full rounded-xl border border-border bg-black" aria-label="Recording preview" />
+      <div className="flex items-center justify-between gap-2 text-[12px] text-muted-foreground">
+        <span>Saved to your downloads. Nothing was uploaded.</span>
+        <Button variant="secondary" size="sm" onClick={onDownload}>
+          <DownloadIcon className="size-3.5" />
+          Download again
+        </Button>
+      </div>
+    </div>
   );
 }

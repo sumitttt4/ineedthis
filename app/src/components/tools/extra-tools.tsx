@@ -418,7 +418,7 @@ const imageColors: ExtraTool = {
   defaults: {},
   Options: ({ files }) => (
     <Panel>
-      <span className="text-[12px] font-medium text-muted-foreground">Palette — click a swatch to copy its hex</span>
+      <span className="text-[12px] font-medium text-muted-foreground">Palette: click a swatch to copy its hex</span>
       <PaletteSwatches file={files[0]} />
     </Panel>
   ),

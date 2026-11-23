@@ -13,7 +13,7 @@ const CREDITS: Array<[string, string, string]> = [
   ["Glaze UI", "Apache-2.0", "https://github.com/sumitttt4/glazeui"],
   ["Paper Shaders", "Apache-2.0", "https://github.com/paper-design/shaders"],
   ["ffmpeg.wasm (wrapper)", "MIT", "https://github.com/ffmpegwasm/ffmpeg.wasm"],
-  ["FFmpeg core inside ffmpeg.wasm (incl. x264)", "LGPL / GPL — source at the link", "https://github.com/ffmpegwasm/ffmpeg.wasm"],
+  ["FFmpeg core inside ffmpeg.wasm (incl. x264)", "LGPL / GPL (source at the link)", "https://github.com/ffmpegwasm/ffmpeg.wasm"],
   ["PDF.js", "Apache-2.0", "https://github.com/mozilla/pdf.js"],
   ["pdf-lib", "MIT", "https://github.com/Hopding/pdf-lib"],
   ["qpdf (WebAssembly build)", "Apache-2.0 / ISC", "https://github.com/neslinesli93/qpdf-wasm"],
@@ -32,7 +32,7 @@ export default function AboutPage() {
   return (
     <LegalPage
       title="About INeedThis"
-      intro={`INeedThis is ${TOOLS.length} free tools for the everyday jobs everyone runs into — compressing a PDF, converting an iPhone photo, cutting a ringtone, transcribing a voice note — without uploading your files to someone else's server.`}
+      intro={`INeedThis is ${TOOLS.length} free tools for the everyday jobs everyone runs into, like compressing a PDF, converting an iPhone photo, cutting a ringtone or transcribing a voice note, without uploading your files to someone else's server.`}
     >
       <h2>Why</h2>
       <p>
@@ -44,7 +44,7 @@ export default function AboutPage() {
       <h2>Free to use</h2>
       <p>
         Every tool is free, with no sign-up, watermark or limit on use. Missing something? Use &quot;Request a feature&quot; in the
-        sidebar — requests come straight to me.
+        sidebar. Requests come straight to me.
       </p>
 
       <h2>Who made it</h2>

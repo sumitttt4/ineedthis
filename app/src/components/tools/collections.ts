@@ -20,7 +20,7 @@ export const EVERYDAY: Array<{ id: string; label: string }> = [
 ];
 
 export const GEMS: Array<{ id: string; why: string }> = [
-  { id: "text-to-image", why: "Turn a thought into a shareable card on a live shader background — Hindi handwriting fonts included." },
+  { id: "text-to-image", why: "Turn a thought into a shareable card on a live shader background, with Hindi handwriting fonts included." },
   { id: "auto-subtitles", why: "AI writes subtitles for your video and plays them back, without the video ever being uploaded." },
   { id: "pdf-redact", why: "Real redaction: emails, phone and card numbers are removed from the file, not just covered with boxes." },
   { id: "p2p-transfer", why: "Send a big file straight from one browser to another. No cloud, no size-limited upload." },

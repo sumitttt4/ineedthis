@@ -141,7 +141,7 @@ function drawText(ctx: CanvasRenderingContext2D, W: number, H: number, L: Layout
     ctx.shadowBlur = 0;
     ctx.font = `500 ${authorSize}px ${L.font.kind === "handwritten" ? L.font.family : L.font.family}`;
     ctx.fillStyle = light ? "rgba(255,255,255,0.78)" : "rgba(17,19,23,0.7)";
-    ctx.fillText(`— ${L.author}`, x, y + authorSize * 0.9);
+    ctx.fillText(L.author, x, y + authorSize * 0.9);
   }
 }
 
@@ -271,7 +271,7 @@ export default function QuoteCard() {
     try {
       const blob = await render();
       await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
-      flash("Copied — paste it into any chat");
+      flash("Copied. Paste it into any chat.");
     } catch {
       flash("Your browser blocked copying images. Use Download.");
     } finally {

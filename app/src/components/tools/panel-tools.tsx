@@ -239,7 +239,7 @@ function jsonError(text: string, e: unknown) {
   const before = text.slice(0, pos);
   const line = before.split("\n").length;
   const col = pos - before.lastIndexOf("\n");
-  return `${what} — line ${line}, column ${col}`;
+  return `${what} (line ${line}, column ${col})`;
 }
 
 function JsonFormatter() {
@@ -427,7 +427,7 @@ function UrlTool() {
                 ["Protocol", parsed.u.protocol],
                 ["Host", parsed.u.host],
                 ["Path", parsed.u.pathname],
-                ["Hash", parsed.u.hash || "—"],
+                ["Hash", parsed.u.hash || "None"],
                 ...parsed.params.map(([k, v]) => [`?${k}`, v]),
               ].map(([k, v], i) => (
                 <tr key={i} className="border-b border-border last:border-0">
@@ -593,7 +593,7 @@ function TimestampTool() {
       <div className="flex items-center justify-between rounded-lg border border-border bg-background px-3 py-2">
         <span className="text-[12px] text-muted-foreground">Now (Unix seconds)</span>
         <span className="flex items-center gap-2">
-          <code className="font-mono text-[15px] tabular-nums">{now ? Math.floor(now / 1000) : "—"}</code>
+          <code className="font-mono text-[15px] tabular-nums">{now ? Math.floor(now / 1000) : "…"}</code>
           <CopyButton text={now ? String(Math.floor(now / 1000)) : ""} />
         </span>
       </div>

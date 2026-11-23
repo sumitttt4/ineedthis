@@ -19,7 +19,7 @@ export default function P2PPanel() {
   const [localSignal, setLocalSignal] = useState("");
   const [remoteSignal, setRemoteSignal] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [status, setStatus] = useState("Idle — pick a role to start");
+  const [status, setStatus] = useState("Idle. Pick a role to start.");
   const [busy, setBusy] = useState(false);
   const transferRef = useRef<P2PTransfer | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -95,7 +95,7 @@ export default function P2PPanel() {
       const transfer = createTransfer();
       const offer = await transfer.createOffer(selectedFile);
       setLocalSignal(offer);
-      setStatus("Offer ready — send it to the receiver, then paste their answer");
+      setStatus("Offer ready. Send it to the receiver, then paste their answer.");
       toast("Offer ready to share", { type: "success" });
     } catch (err) {
       setStatus(err instanceof Error ? err.message : "Failed to create offer");
@@ -116,7 +116,7 @@ export default function P2PPanel() {
     setBusy(true);
     try {
       await transferRef.current.applyAnswer(remoteSignal.trim());
-      setStatus("Answer applied — waiting for data channel…");
+      setStatus("Answer applied. Waiting for the connection…");
       toast("Answer applied", { type: "success" });
     } catch (err) {
       setStatus(err instanceof Error ? err.message : "Invalid answer SDP");
@@ -140,7 +140,7 @@ export default function P2PPanel() {
       const transfer = createTransfer();
       const answer = await transfer.acceptOffer(remoteSignal.trim());
       setLocalSignal(answer);
-      setStatus("Answer ready — send it back to the sender");
+      setStatus("Answer ready. Send it back to the sender.");
       toast("Answer ready to share", { type: "success" });
     } catch (err) {
       setStatus(err instanceof Error ? err.message : "Failed to accept offer");
@@ -171,7 +171,7 @@ export default function P2PPanel() {
                 </span>
               </div>
               <p className="text-muted-foreground mt-0.5 text-[13px]">
-                Manual SDP exchange — files stream browser-to-browser. Only public STUN is used for NAT traversal.
+                Manual SDP exchange: files stream browser-to-browser. Only public STUN is used for NAT traversal.
               </p>
             </div>
           </div>
@@ -184,7 +184,7 @@ export default function P2PPanel() {
               resetTransfer();
               setRole("send");
               setRemoteSignal("");
-              setStatus("Send mode — pick a file and create an offer");
+              setStatus("Send mode. Pick a file and create an offer.");
             }}
             className={`pb-2 text-[14px] font-medium transition-colors cursor-pointer border-b-2 ${
               role === "send"
@@ -201,7 +201,7 @@ export default function P2PPanel() {
               setRole("receive");
               setSelectedFile(null);
               setRemoteSignal("");
-              setStatus("Receive mode — paste the sender offer");
+              setStatus("Receive mode. Paste the sender's offer.");
             }}
             className={`pb-2 text-[14px] font-medium transition-colors cursor-pointer border-b-2 ${
               role === "receive"

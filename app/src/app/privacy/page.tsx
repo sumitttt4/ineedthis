@@ -43,7 +43,7 @@ export default function PrivacyPage() {
       <ul>
         <li>No accounts, sign-ups or email addresses.</li>
         <li>No advertising, analytics or tracking scripts.</li>
-        <li>No selling or sharing of personal data — we don&apos;t have any to sell.</li>
+        <li>No selling or sharing of personal data. We don&apos;t have any to sell.</li>
       </ul>
 
       <h2>Hosting and logs</h2>
@@ -60,10 +60,10 @@ export default function PrivacyPage() {
 
       <h2>Storage on your device</h2>
       <ul>
-        <li><strong>Theme</strong> — your light/dark choice is saved in your browser&apos;s local storage.</li>
-        <li><strong>Sidebar</strong> — a small functional cookie (<code>sidebar_state</code>) remembers whether the sidebar is collapsed.</li>
+        <li><strong>Theme:</strong> your light/dark choice is saved in your browser&apos;s local storage.</li>
+        <li><strong>Sidebar:</strong> a small functional cookie (<code>sidebar_state</code>) remembers whether the sidebar is collapsed.</li>
         <li>
-          <strong>Offline cache</strong> — if your browser supports it, a service worker caches the site and tool engines so they
+          <strong>Offline cache:</strong> if your browser supports it, a service worker caches the site and tool engines so they
           load faster and work offline. Clearing your browser data removes all of this.
         </li>
       </ul>
