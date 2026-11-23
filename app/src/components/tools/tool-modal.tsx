@@ -4,7 +4,8 @@ import { fileSizeError } from "@/lib/limits";
 import { useMounted } from "@/lib/use-mounted";
 import { EXTRA_TOOLS, type ExtraOpts } from "./extra-tools";
 import { PANEL_TOOLS, WIDE_TOOLS } from "./panel-tools";
-import { useState, useRef, useEffect, useMemo } from "react";
+import ResultPreview from "./result-preview";
+import { useState, useRef, useEffect } from "react";
 import Dialog from "@/components/_ui/dialog";
 import Button from "@/components/_ui/button";
 import { toast } from "@/components/_ui/toaster";
@@ -13,7 +14,6 @@ import type { ToolDefinition } from "./tools-registry";
 import {
   UploadCloudIcon,
   DownloadIcon,
-  CheckCircleIcon,
   RefreshCwIcon,
   PlayIcon,
   CopyIcon,
@@ -279,13 +279,25 @@ export default function ToolModal({
     if (!quiet) toast(`Downloaded ${taskResult.filename}`, { type: "success" });
   };
 
-  const autoDownloadResult = (res: TaskResult | BatchTaskResult) => {
-    if ("files" in res) {
-      res.files.forEach((f) => downloadFile(f, true));
-      toast(`Downloaded ${res.files.length} files`, { type: "success" });
-      return;
+  const [zipping, setZipping] = useState(false);
+  /** Multi-file results download as one ZIP instead of a burst of downloads. */
+  const downloadAll = async (res: BatchTaskResult) => {
+    setZipping(true);
+    try {
+      const JSZip = (await import("jszip")).default;
+      const zip = new JSZip();
+      const used = new Map<string, number>();
+      for (const f of res.files) {
+        const n = used.get(f.filename) ?? 0;
+        used.set(f.filename, n + 1);
+        const name = n ? f.filename.replace(/(\.[^.]*)?$/, (ext) => `-${n + 1}${ext}`) : f.filename;
+        zip.file(name, f.data as Blob);
+      }
+      const data = await zip.generateAsync({ type: "blob" });
+      downloadFile({ data, filename: `${tool?.id ?? "results"}-${res.files.length}-files.zip`, mimeType: "application/zip", durationMs: 0, sizeBytes: data.size });
+    } finally {
+      setZipping(false);
     }
-    downloadFile(res);
   };
 
   const acceptForTool = (id: string): string | undefined => {
@@ -686,10 +698,8 @@ export default function ToolModal({
       setProgress({
         state: "completed",
         percent: 100,
-        message: "Done. Your file is downloading.",
+        message: "Done. Check the preview, then download.",
       });
-
-      if (res) autoDownloadResult(res);
     } catch (err) {
       console.error(`[${tool.id}]`, err);
       const msg =
@@ -766,9 +776,8 @@ export default function ToolModal({
     setRecStartedAt(null);
     setIsRecording(false);
     setResult(recordResult);
-    setProgress({ state: "completed", percent: 100, message: "Recording saved" });
-    toast("Recording saved", { description: recordResult.filename, type: "success" });
-    downloadFile(recordResult);
+    setProgress({ state: "completed", percent: 100, message: "Recording ready" });
+    toast("Recording ready", { description: "Play it back below, then download.", type: "success" });
   };
 
   const startScreenRecording = async () => {
@@ -858,6 +867,16 @@ export default function ToolModal({
                 <Button variant="danger" onClick={stopScreenRecording}>
                   Stop & Save Recording
                 </Button>
+              ) : result && !("files" in result) ? (
+                <div className="flex items-center gap-2">
+                  <Button variant="secondary" onClick={startScreenRecording}>
+                    Record again
+                  </Button>
+                  <Button variant="primary" onClick={() => downloadFile(result)}>
+                    <DownloadIcon className="size-4" />
+                    Download
+                  </Button>
+                </div>
               ) : (
                 <Button variant="primary" onClick={startScreenRecording}>
                   Start Screen Recording
@@ -866,16 +885,11 @@ export default function ToolModal({
             ) : result ? (
               <Button
                 variant="primary"
-                onClick={() => {
-                  if ("files" in result) {
-                    result.files.forEach((f) => downloadFile(f));
-                  } else {
-                    downloadFile(result);
-                  }
-                }}
+                disabled={zipping}
+                onClick={() => ("files" in result ? downloadAll(result) : downloadFile(result))}
               >
                 <DownloadIcon className="size-4" />
-                Download Again
+                {"files" in result ? (zipping ? "Zipping…" : `Download all (${result.files.length})`) : "Download"}
               </Button>
             ) : (
               <Button
@@ -891,7 +905,7 @@ export default function ToolModal({
                 ) : (
                   <>
                     <DownloadIcon className="size-3.5" />
-                    1-Tap Process & Download
+                    1-Tap Process
                   </>
                 )}
               </Button>
@@ -1748,46 +1762,15 @@ export default function ToolModal({
           </div>
         )}
 
-        {/* Screen recording preview */}
-        {tool.id === "screen-recorder" && result && !("files" in result) && result.data instanceof Blob && (
-          <RecordingPreview result={result} onDownload={() => downloadFile(result)} />
-        )}
-
-        {/* Completed Task Summary */}
+        {/* Result preview: nothing is saved until the user clicks Download. */}
         {result && (
-          <div className="border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300 rounded-xl border p-4 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <CheckCircleIcon className="size-5 text-emerald-500 shrink-0" />
-              <div>
-                <p className="text-[13px] font-semibold">Ready</p>
-                <p className="text-[12px] opacity-80">
-                  {"files" in result
-                    ? `${result.files.length} output files (${formatDuration(result.totalDurationMs)})`
-                    : `${result.filename} (${formatBytes(result.sizeBytes)} • ${formatDuration(result.durationMs)})`}
-                </p>
-              </div>
-            </div>
-          </div>
+          <ResultPreview
+            result={result}
+            inputBytes={tool.id === "screen-recorder" ? undefined : files.reduce((n, f) => n + f.size, 0) || undefined}
+            onDownload={(f) => downloadFile(f)}
+          />
         )}
       </div>
     </Frame>
-  );
-}
-
-/** Plays back a finished screen recording so people can check it before sharing. */
-function RecordingPreview({ result, onDownload }: { result: TaskResult; onDownload: () => void }) {
-  const url = useMemo(() => URL.createObjectURL(result.data as Blob), [result]);
-  useEffect(() => () => URL.revokeObjectURL(url), [url]);
-  return (
-    <div className="flex flex-col gap-2">
-      <video src={url} controls playsInline className="aspect-video w-full rounded-xl border border-border bg-black" aria-label="Recording preview" />
-      <div className="flex items-center justify-between gap-2 text-[12px] text-muted-foreground">
-        <span>Saved to your downloads. Nothing was uploaded.</span>
-        <Button variant="secondary" size="sm" onClick={onDownload}>
-          <DownloadIcon className="size-3.5" />
-          Download again
-        </Button>
-      </div>
-    </div>
   );
 }

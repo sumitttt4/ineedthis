@@ -144,7 +144,7 @@ export function howItWorks(t: ToolDefinition): string[] {
   return [
     `Drop your ${formats} file${t.formats.length > 1 ? "s" : ""} or click to choose.`,
     "Adjust the options if you want. Sensible defaults are already set.",
-    "Your result downloads automatically. Nothing is uploaded.",
+    "Preview the result, then download it. Nothing is uploaded.",
   ];
 }
 
