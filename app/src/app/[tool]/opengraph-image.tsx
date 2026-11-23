@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
-import { allToolSlugs, toolBySlug } from "@/lib/tool-pages";
+import { allToolSlugs, toolBySlug, toolSeo } from "@/lib/tool-pages";
+import { CATEGORY_PAGES, type CategorySlug } from "@/lib/seo-content";
 import { SITE_DOMAIN } from "@/lib/site";
 import { LOGO_DATA_URI } from "@/lib/logo";
 
@@ -8,12 +9,15 @@ export const contentType = "image/png";
 export const alt = "INeedThis tool";
 
 export function generateStaticParams() {
-  return allToolSlugs().map((tool) => ({ tool }));
+  return [...allToolSlugs(), ...Object.keys(CATEGORY_PAGES)].map((tool) => ({ tool }));
 }
 
 export default async function Image({ params }: { params: Promise<{ tool: string }> }) {
   const { tool } = await params;
   const t = toolBySlug(tool);
+  const cat = tool in CATEGORY_PAGES ? CATEGORY_PAGES[tool as CategorySlug] : null;
+  const heading = cat ? cat.h1 : t ? toolSeo(t).h1 : "INeedThis";
+  const sub = cat ? cat.intro : t ? toolSeo(t).intro : "";
   return new ImageResponse(
     (
       <div
@@ -35,8 +39,8 @@ export default async function Image({ params }: { params: Promise<{ tool: string
           INeedThis · free · private
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
-          <div style={{ fontSize: 80, fontWeight: 700, letterSpacing: -3, lineHeight: 1.02 }}>{t?.name ?? "INeedThis"}</div>
-          <div style={{ fontSize: 30, color: "#a1a1a1", lineHeight: 1.3, maxWidth: 980 }}>{t?.description ?? ""}</div>
+          <div style={{ fontSize: 80, fontWeight: 700, letterSpacing: -3, lineHeight: 1.02 }}>{heading}</div>
+          <div style={{ fontSize: 30, color: "#a1a1a1", lineHeight: 1.3, maxWidth: 980 }}>{sub}</div>
         </div>
         <div style={{ display: "flex", fontSize: 26, color: "#8c9bff" }}>{SITE_DOMAIN}/{tool}</div>
       </div>

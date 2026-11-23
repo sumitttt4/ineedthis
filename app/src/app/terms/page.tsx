@@ -4,7 +4,7 @@ import { LegalPage } from "@/components/legal/legal-page";
 
 export const metadata: Metadata = {
   title: "Terms of Use",
-  description: "The terms for using INeedThis: free file tools provided as-is.",
+  description: "The terms for using INeedThis: free file tools that run in your browser, provided as-is, with your files staying on your device.",
   alternates: { canonical: "/terms" },
 };
 

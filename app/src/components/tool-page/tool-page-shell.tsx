@@ -11,13 +11,28 @@ import ToolModal from "@/components/tools/tool-modal";
 import P2PPanel from "@/components/p2p/p2p-panel";
 import Toaster from "@/components/_ui/toaster";
 import FeatureRequest from "@/components/feedback/feature-request";
-import { CATEGORIES, TOOLS } from "@/components/tools/tools-registry";
-import { toolSlug } from "@/lib/tool-pages";
+import { CATEGORIES, TOOLS, type ToolCategory } from "@/components/tools/tools-registry";
+import { categorySlug, toolSlug } from "@/lib/tool-pages";
+import { CATEGORY_PAGES, type CategorySlug } from "@/lib/seo-content";
 
-export default function ToolPageShell({ toolId, intro, children }: { toolId: string; intro: ReactNode; children: ReactNode }) {
+/** Tool page (with the tool runner) or, without toolId, a category landing page. */
+export default function ToolPageShell({
+  toolId,
+  categoryId,
+  intro,
+  children,
+}: {
+  toolId?: string;
+  categoryId?: ToolCategory;
+  intro: ReactNode;
+  children: ReactNode;
+}) {
   const router = useRouter();
-  const tool = TOOLS.find((t) => t.id === toolId)!;
-  const category = CATEGORIES.find((c) => c.id === tool.category);
+  const tool = toolId ? TOOLS.find((t) => t.id === toolId) : undefined;
+  const catId = (tool?.category ?? categoryId)!;
+  const category = CATEGORIES.find((c) => c.id === catId);
+  const catSlug = categorySlug(catId);
+  const catHref = catSlug ? `/${catSlug}` : `/?c=${catId}`;
 
   return (
     <SidebarProvider className="h-dvh max-w-full overflow-hidden bg-background text-foreground">
@@ -25,8 +40,11 @@ export default function ToolPageShell({ toolId, intro, children }: { toolId: str
         Skip to content
       </a>
       <AppSidebar
-        activeCategory={tool.category}
-        onSelectCategory={(c) => router.push(c === "all" ? "/" : `/?c=${c}`)}
+        activeCategory={catId}
+        onSelectCategory={(c) => {
+          const slug = categorySlug(c);
+          router.push(c === "all" ? "/" : slug ? `/${slug}` : `/?c=${c}`);
+        }}
         onOpenToolModal={(id) => router.push(`/${toolSlug(id)}`)}
       />
       <SidebarInset className="min-w-0 overflow-hidden">
@@ -42,17 +60,25 @@ export default function ToolPageShell({ toolId, intro, children }: { toolId: str
                   </Link>
                 </li>
                 <li aria-hidden="true">/</li>
-                <li className="hidden sm:block">
-                  <Link href={`/?c=${tool.category}`} className="hover:text-foreground">
+                {tool ? (
+                  <>
+                    <li className="hidden sm:block">
+                      <Link href={catHref} className="hover:text-foreground">
+                        {category?.name}
+                      </Link>
+                    </li>
+                    <li aria-hidden="true" className="hidden sm:block">
+                      /
+                    </li>
+                    <li aria-current="page" className="truncate font-medium text-foreground">
+                      {tool.name}
+                    </li>
+                  </>
+                ) : (
+                  <li aria-current="page" className="truncate font-medium text-foreground">
                     {category?.name}
-                  </Link>
-                </li>
-                <li aria-hidden="true" className="hidden sm:block">
-                  /
-                </li>
-                <li aria-current="page" className="truncate font-medium text-foreground">
-                  {tool.name}
-                </li>
+                  </li>
+                )}
               </ol>
             </nav>
           </div>
@@ -62,16 +88,24 @@ export default function ToolPageShell({ toolId, intro, children }: { toolId: str
         <div id="main" tabIndex={-1} className="min-h-0 flex-1 overflow-y-auto px-4 py-6 outline-none sm:px-6 sm:py-8">
           <div className="mx-auto flex max-w-4xl flex-col gap-8">
             {intro}
-            {tool.id === "p2p-transfer" ? (
-              <P2PPanel />
-            ) : (
-              <ToolModal tool={tool} open inline onClose={() => router.push("/")} />
-            )}
+            {tool &&
+              (tool.id === "p2p-transfer" ? (
+                <P2PPanel />
+              ) : (
+                <ToolModal tool={tool} open inline onClose={() => router.push("/")} />
+              ))}
             {children}
-            <footer className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border pt-6 text-[13px] text-muted-foreground">
+            <nav aria-label="Tool categories" className="flex flex-wrap gap-x-4 gap-y-2 border-t border-border pt-6 text-[13px]">
+              {(Object.keys(CATEGORY_PAGES) as CategorySlug[]).map((slug) => (
+                <Link key={slug} href={`/${slug}`} className="text-muted-foreground hover:text-foreground">
+                  {CATEGORY_PAGES[slug].h1.replace(/^Free /, "")}
+                </Link>
+              ))}
+            </nav>
+            <footer className="-mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-muted-foreground">
               <span>Free to use · files stay on your device</span>
               <FeatureRequest
-                defaultTool={tool.id}
+                defaultTool={tool?.id}
                 trigger={(open) => (
                   <button type="button" onClick={open} className="font-medium text-foreground underline-offset-4 hover:underline">
                     Request a feature

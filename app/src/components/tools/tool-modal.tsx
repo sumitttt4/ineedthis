@@ -5,6 +5,7 @@ import { useMounted } from "@/lib/use-mounted";
 import { EXTRA_TOOLS, type ExtraOpts } from "./extra-tools";
 import { PANEL_TOOLS, WIDE_TOOLS } from "./panel-tools";
 import ResultPreview from "./result-preview";
+import { ArrowRight } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import Dialog from "@/components/_ui/dialog";
 import Button from "@/components/_ui/button";
@@ -904,7 +905,7 @@ export default function ToolModal({
                   </>
                 ) : (
                   <>
-                    <DownloadIcon className="size-3.5" />
+                    <ArrowRight className="size-3.5" aria-hidden="true" />
                     1-Tap Process
                   </>
                 )}

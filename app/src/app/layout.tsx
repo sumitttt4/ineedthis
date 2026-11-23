@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist_Mono } from "next/font/google";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, siteUrl } from "@/lib/site";
+import { OWNER_SITE, OWNER_X_HANDLE, SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, siteUrl } from "@/lib/site";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
@@ -81,6 +81,29 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                name: SITE_NAME,
+                url: siteUrl().toString(),
+                description: SITE_DESCRIPTION,
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                name: SITE_NAME,
+                url: siteUrl().toString(),
+                logo: new URL("/icon-512.png", siteUrl()).toString(),
+                founder: { "@type": "Person", name: "Sumit Sharma", url: OWNER_SITE },
+                sameAs: [`https://x.com/${OWNER_X_HANDLE}`],
+              },
+            ]).replace(/</g, "\\u003c"),
+          }}
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { CATEGORIES, TOOLS, type ToolDefinition } from "@/components/tools/tools-registry";
 import { EVERYDAY, GEMS } from "@/components/tools/collections";
 import ToolCard from "@/components/tools/tool-card";
-import { toolSlug } from "@/lib/tool-pages";
+import { categorySlug, toolSlug } from "@/lib/tool-pages";
 import { ChevronRightIcon } from "@/components/_ui/icons";
 import { Gem } from "lucide-react";
 import { toolTexture, toolVariant } from "@/lib/category-style";
@@ -103,7 +103,13 @@ export function AllByCategory() {
       {groups.map((g) => (
         <div key={g.id} className="flex flex-col gap-3">
           <h3 className="flex items-center gap-2 text-[14px] font-semibold text-foreground">
-            {g.name}
+            {categorySlug(g.id) ? (
+              <Link href={`/${categorySlug(g.id)}`} className="underline-offset-4 hover:text-primary hover:underline">
+                {g.name}
+              </Link>
+            ) : (
+              g.name
+            )}
             <span className="rounded-full bg-secondary px-2 py-0.5 text-[11px] font-medium tabular-nums text-muted-foreground">{g.tools.length}</span>
           </h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

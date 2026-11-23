@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import AppSidebar from "@/components/sidebar/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -27,23 +26,22 @@ import {
 } from "@/components/_ui/icons";
 import PwaInstallButton from "@/components/_ui/pwa-install-button";
 
+// No useSearchParams here: it would make the whole page client-rendered, and search
+// engines would get an empty shell. ?c=<category> is read after hydration instead.
 export default function Page() {
-  return (
-    <Suspense>
-      <Home />
-    </Suspense>
-  );
+  return <Home />;
 }
 
 const CATEGORY_IDS = new Set(["all", "pdf", "image", "media", "data", "text", "p2p"]);
 
 function Home() {
-  // Sidebar links on tool pages come back as /?c=<category>.
-  const params = useSearchParams();
-  const fromUrl = params.get("c");
-  const [activeCategory, setActiveCategory] = useState<ToolCategory | "all">(
-    fromUrl && CATEGORY_IDS.has(fromUrl) ? (fromUrl as ToolCategory) : "all"
-  );
+  const [activeCategory, setActiveCategory] = useState<ToolCategory | "all">("all");
+  // Old /?c=<category> links still work.
+  useEffect(() => {
+    const c = new URLSearchParams(window.location.search).get("c");
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time sync from the URL after hydration
+    if (c && CATEGORY_IDS.has(c)) setActiveCategory(c as ToolCategory);
+  }, []);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTool, setSelectedTool] = useState<ToolDefinition | null>(null);
   const [modalOpen, setModalOpen] = useState(false);

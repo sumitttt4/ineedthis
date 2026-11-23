@@ -1,4 +1,5 @@
 import { TOOLS, type ToolCategory, type ToolDefinition } from "@/components/tools/tools-registry";
+import { CATEGORY_PAGES, TOOL_SEO, type CategorySlug, type ToolSeo } from "@/lib/seo-content";
 
 /**
  * Public URL slug for every tool: the words people actually search for.
@@ -105,13 +106,36 @@ export function privacyLine(t: ToolDefinition): string {
   return "Runs entirely in your browser. Your files never leave your device.";
 }
 
+export function toolSeo(t: ToolDefinition): ToolSeo {
+  return TOOL_SEO[t.id] ?? { h1: t.name, intro: t.description, uses: ["", "", ""] as [string, string, string] };
+}
+
+/** "Compress PDF Online Free, No Upload": search phrase first, then the reasons to click. */
 export function seoTitle(t: ToolDefinition): string {
-  if (NO_FILE_TOOLS.has(t.id)) return `${t.name}: free online, no sign-up`;
-  return `${t.name}: free, private, no upload`;
+  const { h1 } = toolSeo(t);
+  const tail = SERVER_TOOLS.has(t.id) || NO_FILE_TOOLS.has(t.id) ? "Free, No Sign-up" : "Free, No Upload";
+  // The layout appends " · INeedThis" (12 chars); keep the whole title near 60.
+  for (const title of [`${h1} Online: ${tail}`, `${h1}: ${tail}`, `${h1}, Free`]) {
+    if (title.length <= 48) return title;
+  }
+  return h1;
 }
 
 export function seoDescription(t: ToolDefinition): string {
-  return `${t.description} ${privacyLine(t)} Free, no sign-up, no watermark.`;
+  const { intro } = toolSeo(t);
+  if (intro.length > 120) return `${intro} Free, no sign-up.`;
+  const tail = SERVER_TOOLS.has(t.id)
+    ? "Free, no sign-up."
+    : NO_FILE_TOOLS.has(t.id)
+      ? "Free, private, no sign-up."
+      : "Free, no sign-up, and your files never leave your device.";
+  return `${intro} ${tail}`;
+}
+
+/** Category landing page slug for a tool category, if it has one. */
+export function categorySlug(category: ToolCategory | "all"): CategorySlug | null {
+  const hit = (Object.keys(CATEGORY_PAGES) as CategorySlug[]).find((k) => CATEGORY_PAGES[k].category === category);
+  return hit ?? null;
 }
 
 export function howItWorks(t: ToolDefinition): string[] {
